@@ -14,6 +14,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.kDrive;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -51,7 +53,7 @@ public class DriveCommands {
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
-    double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
+    double linearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND), -1, 1);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
@@ -154,6 +156,17 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+  }
+
+  public static final PIDController DRIVE_CONTROLLER = new PIDController(kDrive.TRANSLATION_PID.kP, kDrive.TRANSLATION_PID.kI, kDrive.TRANSLATION_PID.kD);
+
+  public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
+    return joystickDriveAtAngle(
+      drive,
+      () -> DRIVE_CONTROLLER.calculate(drive.getPose().getX(), target.get().getX()),
+      () -> DRIVE_CONTROLLER.calculate(drive.getPose().getY(), target.get().getY()),
+      () -> target.get().getRotation()
+    ).beforeStarting(DRIVE_CONTROLLER::reset);
   }
 
   /**

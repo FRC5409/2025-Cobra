@@ -13,7 +13,13 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+import com.pathplanner.lib.config.PIDConstants;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.util.FieldMirror;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -33,5 +39,25 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static final class kReef {
+    public static final HashMap<String, Pose2d> TARGETS = new HashMap<>();
+    static {
+      TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
+      TARGETS.put("FL", new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
+      TARGETS.put("F" , new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
+      TARGETS.put("B" , new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
+      TARGETS.put("BR", FieldMirror.mirrorPose(TARGETS.get("BL")));
+      TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
+    }
+
+    public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
+    public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+  }
+
+  public static final class kDrive {
+    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
+    public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
   }
 }
