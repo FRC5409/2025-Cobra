@@ -13,11 +13,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import java.util.HashMap;
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.util.FieldMirror;
 
@@ -41,6 +45,17 @@ public final class Constants {
     REPLAY
   }
 
+  public static final class kDrive {
+    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
+    public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
+
+    public static final PIDConstants ALIGN_PID = new PIDConstants(10.0, 0.0, 0.0);
+
+    public static final Mass ROBOT_FULL_MASS = Pounds.of(125.0);
+    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(9.2437679288);
+    public static final double WHEEL_COF = 1.2;
+  }
+
   public static final class kReef {
     public static final HashMap<String, Pose2d> TARGETS = new HashMap<>();
     static {
@@ -54,10 +69,5 @@ public final class Constants {
 
     public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
     public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
-  }
-
-  public static final class kDrive {
-    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
-    public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
   }
 }

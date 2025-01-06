@@ -14,8 +14,11 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,6 +55,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+
     switch (Constants.currentMode) {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
@@ -85,6 +90,8 @@ public class RobotContainer {
       }
     }
 
+    registerCommands();
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -106,6 +113,11 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+  }
+
+  private void registerCommands() {
+    NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH )));
+    NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH)));
   }
 
   /**

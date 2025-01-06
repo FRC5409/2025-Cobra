@@ -7,7 +7,61 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "IC to FL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ALIGN_LEFT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "FL to LP"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LP to BL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ALIGN_LEFT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BL to LP"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LP to BL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ALIGN_RIGHT"
           }
         }
       ]
