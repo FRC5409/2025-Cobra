@@ -20,6 +20,8 @@ import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -56,18 +58,25 @@ public final class Constants {
     public static final double WHEEL_COF = 1.2;
   }
 
-  public static final class kReef {
-    public static final HashMap<String, Pose2d> TARGETS = new HashMap<>();
-    static {
-      TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
-      TARGETS.put("FL", new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
-      TARGETS.put("F" , new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
-      TARGETS.put("B" , new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
-      TARGETS.put("BR", FieldMirror.mirrorPose(TARGETS.get("BL")));
-      TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
-    }
+  public static final class kAutoAlign {
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
+    public static final Angle ROTATION_TOLLERANCE = Degrees.of(1.0);
 
-    public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
-    public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+    public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
+
+    public static final class kReef {
+      public static final HashMap<String, Pose2d> TARGETS = new HashMap<>();
+      static {
+        TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
+        TARGETS.put("FL", new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
+        TARGETS.put("F" , new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
+        TARGETS.put("B" , new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
+        TARGETS.put("BR", FieldMirror.mirrorPose(TARGETS.get("BL")));
+        TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
+      }
+
+      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+    }
   }
 }

@@ -6,7 +6,7 @@ import com.pathplanner.lib.util.FlippingUtil.FieldSymmetry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Constants.kReef;
+import frc.robot.Constants.kAutoAlign.kReef;
 
 public class AlignHelper {
     public static Pose2d getClosestReef(Pose2d robotPose) {

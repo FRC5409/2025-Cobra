@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.kReef;
+import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -147,17 +147,17 @@ public class RobotContainer {
                     drive
                 ).ignoringDisable(true));
 
-    primaryController.leftBumper()
-        .whileTrue(
-            DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()))
-        );
+    // primaryController.leftBumper()
+    //     .whileTrue(
+    //         DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()))
+    //     );
 
-    primaryController.povLeft()
+    primaryController.leftBumper()
         .whileTrue(
             DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
         );
 
-    primaryController.povRight()
+    primaryController.rightBumper()
         .whileTrue(
             DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH))
         );
