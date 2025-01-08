@@ -13,9 +13,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -177,6 +181,9 @@ public class Robot extends LoggedRobot {
     final Drive drive = robotContainer.getDrive();
 
     PieceVisualizer.configure(() -> drive.getPose());
+    
+    // EXAMPLE GAME PIECE
+    PieceVisualizer.addGamePiece(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
   }
 
   /** This function is called periodically whilst in simulation. */

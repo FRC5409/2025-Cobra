@@ -13,14 +13,10 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -38,7 +34,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
-import frc.robot.util.PieceVisualizer;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -93,9 +88,6 @@ public class RobotContainer {
                 new ModuleIO() {});
       }
     }
-
-    // EXAMPLE CORAL
-    PieceVisualizer.addGamePiece(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
 
     registerCommands();
 
