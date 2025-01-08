@@ -13,11 +13,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -35,6 +38,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.CoralVisualizer;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -45,7 +49,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  private final Drive sys_drive;
 
   // Controller
   private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -60,7 +64,7 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
-        drive =
+        sys_drive =
             new Drive(
                 new GyroIOPigeon2(),
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
@@ -70,7 +74,7 @@ public class RobotContainer {
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
-        drive =
+        sys_drive =
             new Drive(
                 new GyroIO() {},
                 new ModuleIOSim(TunerConstants.FrontLeft),
@@ -80,7 +84,7 @@ public class RobotContainer {
       }
       default -> {
         // Replayed robot, disable IO implementations
-        drive =
+        sys_drive =
             new Drive(
                 new GyroIO() {},
                 new ModuleIO() {},
@@ -90,6 +94,11 @@ public class RobotContainer {
       }
     }
 
+    CoralVisualizer.configure(() -> sys_drive.getPose());
+
+    // EXAMPLE CORAL
+    CoralVisualizer.addCoral(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
+
     registerCommands();
 
     // Set up auto routines
@@ -97,27 +106,27 @@ public class RobotContainer {
 
     // Set up SysId routines
     autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(sys_drive));
     autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(sys_drive));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        "Drive SysId (Dynamic Forward)", sys_drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        "Drive SysId (Dynamic Reverse)", sys_drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
   }
 
   private void registerCommands() {
-    NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH )));
-    NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH)));
+    NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH )));
+    NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH)));
   }
 
   /**
@@ -128,9 +137,9 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    drive.setDefaultCommand(
+    sys_drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
+            sys_drive,
             () -> -primaryController.getLeftY(),
             () -> -primaryController.getLeftX(),
             () -> -primaryController.getRightX()
@@ -142,9 +151,9 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                     () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive
+                    sys_drive.setPose(
+                            new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
+                    sys_drive
                 ).ignoringDisable(true));
 
     // primaryController.leftBumper()
@@ -154,12 +163,12 @@ public class RobotContainer {
 
     primaryController.leftBumper()
         .whileTrue(
-            DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
+            DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
         );
 
     primaryController.rightBumper()
         .whileTrue(
-            DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH))
+            DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH))
         );
   }
 
