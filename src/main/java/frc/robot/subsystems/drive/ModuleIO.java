@@ -15,6 +15,7 @@ package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public interface ModuleIO {
   @AutoLog
@@ -52,4 +53,16 @@ public interface ModuleIO {
 
   /** Run the turn motor to the specified rotation. */
   public default void setTurnPosition(Rotation2d rotation) {}
+
+  /**
+   * Sets the Neutral Mode of the drive motor
+   * @param mode The {@link NeutralModeValue Neutral Mode}
+   */
+  public default void setDriveNeutralMode(NeutralModeValue mode) {}
+
+  /**
+   * Sets the Neutral Mode of the turn motor
+   * @param mode The {@link NeutralModeValue Neutral Mode}
+   */
+  public default void  setTurnNeutralMode(NeutralModeValue mode) {}
 }

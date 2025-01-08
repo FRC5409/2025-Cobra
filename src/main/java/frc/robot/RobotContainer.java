@@ -38,7 +38,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
-import frc.robot.util.CoralVisualizer;
+import frc.robot.util.PieceVisualizer;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -94,10 +94,8 @@ public class RobotContainer {
       }
     }
 
-    CoralVisualizer.configure(() -> sys_drive.getPose());
-
     // EXAMPLE CORAL
-    CoralVisualizer.addCoral(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
+    PieceVisualizer.addGamePiece(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
 
     registerCommands();
 
@@ -179,5 +177,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public Drive getDrive() {
+    return sys_drive;
   }
 }

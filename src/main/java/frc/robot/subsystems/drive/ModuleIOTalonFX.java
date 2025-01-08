@@ -263,4 +263,14 @@ public class ModuleIOTalonFX implements ModuleIO {
               rotation.getRotations());
         });
   }
+
+  @Override
+  public void setDriveNeutralMode(NeutralModeValue mode) {
+    driveTalon.setNeutralMode(mode);
+  }
+
+  @Override
+  public void setTurnNeutralMode(NeutralModeValue mode) {
+    turnTalon.setNeutralMode(mode);
+  }
 }

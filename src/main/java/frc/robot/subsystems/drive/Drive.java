@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -43,12 +44,14 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kDrive;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -153,6 +156,13 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
+    // Register Debug Commands
+    DebugCommand.register("Drive-X", Commands.runOnce(this::stopWithX, this));
+
+    // No Subsystem requiredment because we don't want to stop driving
+    DebugCommand.register("Drive-Coast", Commands.runOnce(this::coastMode)); 
+    DebugCommand.register("Drive-Brake", Commands.runOnce(this::brakeMode));
   }
 
   @Override
@@ -261,6 +271,20 @@ public class Drive extends SubsystemBase {
     }
     kinematics.resetHeadings(headings);
     stop();
+  }
+
+  public void coastMode() {
+    for (Module module : modules) {
+      module.driveNeutralMode(NeutralModeValue.Coast);
+      module.turnNeutralMode(NeutralModeValue.Coast);
+    }
+  }
+
+  public void brakeMode() {
+    for (Module module : modules) {
+      module.driveNeutralMode(NeutralModeValue.Brake);
+      module.turnNeutralMode(NeutralModeValue.Brake);
+    }
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
