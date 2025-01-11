@@ -11,7 +11,7 @@ public class Vision extends SubsystemBase {
     private final VisionIO io;
     private final VisionInputsAutoLogged inputs;
 
-    private Vision(VisionIO io) {
+    public Vision(VisionIO io) {
         this.io = io;
         inputs = new VisionInputsAutoLogged();
     }
