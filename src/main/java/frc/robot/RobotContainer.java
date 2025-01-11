@@ -11,7 +11,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
+
 package frc.robot;
+
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -39,6 +41,8 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+
+
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a
@@ -56,14 +60,14 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController primaryController = new CommandXboxController(0);
 
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
+
 
     switch (Constants.currentMode) {
       case REAL -> {
@@ -151,6 +155,7 @@ public class RobotContainer {
    * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
+ 
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     sys_drive.setDefaultCommand(
@@ -162,13 +167,29 @@ public class RobotContainer {
         )
     );
 
+    primaryController.x()
+      .onTrue(
+        DriveCommands.setSpeedHigh(sys_drive)
+      );
+
+    primaryController.y()
+      .onTrue(
+        DriveCommands.setSpeedLow(sys_drive) 
+      );
+
+    // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
+
+    // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
+   
     // Reset gyro to 0° when Start button is pressed
     primaryController.start()
         .onTrue(
             Commands.runOnce(
-                () -> sys_drive.setPose(
-                    new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
-                sys_drive).ignoringDisable(true));
+                    () ->
+                    sys_drive.setPose(
+                            new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
+                    sys_drive
+                ).ignoringDisable(true));
 
     // primaryController.leftBumper()
     // .whileTrue(
