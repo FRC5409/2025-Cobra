@@ -158,7 +158,9 @@ public class RobotContainer {
             sys_drive,
             () -> -primaryController.getLeftY(),
             () -> -primaryController.getLeftX(),
-            () -> -primaryController.getRightX()));
+            () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+        )
+    );
 
     // Reset gyro to 0° when Start button is pressed
     primaryController.start()
