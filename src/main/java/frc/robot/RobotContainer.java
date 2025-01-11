@@ -146,18 +146,18 @@ public class RobotContainer {
 
     primaryController.x()
       .onTrue(
-        Commands.runOnce(
-          () -> DriveCommands.speedModifier = 2.0              
-        )
+        DriveCommands.setSpeedHigh(sys_drive)
       );
 
     primaryController.y()
-    .onTrue(
-      Commands.runOnce(
-        () -> DriveCommands.speedModifier = 0.5              
-      )
-    );
+      .onTrue(
+        DriveCommands.setSpeedLow(sys_drive) 
+      );
 
+    // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
+
+    // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
+   
     // Reset gyro to 0° when Start button is pressed
     primaryController.start()
         .onTrue(
@@ -178,7 +178,6 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
         );
-
 
     primaryController.rightBumper()
         .whileTrue(

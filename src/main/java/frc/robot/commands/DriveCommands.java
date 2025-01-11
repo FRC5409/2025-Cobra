@@ -57,6 +57,7 @@ public class DriveCommands {
 
   private DriveCommands() {}
 
+
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
     double linearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND), -1, 1);
@@ -69,6 +70,22 @@ public class DriveCommands {
     return new Pose2d(new Translation2d(), linearDirection)
         .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
         .getTranslation();
+  }
+
+  // Increase drive speed
+  public static Command setSpeedHigh(Drive drive) {
+    return Commands.run(
+            () -> {
+              speedModifier = 1.0;
+            });
+  }
+
+  // Decrease drive speed
+  public static Command setSpeedLow(Drive drive) {
+    return Commands.run(
+            () -> {
+              speedModifier = 0.5;
+            });
   }
 
   /**
@@ -91,7 +108,10 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
+    
+
           // Convert to field relative speeds & send command
+
           ChassisSpeeds  speeds = new ChassisSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
@@ -147,8 +167,8 @@ public class DriveCommands {
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
                   new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
                       omega);
               boolean isFlipped =
                   DriverStation.getAlliance().isPresent()
