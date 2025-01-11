@@ -11,7 +11,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
+
 package frc.robot;
+
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -36,6 +38,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -46,15 +49,19 @@ public class RobotContainer {
   // Subsystems
   private final Drive sys_drive;
 
+
   // Controller
   private final CommandXboxController primaryController = new CommandXboxController(0);
+
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
+
 
     switch (Constants.currentMode) {
       case REAL -> {
@@ -125,6 +132,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
+ 
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     sys_drive.setDefaultCommand(
@@ -134,6 +142,20 @@ public class RobotContainer {
             () -> -primaryController.getLeftX(),
             () -> -primaryController.getRightX()
         )
+    );
+
+    primaryController.x()
+      .onTrue(
+        Commands.runOnce(
+          () -> DriveCommands.speedModifier = 2.0              
+        )
+      );
+
+    primaryController.y()
+    .onTrue(
+      Commands.runOnce(
+        () -> DriveCommands.speedModifier = 0.5              
+      )
     );
 
     // Reset gyro to 0° when Start button is pressed
@@ -146,6 +168,7 @@ public class RobotContainer {
                     sys_drive
                 ).ignoringDisable(true));
 
+
     // primaryController.leftBumper()
     //     .whileTrue(
     //         DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()))
@@ -155,6 +178,7 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
         );
+
 
     primaryController.rightBumper()
         .whileTrue(
