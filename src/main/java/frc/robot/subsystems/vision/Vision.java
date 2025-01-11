@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision;
 
+import org.littletonrobotics.junction.Logger;
 import org.opencv.core.Point;
 
 // 5409: The Chargers
@@ -24,12 +25,11 @@ public class Vision extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
         io.updateInputs(inputs);
+        Logger.processInputs("Vision", inputs);
     }
 
     @Override
     public void simulationPeriodic() {
         // This method will be called once per scheduler run during simulation
-
     }
-
 }
