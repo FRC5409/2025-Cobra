@@ -12,7 +12,11 @@
     "**/.project": true,
     "**/.settings": true,
     "**/.factorypath": true,
-    "**/*~": true
+    "**/*~": true,
+    "**/*.rpyc": true,
+    "**/*.rpa": true,
+    "**/*.rpymc": true,
+    "**/cache/": true
   },
   "java.test.config": [
     {
@@ -31,7 +35,7 @@
   "java.test.defaultConfig": "WPIlibUnitTests",
   "spotlessGradle.format.enable": true,
   "spotlessGradle.diagnostics.enable": false,
-  "java.import.gradle.annotationProcessing.enabled": false,
+  "java.import.gradle.annotationProcessing.enabled": true,
   "java.completion.favoriteStaticMembers": [
     "org.junit.Assert.*",
     "org.junit.Assume.*",
@@ -67,7 +71,10 @@
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
   },
   "[java]": {
-    "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
+    "editor.defaultFormatter": "redhat.java"
   },
-  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
