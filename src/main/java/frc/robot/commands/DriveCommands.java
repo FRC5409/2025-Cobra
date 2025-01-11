@@ -166,7 +166,7 @@ public class DriveCommands {
           kDrive.ALIGN_PID.kP,
           kDrive.ALIGN_PID.kI,
           kDrive.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(Math.sqrt(drive.getMaxLinearSpeedMetersPerSec()), 1.5)
+          new TrapezoidProfile.Constraints(drive.getMaxLinearSpeedMetersPerSec(), 5.0)
         );
 
     ProfiledPIDController yController = 
@@ -174,7 +174,7 @@ public class DriveCommands {
           kDrive.ALIGN_PID.kP,
           kDrive.ALIGN_PID.kI,
           kDrive.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(Math.sqrt(drive.getMaxLinearSpeedMetersPerSec()), 1.5)
+          new TrapezoidProfile.Constraints(drive.getMaxLinearSpeedMetersPerSec(), 5.0)
         );
 
     ProfiledPIDController angleController =
@@ -201,8 +201,12 @@ public class DriveCommands {
     }, drive).beforeStarting(() -> {
       Pose2d robotPose = drive.getPose();
 
-      xController.reset(robotPose.getX());
-      yController.reset(robotPose.getY());
+      ChassisSpeeds speeds = drive.getChassisSpeeds();
+      double xSpeed = speeds.vxMetersPerSecond * robotPose.getRotation().getCos();
+      double ySpeed = speeds.vxMetersPerSecond * robotPose.getRotation().getSin();
+
+      xController.reset(robotPose.getX(), xSpeed);
+      yController.reset(robotPose.getY(), ySpeed);
       angleController.reset(drive.getRotation().getRadians());
     }).until(() -> {
       Pose2d robotPose = drive.getPose();
