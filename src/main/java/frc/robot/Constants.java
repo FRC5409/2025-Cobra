@@ -22,6 +22,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -47,6 +49,9 @@ public final class Constants {
     REPLAY
   }
 
+  /** @throws IllegalArgumentException If this the auto command is ran twice */
+  public static final boolean PRINT_AUTO_TIME = true;
+
   public static final class kDrive {
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
     public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
@@ -59,8 +64,11 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.0);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(3.0);
+
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
-    public static final Angle ROTATION_TOLLERANCE = Degrees.of(1.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
 
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
