@@ -19,12 +19,16 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
@@ -36,6 +40,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.WaitThen;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
@@ -51,17 +56,19 @@ public class RobotContainer {
 
 
   // Controller
-  private final CommandXboxController primaryController = new CommandXboxController(0);
-
+  private final CommandXboxController primaryController   = new CommandXboxController(0);
+  private final CommandXboxController secondaryController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // Alerts
+  private final Alert primaryDisconnectedAlert   = new Alert("Primary Controller Disconnected!"  , AlertType.kError);
+  private final Alert secondaryDisconnectedAlert = new Alert("Secondary Controller Disconnected!", AlertType.kError);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
-
 
     switch (Constants.currentMode) {
       case REAL -> {
@@ -119,6 +126,34 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    // Controller Alerts
+    new Trigger(() -> !primaryController.isConnected())
+        .onTrue(Commands.runOnce(() -> {
+          secondaryController.setRumble(RumbleType.kBothRumble, 0.50);
+          primaryDisconnectedAlert.set(true);
+        }).ignoringDisable(true).andThen(
+          new WaitThen(0.5, Commands.runOnce(() -> secondaryController.setRumble(RumbleType.kBothRumble, 0.0))).ignoringDisable(true)
+        )).onFalse(
+          Commands.runOnce(() -> primaryDisconnectedAlert.set(false)).ignoringDisable(true)
+        );
+
+    new Trigger(() -> !secondaryController.isConnected())
+        .onTrue(Commands.runOnce(() -> {
+          primaryController.setRumble(RumbleType.kBothRumble, 0.50);
+          secondaryDisconnectedAlert.set(true);
+        }).ignoringDisable(true).andThen(
+          new WaitThen(0.5, Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))).ignoringDisable(true)
+        )).onFalse(
+          Commands.runOnce(() -> secondaryDisconnectedAlert.set(false)).ignoringDisable(true)
+        );
+
+    new Trigger(DriverStation::isDSAttached)
+        .onTrue(Commands.runOnce(() -> {
+            primaryDisconnectedAlert  .set(!primaryController  .isConnected());
+            secondaryDisconnectedAlert.set(!secondaryController.isConnected());
+          }).ignoringDisable(true)
+        );
   }
 
   private void registerCommands() {
