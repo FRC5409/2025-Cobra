@@ -49,18 +49,23 @@ public final class Constants {
     REPLAY
   }
 
-  /** @throws IllegalArgumentException If this the auto command is ran twice */
-  public static final boolean PRINT_AUTO_TIME = false;
-
   public static final class kDrive {
-    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
-    public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
-
     public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.0);
 
     public static final Mass ROBOT_FULL_MASS = Pounds.of(125.0);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(9.2437679288);
     public static final double WHEEL_COF = 1.2;
+  }
+
+  public static final class kAuto {
+    /** @throws IllegalArgumentException If this the auto command is ran twice */
+    public static final boolean PRINT_AUTO_TIME = true;
+
+    /** When this is true the robot will set it's position where the path starts when the auto is selected. */
+    public static final boolean RESET_ODOM_ON_CHANGE = false;
+
+    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0 , 0.0, 0.0);
+    public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0 , 0.0, 0.0);
   }
 
   public static final class kAutoAlign {

@@ -26,11 +26,13 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -44,6 +46,7 @@ import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
 import java.io.IOException;
 import org.json.simple.parser.ParseException;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
@@ -55,8 +58,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive sys_drive;
-
+  public final Drive sys_drive;
 
   // Controller
   private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -110,22 +112,15 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    autoChooser.getSendableChooser().onChange((path) -> {
-      if (path.equals("None")) return;
-      
-      try {
-        Pose2d pose = PathPlannerAuto.getPathGroupFromAutoFile(path).get(0).getStartingHolonomicPose().get();
 
-        boolean flip = AutoBuilder.shouldFlip();
-        if (flip) {
-          sys_drive.setPose(FlippingUtil.flipFieldPose(pose));
-        } else {
-          sys_drive.setPose(pose);
-        }
-      } catch (IOException | ParseException e) {
-        System.out.println("Couldn't reset Odometry from path: " + path);
-      }
-    });
+    if (kAuto.RESET_ODOM_ON_CHANGE)
+      autoChooser.getSendableChooser().onChange((path) -> sys_drive.setPose(getStartingPose()));
+      
+    SmartDashboard.putData("Reset", 
+      Commands.runOnce(
+        () -> sys_drive.setPose(getStartingPose())
+      ).ignoringDisable(true)
+    );
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -175,6 +170,22 @@ public class RobotContainer {
         );
   }
 
+  @AutoLogOutput(key = "Odometry/StartingPose")
+  public Pose2d getStartingPose() {
+    String path = autoChooser.getSendableChooser().getSelected();
+
+    if (path.equals("None")) return new Pose2d();
+        
+    try {
+      Pose2d pose = PathPlannerAuto.getPathGroupFromAutoFile(path).get(0).getStartingHolonomicPose().get();
+
+      return AutoBuilder.shouldFlip() ? FlippingUtil.flipFieldPose(pose) : pose;
+    } catch (IOException | ParseException e) {
+      System.out.println("Couldn't reset Odometry from path: " + path);
+      return new Pose2d();
+    }
+  }
+
   private void registerCommands() {
     NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH )));
     NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH)));
@@ -182,7 +193,7 @@ public class RobotContainer {
     // TODO: Finish Commands
     NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
     NamedCommands.registerCommand("STATION_PICKUP", Commands.waitSeconds(0.35));
-    NamedCommands.registerCommand("SCORE_CORAL", Commands.waitSeconds(0.35));
+    NamedCommands.registerCommand("SCORE_CORAL", Commands.waitSeconds(0.45));
   }
 
   /**

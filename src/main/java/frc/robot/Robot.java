@@ -20,10 +20,15 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.kAuto;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.PieceVisualizer;
@@ -43,6 +48,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+
+  private final Alert autoStartingConfigAlert = new Alert("Auto Pose Mismatch!", AlertType.kWarning);
 
   public Robot() {
     // Record metadata
@@ -124,6 +131,8 @@ public class Robot extends LoggedRobot {
 
     // Return to normal thread priority
     Threads.setCurrentThreadPriority(false, 10);
+
+    SmartDashboard.putNumber("Time", DriverStation.getMatchTime());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -132,7 +141,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    autoStartingConfigAlert.set(robotContainer.getStartingPose().getTranslation().getDistance(robotContainer.sys_drive.getPose().getTranslation()) > 0.25);
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -141,12 +152,12 @@ public class Robot extends LoggedRobot {
 
     if (baseAutoCommand == null) return;
 
-    if (Constants.PRINT_AUTO_TIME) {
+    if (kAuto.PRINT_AUTO_TIME) {
       long startTime = System.currentTimeMillis();
       autonomousCommand = Commands.sequence(
         baseAutoCommand,
         Commands.runOnce(
-          () -> System.out.println("Auto Command took: " + (System.currentTimeMillis() - startTime) / 1000f + " Seconds!")
+          () -> System.out.println("Auto Command took: " + (System.currentTimeMillis() - startTime - 20) / 1000f + " Seconds!")
         )
       );
     } else 

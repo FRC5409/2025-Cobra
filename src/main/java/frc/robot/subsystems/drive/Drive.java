@@ -49,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.DebugCommand;
@@ -131,7 +132,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            kDrive.TRANSLATION_PID, kDrive.ROTATION_PID),
+            kAuto.TRANSLATION_PID, kAuto.ROTATION_PID),
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
