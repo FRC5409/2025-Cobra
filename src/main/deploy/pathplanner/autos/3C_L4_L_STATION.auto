@@ -63,35 +63,11 @@
           "data": {
             "name": "ALIGN_RIGHT"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL to LP"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LP to FL"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ALIGN_LEFT"
-          }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

@@ -244,7 +244,7 @@ public class DriveCommands {
       return
         Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
         Math.abs(drive.getRotation().getRadians() - targetPose.getRotation().getRadians()) < kAutoAlign.ROTATION_TOLLERANCE.in(Radians);
-    });
+    }).andThen(Commands.runOnce(drive::stop, drive));
   }
 
 

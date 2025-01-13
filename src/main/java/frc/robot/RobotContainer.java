@@ -14,9 +14,10 @@
 
 package frc.robot;
 
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -41,6 +42,8 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
+import java.io.IOException;
+import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
@@ -107,6 +110,22 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser.getSendableChooser().onChange((path) -> {
+      if (path.equals("None")) return;
+      
+      try {
+        Pose2d pose = PathPlannerAuto.getPathGroupFromAutoFile(path).get(0).getStartingHolonomicPose().get();
+
+        boolean flip = AutoBuilder.shouldFlip();
+        if (flip) {
+          sys_drive.setPose(FlippingUtil.flipFieldPose(pose));
+        } else {
+          sys_drive.setPose(pose);
+        }
+      } catch (IOException | ParseException e) {
+        System.out.println("Couldn't reset Odometry from path: " + path);
+      }
+    });
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -159,6 +178,11 @@ public class RobotContainer {
   private void registerCommands() {
     NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH )));
     NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH)));
+
+    // TODO: Finish Commands
+    NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
+    NamedCommands.registerCommand("STATION_PICKUP", Commands.waitSeconds(0.35));
+    NamedCommands.registerCommand("SCORE_CORAL", Commands.waitSeconds(0.35));
   }
 
   /**

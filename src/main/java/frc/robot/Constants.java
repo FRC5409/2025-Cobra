@@ -50,13 +50,13 @@ public final class Constants {
   }
 
   /** @throws IllegalArgumentException If this the auto command is ran twice */
-  public static final boolean PRINT_AUTO_TIME = true;
+  public static final boolean PRINT_AUTO_TIME = false;
 
   public static final class kDrive {
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
     public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
 
-    public static final PIDConstants ALIGN_PID = new PIDConstants(10.0, 0.0, 0.0);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.0);
 
     public static final Mass ROBOT_FULL_MASS = Pounds.of(125.0);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(9.2437679288);
@@ -64,8 +64,8 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.0);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(3.0);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(4.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
     public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
