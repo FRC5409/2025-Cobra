@@ -1,12 +1,19 @@
 package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
-import org.opencv.core.Point;
+
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 // 5409: The Chargers
 // http://github.com/FRC5409
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
+import frc.robot.Constants.kVision;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
@@ -17,8 +24,18 @@ public class Vision extends SubsystemBase {
         inputs = new VisionInputsAutoLogged();
     }
 
-    public Point get2DOffset() {
-        return new Point(inputs.tx, inputs.ty);
+    /**
+     * Estimates the robot pose given the apriltags on the field
+     * 
+     * @return Pose2D
+     */
+    public Pose2d estimatePose(SwerveDrivePoseEstimator poseEstimator) {
+        double[] pose = LimelightHelpers.getBotPose(kVision.CAM_NAME);
+
+        if (pose.length != 6)
+            throw new IllegalStateException("Invalid pose data received");
+
+        return new Pose2d(pose[0], pose[1], Rotation2d.fromDegrees(pose[5]));
     }
 
     @Override

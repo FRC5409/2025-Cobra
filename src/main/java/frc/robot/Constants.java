@@ -83,6 +83,6 @@ public final class Constants {
   }
 
   public static final class kVision {
-    public static final String HOSTNAME = "limelight";
+    public static final String CAM_NAME = "limelight";
   }
 }
