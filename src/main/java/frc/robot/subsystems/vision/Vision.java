@@ -2,8 +2,6 @@ package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,8 +10,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 // http://github.com/FRC5409
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
 import frc.robot.Constants.kVision;
+import frc.robot.LimelightHelpers;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
