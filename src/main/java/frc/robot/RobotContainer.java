@@ -162,6 +162,7 @@ public class RobotContainer {
           Commands.runOnce(() -> secondaryDisconnectedAlert.set(false)).ignoringDisable(true)
         );
 
+    // TODO: fix on real robot
     new Trigger(DriverStation::isDSAttached)
         .onTrue(Commands.runOnce(() -> {
             primaryDisconnectedAlert  .set(!primaryController  .isConnected());

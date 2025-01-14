@@ -59,10 +59,10 @@ public final class Constants {
 
   public static final class kAuto {
     /** @throws IllegalArgumentException If this the auto command is ran twice */
-    public static final boolean PRINT_AUTO_TIME = true;
+    public static final boolean PRINT_AUTO_TIME = false;
 
     /** When this is true the robot will set it's position where the path starts when the auto is selected. */
-    public static final boolean RESET_ODOM_ON_CHANGE = false;
+    public static final boolean RESET_ODOM_ON_CHANGE = true;
 
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0 , 0.0, 0.0);
     public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0 , 0.0, 0.0);
