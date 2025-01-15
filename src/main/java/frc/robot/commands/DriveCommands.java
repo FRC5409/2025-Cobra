@@ -17,7 +17,6 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.*;
 
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -34,7 +33,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAutoAlign;
-import frc.robot.Constants.kDrive;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -189,18 +187,18 @@ public class DriveCommands {
   public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
     ProfiledPIDController xController =
       new ProfiledPIDController(
-          kDrive.ALIGN_PID.kP,
-          kDrive.ALIGN_PID.kI,
-          kDrive.ALIGN_PID.kD,
+          kAutoAlign.ALIGN_PID.kP,
+          kAutoAlign.ALIGN_PID.kI,
+          kAutoAlign.ALIGN_PID.kD,
           new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
 
     ProfiledPIDController yController =
       new ProfiledPIDController(
-          kDrive.ALIGN_PID.kP,
-          kDrive.ALIGN_PID.kI,
-          kDrive.ALIGN_PID.kD,
+          kAutoAlign.ALIGN_PID.kP,
+          kAutoAlign.ALIGN_PID.kI,
+          kAutoAlign.ALIGN_PID.kD,
           new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
