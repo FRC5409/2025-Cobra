@@ -92,4 +92,12 @@ public final class Constants {
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
   }
+
+  public static final class kElevator {
+    public static final double   ELEVATOR_GEARING      = 10.0/1.0;
+    public static final Distance ELEVATOR_DRUM_RADIUS  = Inches.of(0.944);
+    public static final Mass     ELEVATOR_MASS         = Pounds.of(11.0);
+
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.0);
+  }
 }

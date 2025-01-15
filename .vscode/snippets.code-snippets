@@ -53,7 +53,8 @@
     "FRC insert Subsystem boilerplate code": {
         "prefix": "frcsys",
         "body": [
-			"import edu.wpi.first.wpilibj2.command.SubsystemBase;\n",
+			"import edu.wpi.first.wpilibj2.command.SubsystemBase;",
+			"import org.littletonrobotics.junction.Logger;\n",
 
 			// Class name
 			"public class $TM_FILENAME_BASE extends SubsystemBase {\n",

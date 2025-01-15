@@ -42,6 +42,9 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
 import java.io.IOException;
@@ -59,6 +62,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   public final Drive sys_drive;
+  private final Elevator sys_elevator;
 
   // Controller
   private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -85,6 +89,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+
+        sys_elevator = new Elevator(new ElevatorIO() {});
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -95,6 +101,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+
+        sys_elevator = new Elevator(new ElevatorIOSim());
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -105,6 +113,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        
+        sys_elevator = new Elevator(new ElevatorIO() {});
       }
     }
 
