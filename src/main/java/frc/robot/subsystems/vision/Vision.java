@@ -25,13 +25,13 @@ public class Vision extends SubsystemBase {
     /**
      * Estimates the robot pose given the apriltags on the field
      * 
-     * @return Pose2D
+     * @return Pose2d, otherwise null if invalid or no AprilTags
      */
     public Pose2d estimatePose(SwerveDrivePoseEstimator poseEstimator) {
         double[] pose = LimelightHelpers.getBotPose(kVision.CAM_NAME);
 
-        if (pose.length != 6)
-            throw new IllegalStateException("Invalid pose data received");
+        if (pose.length != 6 || !inputs.hasTarget)
+            return null;
 
         return new Pose2d(pose[0], pose[1], Rotation2d.fromDegrees(pose[5]));
     }
