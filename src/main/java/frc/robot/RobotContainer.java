@@ -29,6 +29,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -37,7 +40,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -48,6 +50,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive sys_drive;
+  private final ArmPivot sys_armPivot;
 
 
   // Controller
@@ -73,6 +76,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0));
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -83,6 +87,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        sys_armPivot = new ArmPivot(new ArmPivotIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -93,6 +98,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+      sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0));
       }
     }
 
@@ -144,19 +150,23 @@ public class RobotContainer {
         )
     );
 
+    // Set drive speed to low
     primaryController.x()
       .onTrue(
         DriveCommands.setSpeedHigh(sys_drive)
       );
 
+    // Set drive speed to high
     primaryController.y()
       .onTrue(
         DriveCommands.setSpeedLow(sys_drive) 
       );
 
-    // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
+    // Make arm go up
+    primaryController.a().onTrue(sys_armPivot.setPositionUp()).onFalse(sys_armPivot.keepPosition(0));
 
-    // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
+    // Make arm go down
+    primaryController.b().onTrue(sys_armPivot.setPositionDown());
    
     // Reset gyro to 0° when Start button is pressed
     primaryController.start()
@@ -167,7 +177,6 @@ public class RobotContainer {
                             new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
                     sys_drive
                 ).ignoringDisable(true));
-
 
     // primaryController.leftBumper()
     //     .whileTrue(

@@ -79,4 +79,10 @@ public final class Constants {
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
   }
+
+  public static final class kArmPivot {
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+  }
 }
