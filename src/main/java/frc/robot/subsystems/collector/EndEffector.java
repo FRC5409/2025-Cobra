@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class EndEffector extends SubsystemBase {
 
     private final EndEffectorIO io;
-    private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
+    private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
