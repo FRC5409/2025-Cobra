@@ -192,7 +192,6 @@ public class RobotContainer {
 
       return AutoBuilder.shouldFlip() ? FlippingUtil.flipFieldPose(pose) : pose;
     } catch (IOException | ParseException e) {
-      System.out.println("Couldn't reset Odometry from path: " + path);
       return new Pose2d();
     }
   }
