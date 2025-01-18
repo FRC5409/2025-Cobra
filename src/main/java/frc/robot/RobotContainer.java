@@ -13,10 +13,17 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.FlippingUtil;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -46,10 +53,6 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
-import java.io.IOException;
-import org.json.simple.parser.ParseException;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -184,11 +187,14 @@ public class RobotContainer {
                                 .andThen(
                                         new WaitThen(
                                                 0.5,
-                                                Commands.runOnce(() -> secondaryController
-                                                        .setRumble(RumbleType.kBothRumble, 0.0)))
+                                                Commands.runOnce(
+                                                        () -> secondaryController
+                                                                .setRumble(RumbleType.kBothRumble,
+                                                                        0.0)))
                                                 .ignoringDisable(true)))
                 .onFalse(
-                        Commands.runOnce(() -> primaryDisconnectedAlert.set(false)).ignoringDisable(true));
+                        Commands.runOnce(() -> primaryDisconnectedAlert.set(false))
+                                .ignoringDisable(true));
 
         new Trigger(() -> !secondaryController.isConnected())
                 .onTrue(
@@ -201,10 +207,13 @@ public class RobotContainer {
                                         new WaitThen(
                                                 0.5,
                                                 Commands.runOnce(
-                                                        () -> primaryController.setRumble(RumbleType.kBothRumble, 0.0)))
+                                                        () -> primaryController
+                                                                .setRumble(RumbleType.kBothRumble,
+                                                                        0.0)))
                                                 .ignoringDisable(true)))
                 .onFalse(
-                        Commands.runOnce(() -> secondaryDisconnectedAlert.set(false)).ignoringDisable(true));
+                        Commands.runOnce(() -> secondaryDisconnectedAlert.set(false))
+                                .ignoringDisable(true));
 
         // TODO: fix on real robot
         new Trigger(DriverStation::isDSAttached).onTrue(
@@ -236,12 +245,14 @@ public class RobotContainer {
     private void registerCommands() {
         NamedCommands.registerCommand(
                 "ALIGN_LEFT",
-                DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
-                        kReef.LEFT_OFFSET_TO_BRANCH)));
+                DriveCommands.alignToPoint(sys_drive,
+                        () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
+                                kReef.LEFT_OFFSET_TO_BRANCH)));
         NamedCommands.registerCommand(
                 "ALIGN_RIGHT",
-                DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
-                        kReef.RIGHT_OFFSET_TO_BRANCH)));
+                DriveCommands.alignToPoint(sys_drive,
+                        () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
+                                kReef.RIGHT_OFFSET_TO_BRANCH)));
 
         // TODO: Finish Commands
         NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
@@ -282,7 +293,9 @@ public class RobotContainer {
                 .onTrue(
                         Commands.runOnce(
                                 () -> sys_drive.setPose(
-                                        new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
+                                        new Pose2d(sys_drive.getPose()
+                                                .getTranslation(),
+                                                new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
 
         // primaryController.leftBumper()
@@ -295,15 +308,17 @@ public class RobotContainer {
                 .leftBumper()
                 .whileTrue(
                         DriveCommands.alignToPoint(sys_drive,
-                                () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
-                                        kReef.LEFT_OFFSET_TO_BRANCH)));
+                                () -> AlignHelper.getClosestReef(sys_drive.getPose())
+                                        .transformBy(
+                                                kReef.LEFT_OFFSET_TO_BRANCH)));
 
         primaryController
                 .rightBumper()
                 .whileTrue(
                         DriveCommands.alignToPoint(sys_drive,
-                                () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
-                                        kReef.RIGHT_OFFSET_TO_BRANCH)));
+                                () -> AlignHelper.getClosestReef(sys_drive.getPose())
+                                        .transformBy(
+                                                kReef.RIGHT_OFFSET_TO_BRANCH)));
     }
 
     /**
