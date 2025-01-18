@@ -30,6 +30,8 @@ public class Vision extends SubsystemBase {
         this.io = io;
         inputs = new VisionInputsAutoLogged();
 
+        LimelightHelpers.setCameraPose_RobotSpace(kVision.CAM_NAME, 0.171919, 0, 0.629752, 0, 0, 0);
+
         sTagCount = sTab.add("Tag Count", 0).getEntry();
         sEstimatedPose = new Field2d();
         sTab.add("Estimated Pose", sEstimatedPose);
@@ -40,7 +42,8 @@ public class Vision extends SubsystemBase {
      */
     public void addPoseEstimate(Drive drive) {
         Rotation2d rot = drive.getRotation();
-        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rot.getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rot.getDegrees(),
+                drive.getChassisSpeeds().omegaRadiansPerSecond, 0, 0, 0, 0);
         PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kVision.CAM_NAME);
 
         sTagCount.setInteger(estimate.tagCount);
