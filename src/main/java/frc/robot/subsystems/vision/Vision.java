@@ -2,8 +2,7 @@ package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 // 5409: The Chargers
@@ -12,6 +11,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.PoseEstimate;
+import frc.robot.subsystems.drive.Drive;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
@@ -24,16 +25,14 @@ public class Vision extends SubsystemBase {
 
     /**
      * Estimates the robot pose given the apriltags on the field
-     * 
-     * @return Pose2d, otherwise null if invalid or no AprilTags
      */
-    public Pose2d estimatePose(SwerveDrivePoseEstimator poseEstimator) {
-        double[] pose = LimelightHelpers.getBotPose(kVision.CAM_NAME);
-
-        if (pose.length != 6 || !inputs.hasTarget)
-            return null;
-
-        return new Pose2d(pose[0], pose[1], Rotation2d.fromDegrees(pose[5]));
+    public void addPoseEstimate(Drive drive) {
+        Rotation2d rot = drive.getRotation();
+        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rot.getDegrees(), 0, 0, 0, 0, 0);
+        PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kVision.CAM_NAME);
+        if (estimate.tagCount < kVision.FIDUCIAL_TRUST_THRESHOLD)
+            return;
+        drive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, VecBuilder.fill(.5, .5, 9999999));
     }
 
     @Override

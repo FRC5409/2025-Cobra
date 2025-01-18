@@ -84,5 +84,7 @@ public final class Constants {
 
   public static final class kVision {
     public static final String CAM_NAME = "limelight";
+
+    public static final int FIDUCIAL_TRUST_THRESHOLD = 1;
   }
 }

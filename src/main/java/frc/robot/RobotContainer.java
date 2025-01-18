@@ -109,7 +109,6 @@ public class RobotContainer {
       }
     }
 
-    sys_drive.setVisionSubsystem(sys_vision);
     registerCommands();
 
     // Set up auto routines

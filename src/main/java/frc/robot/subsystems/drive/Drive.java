@@ -61,7 +61,6 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kDrive;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
 
@@ -111,8 +110,6 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
       lastModulePositions, new Pose2d());
-
-  private Vision vision;
 
   public Drive(
       GyroIO gyroIO,
@@ -172,15 +169,8 @@ public class Drive extends SubsystemBase {
     DebugCommand.register("Drive-Brake", Commands.runOnce(this::brakeMode));
   }
 
-  public void setVisionSubsystem(Vision subsystem) {
-    vision = subsystem;
-  }
-
   @Override
   public void periodic() {
-    // TODO: test logic for testing VPE2; not for prod use
-    System.out.println("VPE2 test: " + vision.estimatePose(poseEstimator));
-
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
     Logger.processInputs("Drive/Gyro", gyroInputs);
