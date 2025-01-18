@@ -68,30 +68,35 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
+        sys_vision = new Vision(new VisionIOLimelight());
+
         sys_drive = new Drive(
             new GyroIOPigeon2(),
             new ModuleIOTalonFX(TunerConstants.FrontLeft),
             new ModuleIOTalonFX(TunerConstants.FrontRight),
             new ModuleIOTalonFX(TunerConstants.BackLeft),
-            new ModuleIOTalonFX(TunerConstants.BackRight));
-
-        sys_vision = new Vision(new VisionIOLimelight());
+            new ModuleIOTalonFX(TunerConstants.BackRight),
+            sys_vision);
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
+        sys_vision = new Vision(new VisionIO() {
+        });
+
         sys_drive = new Drive(
             new GyroIO() {
             },
             new ModuleIOSim(TunerConstants.FrontLeft),
             new ModuleIOSim(TunerConstants.FrontRight),
             new ModuleIOSim(TunerConstants.BackLeft),
-            new ModuleIOSim(TunerConstants.BackRight));
-
-        sys_vision = new Vision(new VisionIO() {
-        });
+            new ModuleIOSim(TunerConstants.BackRight),
+            sys_vision);
       }
       default -> {
         // Replayed robot, disable IO implementations
+        sys_vision = new Vision(new VisionIO() {
+        });
+
         sys_drive = new Drive(
             new GyroIO() {
             },
@@ -102,10 +107,7 @@ public class RobotContainer {
             new ModuleIO() {
             },
             new ModuleIO() {
-            });
-
-        sys_vision = new Vision(new VisionIO() {
-        });
+            }, sys_vision);
       }
     }
 
