@@ -105,12 +105,10 @@ public class RobotContainer {
             }
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
-                sys_vision = new Vision(new VisionIO() {
-                });
+                sys_vision = new Vision(new VisionIO() {});
 
                 sys_drive = new Drive(
-                        new GyroIO() {
-                        },
+                        new GyroIO() {},
                         new ModuleIOSim(TunerConstants.FrontLeft),
                         new ModuleIOSim(TunerConstants.FrontRight),
                         new ModuleIOSim(TunerConstants.BackLeft),
@@ -119,20 +117,14 @@ public class RobotContainer {
             }
             default -> {
                 // Replayed robot, disable IO implementations
-                sys_vision = new Vision(new VisionIO() {
-                });
+                sys_vision = new Vision(new VisionIO() {});
 
                 sys_drive = new Drive(
-                        new GyroIO() {
-                        },
-                        new ModuleIO() {
-                        },
-                        new ModuleIO() {
-                        },
-                        new ModuleIO() {
-                        },
-                        new ModuleIO() {
-                        },
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
                         sys_vision);
             }
         }
