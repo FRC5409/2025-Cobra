@@ -23,6 +23,7 @@ public interface VisionIO {
         public double ta = 0;
         public boolean hasTarget = false;
         public double targetId = 0;
+
         /**
          * Latency for camera to capture image in milliseconds
          */
@@ -31,6 +32,11 @@ public interface VisionIO {
          * Camera pipeline and processing latency in milliseconds
          */
         public double prxLatency = 0;
+
+        public double fps = 0;
+        public double cpuTemp = 0;
+        public double ramUsage = 0;
+        public double sysTemp = 0;
     }
 
     default void updateInputs(VisionInputs inputs) {}

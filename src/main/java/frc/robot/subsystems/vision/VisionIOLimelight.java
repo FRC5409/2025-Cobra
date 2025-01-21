@@ -13,13 +13,21 @@ public class VisionIOLimelight implements VisionIO {
 
     @Override
     public void updateInputs(VisionInputs inputs) {
-        inputs.tx = LimelightHelpers.getTX(kVision.CAM_NAME);
-        inputs.ty = LimelightHelpers.getTY(kVision.CAM_NAME);
-        inputs.ta = LimelightHelpers.getTA(kVision.CAM_NAME);
-        inputs.hasTarget = LimelightHelpers.getTV(kVision.CAM_NAME);
-        inputs.targetId = LimelightHelpers.getFiducialID(kVision.CAM_NAME);
-        inputs.imgLatency = LimelightHelpers.getLatency_Capture(kVision.CAM_NAME);
-        inputs.prxLatency = LimelightHelpers.getLatency_Pipeline(kVision.CAM_NAME);
+        inputs.tx           = LimelightHelpers.getTX(               kVision.CAM_NAME);
+        inputs.ty           = LimelightHelpers.getTY(               kVision.CAM_NAME);
+        inputs.ta           = LimelightHelpers.getTA(               kVision.CAM_NAME);
+        inputs.hasTarget    = LimelightHelpers.getTV(               kVision.CAM_NAME);
+        inputs.targetId     = LimelightHelpers.getFiducialID(       kVision.CAM_NAME);
+        inputs.imgLatency   = LimelightHelpers.getLatency_Capture(  kVision.CAM_NAME);
+        inputs.prxLatency   = LimelightHelpers.getLatency_Pipeline( kVision.CAM_NAME);
+
+        Double[] system = LimelightHelpers.getLimelightNTTableEntry(kVision.CAM_NAME, "hw")
+                                                    .getDoubleArray(new Double[] {0.0, 0.0, 0.0, 0.0});
+
+        inputs.fps      = system[0];
+        inputs.cpuTemp  = system[1];
+        inputs.ramUsage = system[2];
+        inputs.sysTemp  = system[3];
 
         // check if disconnected by comparing prx latency
         if (lastPrxLatency != inputs.prxLatency) {
@@ -51,7 +59,7 @@ public class VisionIOLimelight implements VisionIO {
      */
     public static void forwardLimelightPorts() {
         for (int i = 5800; i <= 5809; i++) {
-            PortForwarder.add(i + 10, kVision.CAM_NAME+".local", i);
+            PortForwarder.add(i, kVision.CAM_NAME+".local", i);
         }
     }
 }
