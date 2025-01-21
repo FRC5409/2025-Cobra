@@ -22,8 +22,8 @@ public class Vision extends SubsystemBase {
     private final VisionIO io;
     private final VisionInputsAutoLogged inputs;
 
-    private final GenericEntry sTagCount;
-    private final Field2d sEstimatedPose;
+//    private final GenericEntry sTagCount;
+//    private final Field2d sEstimatedPose;
 
     private final Alert disconnectedAlert = new Alert("Limelight appears to be disconnected. (TIMEOUT)", Alert.AlertType.kError);
 
@@ -33,10 +33,10 @@ public class Vision extends SubsystemBase {
 
         io.setCameraOffset();
 
-        ShuffleboardTab tab = Shuffleboard.getTab("Vision");
-        sTagCount = tab.add("Tag Count", 0).getEntry();
-        sEstimatedPose = new Field2d();
-        tab.add("Estimated Pose", sEstimatedPose);
+//        ShuffleboardTab tab = Shuffleboard.getTab("Vision");
+//        sTagCount = tab.add("Tag Count", 0).getEntry();
+//        sEstimatedPose = new Field2d();
+//        tab.add("Estimated Pose", sEstimatedPose);
     }
 
     /**
@@ -49,8 +49,8 @@ public class Vision extends SubsystemBase {
         if (estimate == null)
             return;
 
-        sTagCount.setInteger(estimate.tagCount);
-        sEstimatedPose.setRobotPose(estimate.pose);
+//        sTagCount.setInteger(estimate.tagCount);
+//        sEstimatedPose.setRobotPose(estimate.pose);
 
         if (estimate.tagCount < kVision.FIDUCIAL_TRUST_THRESHOLD)
             return;
