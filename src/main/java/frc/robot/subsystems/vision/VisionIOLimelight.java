@@ -3,11 +3,13 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
 import frc.robot.Constants;
-import frc.robot.LimelightHelpers;
 import frc.robot.Constants.kVision;
+import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.drive.Drive;
 
 public class VisionIOLimelight implements VisionIO {
+    private double lastPrxLatency = 0;
+    private double disconnectedFrames = 0;
 
     @Override
     public void updateInputs(VisionInputs inputs) {
@@ -16,6 +18,19 @@ public class VisionIOLimelight implements VisionIO {
         inputs.ta = LimelightHelpers.getTA(kVision.CAM_NAME);
         inputs.hasTarget = LimelightHelpers.getTV(kVision.CAM_NAME);
         inputs.targetId = LimelightHelpers.getFiducialID(kVision.CAM_NAME);
+        inputs.imgLatency = LimelightHelpers.getLatency_Capture(kVision.CAM_NAME);
+        inputs.prxLatency = LimelightHelpers.getLatency_Pipeline(kVision.CAM_NAME);
+
+        // check if disconnected by comparing prx latency
+        if (lastPrxLatency != inputs.prxLatency) {
+            disconnectedFrames = 0;
+            inputs.isConnected = true;
+        } else {
+            disconnectedFrames++;
+            inputs.isConnected = disconnectedFrames <= kVision.DISCONNECTION_TIMEOUT;
+        }
+
+        lastPrxLatency = inputs.prxLatency;
     }
 
     @Override
