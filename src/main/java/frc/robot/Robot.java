@@ -203,7 +203,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    final Drive drive = robotContainer.getDrive();
+    final Drive drive = robotContainer.sys_drive;
 
     PieceVisualizer.configure(() -> drive.getPose());
     
