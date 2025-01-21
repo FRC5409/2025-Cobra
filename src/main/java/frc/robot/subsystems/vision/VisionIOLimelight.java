@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.net.PortForwarder;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.kVision;
@@ -28,5 +29,14 @@ public class VisionIOLimelight implements VisionIO {
         LimelightHelpers.SetRobotOrientation(Constants.kVision.CAM_NAME, rot.getDegrees(),
                 drive.getChassisSpeeds().omegaRadiansPerSecond, 0, 0, 0, 0);
         return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.kVision.CAM_NAME);
+    }
+
+    /**
+     * Forward limelight ports (5800-5809) so it can be used over USB
+     */
+    public static void forwardLimelightPorts() {
+        for (int i = 5800; i <= 5809; i++) {
+            PortForwarder.add(i + 10, kVision.CAM_NAME+".local", i);
+        }
     }
 }
