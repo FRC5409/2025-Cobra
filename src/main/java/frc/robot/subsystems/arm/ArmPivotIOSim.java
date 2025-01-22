@@ -1,0 +1,137 @@
+package frc.robot.subsystems.arm;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.kArmPivot;
+
+public class ArmPivotIOSim implements ArmPivotIO{
+
+    private static final ShuffleboardTab sb_sim = Shuffleboard.getTab("SIM");
+
+    private boolean isRunning;
+
+    private final SingleJointedArmSim armSim;
+    private final PIDController controller;
+
+    private final Mechanism2d mech;
+    private final MechanismRoot2d root;
+    private final MechanismLigament2d stand;
+    private final MechanismLigament2d arm;
+
+    public ArmPivotIOSim() {
+        armSim = new SingleJointedArmSim(
+            DCMotor.getFalcon500Foc(1),
+            kArmPivot.ARM_GEARING,
+            kArmPivot.ARM_MOI.in(KilogramSquareMeters),
+            kArmPivot.ARM_LENGTH.in(Meters),
+            kArmPivot.minAngles.in(Radians),
+            kArmPivot.maxAngles.in(Radians),
+            true,
+            0.5
+        );
+
+        controller = new PIDController(
+            kArmPivot.SIMULATED_PID_VALUES.kP,
+            kArmPivot.SIMULATED_PID_VALUES.kI,
+            kArmPivot.SIMULATED_PID_VALUES.kD
+        );
+
+        mech = new Mechanism2d(0.6, 10.0);
+        root = mech.getRoot("Base", 0.3, 0.1);
+
+        stand = root.append(
+            new MechanismLigament2d(
+                "Stand",
+                 0.7,
+                 90
+            )
+        );
+
+        arm = stand.append(
+            new MechanismLigament2d(
+                "Arm",
+                 0.5,
+                 90
+            )
+        );
+
+        SmartDashboard.putData("Mech2d", mech);
+
+        sb_sim.add("Arm Mech", mech);
+
+        isRunning = false;
+    }
+
+    @Override
+    public void moveArm(Angle angle) {
+        controller.setSetpoint(angle.in(Radians));
+        isRunning = true;
+    }
+
+    // @Override
+    // public void increaseAngleSim() {
+    //     armSim.setInputVoltage(6.0);
+    // }
+
+    // @Override
+    // public void decreaseAngleSim() {
+    //     armSim.setInputVoltage(-6.0);
+    // }
+
+    @Override
+    public void stop() {
+        armSim.setInputVoltage(0.0);
+        controller.reset();
+        isRunning = false;
+    }
+
+    @Override
+    public void updateInputs(ArmPivotInputs inputs) {
+        double volatge = 0.0;
+        double current = 0.0;
+
+        if (isRunning) {
+            volatge = MathUtil.clamp(
+                controller.calculate(armSim.getAngleRads()) * RoboRioSim.getVInVoltage(),
+                -12,
+                12
+            );
+            
+            armSim.setInputVoltage((volatge));
+            armSim.update(0.02);
+
+            System.out.println(armSim.getAngleRads());
+
+
+            arm.setAngle(Units.radiansToDegrees(armSim.getAngleRads()));
+
+            current = armSim.getCurrentDrawAmps();
+        }
+
+        inputs.connected = true;
+        inputs.positionAngles = arm.getAngle();
+        inputs.targetAngle = controller.getSetpoint();
+        inputs.voltage = volatge;
+        inputs.current = current;
+        inputs.temperature = 0.0;
+    }
+
+    // SmartDashboard.putData("Mech2d", mech);
+}

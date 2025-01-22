@@ -19,6 +19,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -31,6 +32,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -39,6 +41,9 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.util.AlignHelper;
+
+import static edu.wpi.first.units.Units.Degrees;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -74,6 +79,7 @@ public class RobotContainer {
                 new GyroIOPigeon2(),
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
+
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0));
@@ -87,7 +93,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        sys_armPivot = new ArmPivot(new ArmPivotIO() {});
+        sys_armPivot = new ArmPivot(new ArmPivotIOSim());
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -159,14 +165,18 @@ public class RobotContainer {
     // Set drive speed to high
     primaryController.y()
       .onTrue(
-        DriveCommands.setSpeedLow(sys_drive) 
+        DriveCommands.setSpeedLow(sys_drive)
       );
 
-    // Make arm go up
-    primaryController.a().onTrue(sys_armPivot.setPositionUp()).onFalse(sys_armPivot.keepPosition(0));
+    primaryController.a()
+      .onTrue(
+        sys_armPivot.moveArm(Degrees.of(3))
+      );
 
-    // Make arm go down
-    primaryController.b().onTrue(sys_armPivot.setPositionDown());
+      primaryController.b()
+      .onTrue(
+        sys_armPivot.moveArm(Degrees.of(90))
+      );
    
     // Reset gyro to 0° when Start button is pressed
     primaryController.start()

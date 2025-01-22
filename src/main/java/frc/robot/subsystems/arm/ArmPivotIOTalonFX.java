@@ -1,58 +1,48 @@
 package frc.robot.subsystems.arm;
 
-import java.util.ResourceBundle.Control;
+import static edu.wpi.first.units.Units.Celsius;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.ControlModeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.Constants.kArmPivot;
 
 public class ArmPivotIOTalonFX implements ArmPivotIO {
-    private TalonFX armMotor, followerArmMotor;
+    private TalonFX armMotor;
     private final PositionVoltage positionVoltage;
-    public static double conversionFactor = 0;
     private final double motorArmRatio = 0;
 
-    public ArmPivotIOTalonFX(int ArmPivotIOTalonFX) {
+    public ArmPivotIOTalonFX(int canID) {
 
-        armMotor = new TalonFX(0);
-        followerArmMotor = new TalonFX(0);
+        armMotor = new TalonFX(canID);
 
-        // followerArmMotor.set(ControlModeValue.Follower, armMotor);
+        TalonFXConfigurator configurator = armMotor.getConfigurator();
+        CurrentLimitsConfigs limitConfigs = new CurrentLimitsConfigs();
 
-        var configurator = armMotor.getConfigurator();
-        var limitConfigs = new CurrentLimitsConfigs();
-
-        limitConfigs.StatorCurrentLimit = 30;
-        limitConfigs.StatorCurrentLimitEnable = true;
+        limitConfigs.SupplyCurrentLimit = 30;
+        limitConfigs.SupplyCurrentLimitEnable = true;
         configurator.apply(limitConfigs);
 
-        var feedBackConfig = new FeedbackConfigs()
-            .withSensorToMechanismRatio(1);
+        FeedbackConfigs feedBackConfig = new FeedbackConfigs()
+            .withSensorToMechanismRatio(motorArmRatio);
         configurator.apply(feedBackConfig);
 
         armMotor.setNeutralMode(NeutralModeValue.Brake);
-
-        var turnConfig = new TalonFXConfiguration();
-        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         positionVoltage = new PositionVoltage(0).withSlot(0);
 
         //armMotor.setInverted(false);
 
-        var slot0Configs = new Slot0Configs();
+        Slot0Configs slot0Configs = new Slot0Configs();
         slot0Configs.kP = kArmPivot.kP;
         slot0Configs.kI = kArmPivot.kI;
         slot0Configs.kD = kArmPivot.kD;
@@ -65,30 +55,29 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         armMotor.setVoltage(volts);
     }
 
-    @Override
-    public void setPositionUp(double position) {
-        armMotor.setControl(positionVoltage.withPosition(10));
-    }
 
-    @Override
-    public void setPositionDown(double position) {
-        armMotor.setControl(positionVoltage.withPosition(-10));
-    }
 
+
+
+
+
+
+
+
+    
     @Override
-    public void keepPosition(double armPositionRad) {
-        var motorPositionRad = armPositionRad*motorArmRatio;
-        armMotor.setControl(positionVoltage.withPosition(motorPositionRad));
+    public void moveArm(Angle armPositionRad) {
+        armMotor.setControl(positionVoltage.withPosition(armPositionRad));
     }
 
     @Override
     public void updateInputs(ArmPivotInputs inputs) {
-        inputs.armConnected = armMotor.getFaultField().getValue() == 0;
-        inputs.armVolts = armMotor.getMotorVoltage().getValueAsDouble();
-        inputs.armCurrent = armMotor.getStatorCurrent().getValueAsDouble();
-        inputs.armPosition = armMotor.getPosition().getValueAsDouble();
-        inputs.armTemp = armMotor.getDeviceTemp().getValueAsDouble();
-        inputs.armSpeed = armMotor.getVelocity().getValueAsDouble();
-        inputs.armPositionRad = Units.rotationsToRadians(inputs.armPosition);
+        inputs.connected = armMotor.getFaultField().getValue() == 0;
+        inputs.voltage = armMotor.getMotorVoltage().getValueAsDouble();
+        inputs.current = armMotor.getSupplyCurrent().getValueAsDouble();
+        inputs.positionAngles = armMotor.getPosition().getValue().in(Degrees);
+        inputs.temperature = armMotor.getDeviceTemp().getValue().in(Celsius);
+        inputs.speed = armMotor.getVelocity().getValue().in(RadiansPerSecond);
+        inputs.positionRad = Units.rotationsToRadians(inputs.positionAngles);
     }
 }
