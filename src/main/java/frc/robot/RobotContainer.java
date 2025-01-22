@@ -15,6 +15,7 @@ package frc.robot;
 
 import java.io.IOException;
 
+import frc.robot.commands.FiducialCommands;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -308,6 +309,8 @@ public class RobotContainer {
                                 () -> AlignHelper.getClosestReef(sys_drive.getPose())
                                         .transformBy(
                                                 kReef.RIGHT_OFFSET_TO_BRANCH)));
+
+        primaryController.b().onTrue(FiducialCommands.alignToVisibleFiducial(sys_drive, sys_vision));
     }
 
   /**
