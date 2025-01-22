@@ -54,6 +54,10 @@ public class Vision extends SubsystemBase {
         drive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, VecBuilder.fill(.5, .5, 9999999));
     }
 
+    public double getTargetOffsetX() {
+        return inputs.tx;
+    }
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
