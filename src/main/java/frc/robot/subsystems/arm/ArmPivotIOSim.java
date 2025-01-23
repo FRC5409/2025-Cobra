@@ -85,16 +85,6 @@ public class ArmPivotIOSim implements ArmPivotIO{
         isRunning = true;
     }
 
-    // @Override
-    // public void increaseAngleSim() {
-    //     armSim.setInputVoltage(6.0);
-    // }
-
-    // @Override
-    // public void decreaseAngleSim() {
-    //     armSim.setInputVoltage(-6.0);
-    // }
-
     @Override
     public void stop() {
         armSim.setInputVoltage(0.0);
@@ -117,7 +107,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
             armSim.setInputVoltage((volatge));
             armSim.update(0.02);
 
-            System.out.println(armSim.getAngleRads());
+            // System.out.println(armSim.getAngleRads());
 
 
             arm.setAngle(Units.radiansToDegrees(armSim.getAngleRads()));

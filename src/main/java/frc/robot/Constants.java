@@ -95,6 +95,6 @@ public final class Constants {
     public static final Angle minAngles = Radians.of(0);
     public static final Angle maxAngles = Radians.of(90);
 
-    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 5.0);
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
   }
 }
