@@ -79,44 +79,44 @@ public class RobotContainer {
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    switch (Constants.currentMode) {
-      case REAL -> {
-        // Real robot, instantiate hardware IO implementations
-        sys_vision = new Vision(new VisionIOLimelight());
-        sys_drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight),
-                sys_vision);
-      }
-      case SIM -> {
-        // Sim robot, instantiate physics sim IO implementations
-        sys_vision = new Vision(new VisionIO() {});
-        sys_drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight),
-                sys_vision);
-      }
-      default -> {
-        // Replayed robot, disable IO implementations
-        sys_vision = new Vision(new VisionIO() {});
-        sys_drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                sys_vision);
-      }
-    }
+        switch (Constants.currentMode) {
+            case REAL -> {
+                // Real robot, instantiate hardware IO implementations
+                sys_vision = new Vision(new VisionIOLimelight());
+                sys_drive =
+                    new Drive(
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight),
+                        sys_vision);
+            }
+            case SIM -> {
+                // Sim robot, instantiate physics sim IO implementations
+                sys_vision = new Vision(new VisionIO() {});
+                sys_drive =
+                    new Drive(
+                        new GyroIO() {},
+                        new ModuleIOSim(TunerConstants.FrontLeft),
+                        new ModuleIOSim(TunerConstants.FrontRight),
+                        new ModuleIOSim(TunerConstants.BackLeft),
+                        new ModuleIOSim(TunerConstants.BackRight),
+                        sys_vision);
+            }
+            default -> {
+                // Replayed robot, disable IO implementations
+                sys_vision = new Vision(new VisionIO() {});
+                sys_drive =
+                    new Drive(
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        sys_vision);
+            }
+        }
 
     registerCommands();
 
@@ -206,70 +206,84 @@ public class RobotContainer {
     NamedCommands.registerCommand("SCORE_CORAL", Commands.waitSeconds(0.45));
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    sys_drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            sys_drive,
-            () -> -primaryController.getLeftY(),
-            () -> -primaryController.getLeftX(),
-            () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
-        )
-    );
-
-    primaryController.x()
-      .onTrue(
-        DriveCommands.setSpeedHigh(sys_drive)
-      );
-
-    primaryController.y()
-      .onTrue(
-        DriveCommands.setSpeedLow(sys_drive) 
-      );
-
-    // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
-
-    // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
-   
-    // Reset gyro to 0° when Start button is pressed
-    primaryController.start()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                    sys_drive.setPose(
-                            new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
-                    sys_drive
-                ).ignoringDisable(true));
-
-
-    // primaryController.leftBumper()
-    //     .whileTrue(
-    //         DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()))
-    //     );
-
-    primaryController.leftBumper()
-        .whileTrue(
-            DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
+    /**
+     * Use this method to define your button->command mappings. Buttons can be created by
+     * instantiating a {@link GenericHID} or one of its subclasses ({@link
+     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     */
+    private void configureButtonBindings() {
+        // Default command, normal field-relative drive
+        sys_drive.setDefaultCommand(
+            DriveCommands.joystickDrive(
+                sys_drive,
+                () -> -primaryController.getLeftY(),
+                () -> -primaryController.getLeftX(),
+                () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+            )
         );
 
-    primaryController.rightBumper()
-        .whileTrue(
-            DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH))
-        );
-  }
+        primaryController.x()
+            .onTrue(
+                DriveCommands.setSpeedHigh(sys_drive)
+            );
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return autoChooser.get();
-  }
+        primaryController.y()
+            .onTrue(
+                DriveCommands.setSpeedLow(sys_drive) 
+            );
+
+        // Reset gyro to 0° when Start button is pressed
+        primaryController
+                .start()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> sys_drive.setPose(
+                                        new Pose2d(sys_drive.getPose()
+                                                .getTranslation(),
+                                                new Rotation2d())),
+                                sys_drive).ignoringDisable(true));
+
+        primaryController
+            .leftBumper()
+                .whileTrue(
+                    DriveCommands.alignToPoint(
+                        sys_drive,
+                        () -> AlignHelper.getClosestReef(sys_drive.getPose())
+                            .transformBy(
+                            kReef.LEFT_OFFSET_TO_BRANCH
+                        )
+                    )
+                );
+
+        primaryController
+            .rightBumper()
+                .whileTrue(
+                    DriveCommands.alignToPoint(
+                        sys_drive,
+                        () -> AlignHelper.getClosestReef(sys_drive.getPose())
+                            .transformBy(
+                            kReef.RIGHT_OFFSET_TO_BRANCH
+                        )
+                    )
+                );
+
+        primaryController
+            .povLeft()
+                .whileTrue(
+                    DriveCommands.alignToPoint(
+                        sys_drive, 
+                        () -> AlignHelper.getClosestStation(sys_drive.getPose())
+                    )
+                );
+    }
+
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return autoChooser.get();
+    }
 }

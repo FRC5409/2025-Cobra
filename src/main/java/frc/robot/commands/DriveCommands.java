@@ -187,6 +187,7 @@ public class DriveCommands {
   }
 
   public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
+    System.out.println(target.get());
     ProfiledPIDController xController =
       new ProfiledPIDController(
           kAutoAlign.ALIGN_PID.kP,

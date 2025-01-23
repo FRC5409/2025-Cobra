@@ -72,7 +72,7 @@ public final class Constants {
     public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.5);
 
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
     public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
@@ -92,6 +92,20 @@ public final class Constants {
 
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+    }
+
+    public static final class kStation {
+        private static final Distance DISTANCE_RAMPS = Inches .of( 8.000);
+        private static final Angle    STATION_ANGLE  = Degrees.of(-54.000);
+
+        public static final Pose2d LEFT_STATION  = new Pose2d(1.678, 7.370, Rotation2d.fromDegrees(STATION_ANGLE.in(Degrees)));
+        public static final Pose2d RIGHT_STATION = FieldMirror.mirrorPose(LEFT_STATION);
+
+        public static final Transform2d STATIONS_OFFSET = new Transform2d(
+            0.0,
+            -DISTANCE_RAMPS.in(Meters),
+            new Rotation2d()
+        );
     }
   }
 

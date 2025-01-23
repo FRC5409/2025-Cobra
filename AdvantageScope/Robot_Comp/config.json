@@ -1,0 +1,29 @@
+{
+    "name": "Comp",
+    "rotations": [
+      {
+        "axis": "y",
+        "degrees": 180
+      },
+      {
+        "axis": "z",
+        "degrees": -90
+      }
+    ],
+    "position": [-0.005, -0.025, 0.0],
+    "cameras": [
+      {
+        "name": "LIMELIGHT",
+        "rotations": [
+          {
+            "axis": "y",
+            "degrees": 0
+          }
+        ],
+        "position": [0.0, 0.0, 0.425],
+        "resolution": [1280, 800],
+        "fov": 80
+      }
+    ]
+  }
+  
