@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
+import org.opencv.core.Point;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.Alert;
@@ -13,6 +14,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.drive.Drive;
+import org.opencv.core.Point3;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
@@ -54,8 +56,12 @@ public class Vision extends SubsystemBase {
         drive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, VecBuilder.fill(.5, .5, 9999999));
     }
 
-    public double getTargetOffsetX() {
-        return inputs.tx;
+    /**
+     * Gets the relative offset to the active target
+     * @return 3D point; z=area%
+     */
+    public Point3 getTargetOffset() {
+        return new Point3(inputs.tx, inputs.ty, inputs.ta);
     }
 
     @Override

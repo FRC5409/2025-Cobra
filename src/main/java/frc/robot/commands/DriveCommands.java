@@ -45,8 +45,6 @@ public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = 5.0;
   private static final double ANGLE_KD = 0.4;
-  private static final double ANGLE_MAX_VELOCITY = 8.0;
-  private static final double ANGLE_MAX_ACCELERATION = 20.0;
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 1.0; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -143,7 +141,7 @@ public class DriveCommands {
             ANGLE_KP,
             0.0,
             ANGLE_KD,
-            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+            new TrapezoidProfile.Constraints(kAutoAlign.MAX_ANGULAR_VELOCITY, kAutoAlign.MAX_ANGULAR_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Construct command
@@ -188,7 +186,7 @@ public class DriveCommands {
           kAutoAlign.ALIGN_PID.kP,
           kAutoAlign.ALIGN_PID.kI,
           kAutoAlign.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+          new TrapezoidProfile.Constraints(kAutoAlign.MAX_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
 
@@ -197,7 +195,7 @@ public class DriveCommands {
           kAutoAlign.ALIGN_PID.kP,
           kAutoAlign.ALIGN_PID.kI,
           kAutoAlign.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+          new TrapezoidProfile.Constraints(kAutoAlign.MAX_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
 
@@ -206,7 +204,7 @@ public class DriveCommands {
           ANGLE_KP,
           0.0,
           ANGLE_KD,
-          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+          new TrapezoidProfile.Constraints(kAutoAlign.MAX_ANGULAR_VELOCITY, kAutoAlign.MAX_ANGULAR_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     return Commands.parallel(

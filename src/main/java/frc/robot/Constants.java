@@ -71,8 +71,11 @@ public final class Constants {
   public static final class kAutoAlign {
     public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.5);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
+    public static final LinearVelocity MAX_VELOCITY         = MetersPerSecond         .of(3.5);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
+
+    public static final double MAX_ANGULAR_VELOCITY     = 8.0;
+    public static final double MAX_ANGULAR_ACCELERATION = 20.0;
 
     public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.0);
     public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.0);
@@ -92,6 +95,11 @@ public final class Constants {
 
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+    }
+
+    public static final class kFiducialBased {
+      public static final double AREA_PERCENT_TO_FINISH = 0.95;
+      public static final double SAGITTAL_AXIS_VELOCITY_FACTOR = 1;
     }
   }
 
