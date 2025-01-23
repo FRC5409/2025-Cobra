@@ -98,8 +98,8 @@ public final class Constants {
     }
 
     public static final class kFiducialBased {
-      public static final double AREA_PERCENT_TO_FINISH = 0.95;
-      public static final double SAGITTAL_AXIS_VELOCITY_FACTOR = 1;
+      public static final double FIDUCIAL_AREA_THRESHOLD        = 8.0;
+      public static final double SAGITTAL_AXIS_VELOCITY_FACTOR  = 0.5;
     }
   }
 

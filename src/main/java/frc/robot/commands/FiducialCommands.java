@@ -31,6 +31,6 @@ public class FiducialCommands {
                         },
                         drive::stop,
                         drive, vision),
-                Commands.waitUntil(() -> vision.getTargetOffset().y >= kAutoAlign.kFiducialBased.AREA_PERCENT_TO_FINISH));
+                Commands.waitUntil(() -> vision.getTargetOffset().y >= kAutoAlign.kFiducialBased.FIDUCIAL_AREA_THRESHOLD));
     }
 }
