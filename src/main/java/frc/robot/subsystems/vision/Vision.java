@@ -1,20 +1,14 @@
 package frc.robot.subsystems.vision;
 
-import org.littletonrobotics.junction.Logger;
-import org.opencv.core.Point;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.Alert;
-
-// 5409: The Chargers
-// http://github.com/FRC5409
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.drive.Drive;
-import org.opencv.core.Point3;
+import org.littletonrobotics.junction.Logger;
+import org.opencv.core.Point;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
@@ -58,10 +52,10 @@ public class Vision extends SubsystemBase {
 
     /**
      * Gets the relative offset to the active target
-     * @return 3D point; z=area%
+     * @return (x: dx°, y: area%)
      */
-    public Point3 getTargetOffset() {
-        return new Point3(inputs.tx, inputs.ty, inputs.ta);
+    public Point getTargetOffset() {
+        return new Point(inputs.tx, inputs.ta);
     }
 
     @Override
