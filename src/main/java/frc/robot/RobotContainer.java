@@ -14,16 +14,13 @@
 package frc.robot;
 
 import java.io.IOException;
-
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.FlippingUtil;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -52,13 +49,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
-import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
-import java.io.IOException;
-import org.json.simple.parser.ParseException;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -243,13 +234,12 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "ALIGN_LEFT",
                 DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
-                                kReef.LEFT_OFFSET_TO_BRANCH)));
+                        () -> AlignHelper.getClosestReef(sys_drive.getPose())));
+
         NamedCommands.registerCommand(
                 "ALIGN_RIGHT",
                 DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(
-                                kReef.RIGHT_OFFSET_TO_BRANCH)));
+                        () -> AlignHelper.getClosestReef(sys_drive.getPose())));
 
         // TODO: Finish Commands
         NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
@@ -257,30 +247,26 @@ public class RobotContainer {
         NamedCommands.registerCommand("SCORE_CORAL", Commands.waitSeconds(0.45));
     }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    sys_drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            sys_drive,
-            () -> -primaryController.getLeftY(),
-            () -> -primaryController.getLeftX(),
-            () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
-        )
-    );
+    /**
+     * Use this method to define your button->command mappings. Buttons can be created by
+     * instantiating a {@link GenericHID} or one of its subclasses ({@link
+     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     */
+    private void configureButtonBindings() {
+        // Default command, normal field-relative drive
+        sys_drive.setDefaultCommand(
+            DriveCommands.joystickDrive(
+                sys_drive,
+                () -> -primaryController.getLeftY(),
+                () -> -primaryController.getLeftX(),
+                () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+            )
+        );
 
         primaryController.x().onTrue(DriveCommands.setSpeedHigh(sys_drive));
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
-
-        // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
-
-        // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
 
         // Reset gyro to 0° when Start button is pressed
         primaryController
@@ -292,29 +278,6 @@ public class RobotContainer {
                                                 .getTranslation(),
                                                 new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
-
-        // primaryController.leftBumper()
-        // .whileTrue(
-        // DriveCommands.alignToPoint(drive, () ->
-        // AlignHelper.getClosestReef(drive.getPose()))
-        // );
-
-        primaryController
-                .leftBumper()
-                .whileTrue(
-                        DriveCommands.alignToPoint(sys_drive,
-                                () -> AlignHelper.getClosestReef(sys_drive.getPose())
-                                        .transformBy(
-                                                kReef.LEFT_OFFSET_TO_BRANCH)));
-
-        primaryController
-                .rightBumper()
-                .whileTrue(
-                        DriveCommands.alignToPoint(sys_drive,
-                                () -> AlignHelper.getClosestReef(sys_drive.getPose())
-                                        .transformBy(
-                                                kReef.RIGHT_OFFSET_TO_BRANCH)));
-    }
 
         primaryController.y()
             .onTrue(
