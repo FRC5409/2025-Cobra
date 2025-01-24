@@ -16,6 +16,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
+
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,6 +28,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.util.FieldMirror;
 
@@ -79,7 +82,13 @@ public final class Constants {
 
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
+    public static final Time VELOCITY_TIME_ADJUSTEDMENT = Milliseconds.of(5000);
+    public static final int  TIME_ADJUSTMENT_TIMEOUT = 10;
+
     public static final class kReef {
+      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+
       public static final HashMap<String, Pose2d> TARGETS = new HashMap<>();
       static {
         TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
@@ -90,15 +99,20 @@ public final class Constants {
         TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
       }
 
-      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+      public static final HashMap<String, Pose2d> BRANCHES = new HashMap<>();
+      static {
+        for (Entry<String, Pose2d> entry : TARGETS.entrySet()) {
+            BRANCHES.put(entry.getKey() + "L", entry.getValue().transformBy( LEFT_OFFSET_TO_BRANCH));
+            BRANCHES.put(entry.getKey() + "R", entry.getValue().transformBy(RIGHT_OFFSET_TO_BRANCH));
+        }
+      }
     }
 
     public static final class kStation {
         private static final Distance DISTANCE_RAMPS = Inches .of( 8.000);
         private static final Angle    STATION_ANGLE  = Degrees.of(-54.000);
 
-        public static final Pose2d LEFT_STATION  = new Pose2d(1.678, 7.370, Rotation2d.fromDegrees(STATION_ANGLE.in(Degrees)));
+        public static final Pose2d LEFT_STATION  = new Pose2d(1.498, 7.274, Rotation2d.fromDegrees(STATION_ANGLE.in(Degrees)));
         public static final Pose2d RIGHT_STATION = FieldMirror.mirrorPose(LEFT_STATION);
 
         public static final Transform2d STATIONS_OFFSET = new Transform2d(

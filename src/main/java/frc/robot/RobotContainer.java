@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAuto;
-import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -47,6 +46,8 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
+import frc.robot.util.AlignHelper.kClosestType;
+import frc.robot.util.AlignHelper.kDirection;
 import java.io.IOException;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -197,8 +198,8 @@ public class RobotContainer {
   }
 
   private void registerCommands() {
-    NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH )));
-    NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.RIGHT_OFFSET_TO_BRANCH)));
+    NamedCommands.registerCommand("ALIGN_LEFT" , DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose(), kClosestType.DISTANCE, kDirection.LEFT )));
+    NamedCommands.registerCommand("ALIGN_RIGHT", DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose(), kClosestType.DISTANCE, kDirection.RIGHT)));
 
     // TODO: Finish Commands
     NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
@@ -245,36 +246,21 @@ public class RobotContainer {
                                 sys_drive).ignoringDisable(true));
 
         primaryController
-            .leftBumper()
-                .whileTrue(
-                    DriveCommands.alignToPoint(
-                        sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getPose())
-                            .transformBy(
-                            kReef.LEFT_OFFSET_TO_BRANCH
-                        )
-                    )
-                );
-
-        primaryController
-            .rightBumper()
-                .whileTrue(
-                    DriveCommands.alignToPoint(
-                        sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getPose())
-                            .transformBy(
-                            kReef.RIGHT_OFFSET_TO_BRANCH
-                        )
-                    )
-                );
-
-        primaryController
             .povLeft()
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
-                        () -> AlignHelper.getClosestStation(sys_drive.getPose())
-                    )
+                        () -> AlignHelper.getClosestElement(sys_drive.getPose(), kDirection.LEFT)
+                    ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+                );
+
+        primaryController
+            .povRight()
+                .whileTrue(
+                    DriveCommands.alignToPoint(
+                        sys_drive, 
+                        () -> AlignHelper.getClosestElement(sys_drive.getPose(), kDirection.RIGHT)
+                    ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
                 );
     }
 
