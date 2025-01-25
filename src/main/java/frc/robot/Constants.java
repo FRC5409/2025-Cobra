@@ -37,8 +37,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.util.FieldMirror;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
+ * This class defines the runtime mode used by AdvantageKit. The mode is always
+ * "real" when running
+ * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics
+ * sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
@@ -79,8 +81,8 @@ public final class Constants {
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
-    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
+    public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.0);
+    public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.0);
 
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
@@ -89,8 +91,8 @@ public final class Constants {
       static {
         TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
         TARGETS.put("FL", new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
-        TARGETS.put("F" , new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
-        TARGETS.put("B" , new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
+        TARGETS.put("F", new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
+        TARGETS.put("B", new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
         TARGETS.put("BR", FieldMirror.mirrorPose(TARGETS.get("BL")));
         TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
       }
@@ -109,5 +111,16 @@ public final class Constants {
       public static final int kGearing = 9/1;
       public static final double kCircumfrence = 2 * Math.PI * 0.0199;
       public static final double kRotationConverter = kCircumfrence / kGearing;
+
+  public static final class kVision {
+    public static final String CAM_NAME = "limelight";
+
+    public static final int FIDUCIAL_TRUST_THRESHOLD = 1;
+
+    /**
+     * Frames allowed without latency update before flagged as disconnected
+     */
+    public static final int DISCONNECTION_TIMEOUT = 5;
+
   }
 }

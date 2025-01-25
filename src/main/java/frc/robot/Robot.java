@@ -31,7 +31,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAuto;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.PieceVisualizer;
+import frc.robot.util.StructHelper;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -114,6 +116,8 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    VisionIOLimelight.forwardLimelightPorts();
   }
 
   /** This function is called periodically during all modes. */
@@ -133,6 +137,8 @@ public class Robot extends LoggedRobot {
     Threads.setCurrentThreadPriority(false, 10);
 
     SmartDashboard.putNumber("Time", DriverStation.getMatchTime());
+
+    StructHelper.update();
   }
 
   /** This function is called once when the robot is disabled. */
@@ -200,7 +206,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    final Drive drive = robotContainer.getDrive();
+    final Drive drive = robotContainer.sys_drive;
 
     PieceVisualizer.configure(() -> drive.getPose());
     

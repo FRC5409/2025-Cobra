@@ -104,9 +104,7 @@ public class DriveCommands {
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
           // Square rotation value for more precise control
-          omega = Math.copySign(omega * omega, omega);
-
-    
+          omega = Math.copySign(Math.pow(Math.abs(omega), 5.0 / 2.0), omega);
 
           // Convert to field relative speeds & send command
 
@@ -240,8 +238,8 @@ public class DriveCommands {
       Pose2d targetPose = target.get();
 
       return
-        Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
-        Math.abs(drive.getRotation().getRadians() - targetPose.getRotation().getRadians()) < kAutoAlign.ROTATION_TOLLERANCE.in(Radians);
+        Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLERANCE.in(Meters) &&
+        Math.abs(drive.getRotation().getRadians() - targetPose.getRotation().getRadians()) < kAutoAlign.ROTATION_TOLERANCE.in(Radians);
     }).andThen(Commands.runOnce(drive::stop, drive));
   }
 
