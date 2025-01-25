@@ -100,4 +100,15 @@ public final class Constants {
     public static final double kCircumfrence = 2 * Math.PI * 0.0199;
     public static final double kRotationConverter = kCircumfrence / kGearing;
   }
+
+  public static final class kVision {
+    public static final String CAM_NAME = "limelight";
+
+    public static final int FIDUCIAL_TRUST_THRESHOLD = 1;
+
+    /**
+     * Frames allowed without latency update before flagged as disconnected
+     */
+    public static final int DISCONNECTION_TIMEOUT = 5;
+  }
 }
