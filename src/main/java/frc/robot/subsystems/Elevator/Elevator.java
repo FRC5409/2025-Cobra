@@ -25,15 +25,6 @@ public class Elevator extends SubsystemBase{
     // Shuffleboard
     private final ShuffleboardTab sb_tab;
 
-    //ghost pose3d
-    private Pose3d poseA = new Pose3d();
-    private Pose3d poseB = new Pose3d();
-    StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
-    .getStructTopic("MyPose", Pose3d.struct).publish();
-    StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
-
-
     public Elevator(ElevatorIO io) {
         // IO
         this.io = io;
@@ -64,9 +55,5 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
         // This method will be called once per scheduler run
         io.updateInputs(inputs);
-        publisher.set(poseA);
-        arrayPublisher.set(new Pose3d[] {poseA, poseB});
-        Logger.processInputs("Elevator", inputs);
     }
-
 }

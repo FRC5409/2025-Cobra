@@ -31,11 +31,11 @@ public class ElevatorIOSim implements ElevatorIO {
 
         PID = new PIDController(1.0, 0.0, 0.0);
         mech = new Mechanism2d(0.927, 10);
-        mainMotor = mech.getRoot("mainMotor", 0.5, 0.25);
-        followerMotor = mech.getRoot("followerMotor", 0.5, -0.25);
+        mainMotor = mech.getRoot("mainMotor", 0.25, 0);
+        followerMotor = mech.getRoot("followerMotor", 0.75, 0);
 
         mainMotorMech = mainMotor.append(new MechanismLigament2d("elevator", 1.066, 90));
-        followerMotorMech = followerMotor.append(new MechanismLigament2d("elevator", 1.066, 0));
+        followerMotorMech = followerMotor.append(new MechanismLigament2d("elevator", 1.066, 90));
 
         sb_Sim.add("Elevator Mech", mech);
 
