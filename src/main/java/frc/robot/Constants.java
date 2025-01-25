@@ -13,17 +13,10 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Centimeters;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.*;
 
 import java.util.HashMap;
-
 import com.pathplanner.lib.config.PIDConstants;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -98,16 +91,5 @@ public final class Constants {
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
-  }
-
-  public static final class kEndEffector {
-      public static final boolean CURRENT_CONFIG = true;
-      public static final int CURRENT_LIMIT = 30;
-  }
-
-  public static final class kElevator {
-      public static final int kGearing = 9/1;
-      public static final double kCircumfrence = 2 * Math.PI * 0.0199;
-      public static final double kRotationConverter = kCircumfrence / kGearing;
   }
 }
