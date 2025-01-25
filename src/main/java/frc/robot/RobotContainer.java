@@ -42,6 +42,10 @@ import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIO;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -67,6 +71,7 @@ public class RobotContainer {
   // Subsystems
   protected final Drive sys_drive;
   private final Vision sys_vision;
+  private final Elevator sys_elevator;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -101,6 +106,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight),
                 sys_vision);
+        sys_elevator = new Elevator(new ElevatorIO() {});
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -113,6 +119,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight),
                 sys_vision);
+        sys_elevator = new Elevator(new ElevatorIOSim());
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -125,7 +132,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 sys_vision);
+        sys_elevator = new Elevator(new ElevatorIO(){});
       }
+        
     }
 
         registerCommands();
@@ -271,7 +280,7 @@ public class RobotContainer {
         primaryController.x().onTrue(DriveCommands.setSpeedHigh(sys_drive));
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
-
+        
         // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
 
         // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
