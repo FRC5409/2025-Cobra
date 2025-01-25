@@ -97,9 +97,7 @@ public final class Constants {
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
 
-    public static final class kFiducialBased {
-      public static final double FIDUCIAL_AREA_THRESHOLD = 8.0;
-    }
+    public static final double FIDUCIAL_AREA_THRESHOLD = 8.0;
   }
 
   public static final class kVision {

@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
-import org.opencv.core.Point;
 
 public class FiducialCommands {
     private static final PIDConstants SAGITTAL_PID = new PIDConstants(0.02,0.0001,0);
@@ -39,20 +38,20 @@ public class FiducialCommands {
         return Commands.parallel(
                 Commands.runOnce(() -> {
                     ChassisSpeeds cs = drive.getChassisSpeeds();
-                    sagittalController.reset(vision.getTargetOffset().y, cs.vxMetersPerSecond);
+                    sagittalController.reset(vision.getTargetOffset().a(), cs.vxMetersPerSecond);
                     angularController.reset(drive.getRotation().getRadians(), cs.omegaRadiansPerSecond);
                 }),
                 Commands.runEnd(
                         () -> {
-                            Point t = vision.getTargetOffset();
+                            Vision.VisionOffset t = vision.getTargetOffset();
                             drive.runVelocity(ChassisSpeeds.fromRobotRelativeSpeeds(
-                                    sagittalController.calculate(t.y, 0),   // move sagittally proportionally to ta
+                                    sagittalController.calculate(t.a(), 0),   // move sagittally proportionally to ta
                                     0,
-                                    angularController.calculate(drive.getRotation().getDegrees(), t.x), // rotate X to face tag
+                                    angularController.calculate(drive.getRotation().getDegrees(), t.dx()), // rotate X to face tag
                                     drive.getRotation()));
                         },
                         drive::stop,
                         drive, vision
-                ).until(() -> vision.getTargetOffset().y >= kAutoAlign.kFiducialBased.FIDUCIAL_AREA_THRESHOLD));
+                ).until(() -> vision.getTargetOffset().a() >= kAutoAlign.FIDUCIAL_AREA_THRESHOLD));
     }
 }

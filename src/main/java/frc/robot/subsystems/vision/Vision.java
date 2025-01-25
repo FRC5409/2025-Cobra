@@ -8,7 +8,6 @@ import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.drive.Drive;
 import org.littletonrobotics.junction.Logger;
-import org.opencv.core.Point;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
@@ -51,11 +50,14 @@ public class Vision extends SubsystemBase {
     }
 
     /**
-     * Gets the relative offset to the active target
-     * @return (x: dx°, y: area%)
+     * Relative offset values to the active target
+     * @param dx    difference to target in degrees
+     * @param a     percentage of FOV filled by target
      */
-    public Point getTargetOffset() {
-        return new Point(inputs.tx, inputs.ta);
+    public record VisionOffset(double dx, double a) {}
+
+    public VisionOffset getTargetOffset() {
+        return new VisionOffset(inputs.tx, inputs.ta);
     }
 
     @Override
