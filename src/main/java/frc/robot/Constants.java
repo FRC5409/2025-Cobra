@@ -101,13 +101,9 @@ public final class Constants {
   }
 
   public static final class kEndEffector {
+      public static final int ENDEFFECTOR_MOTOR_ID = 0;
       public static final boolean CURRENT_CONFIG = true;
       public static final int CURRENT_LIMIT = 30;
   }
 
-  public static final class kElevator {
-      public static final int kGearing = 9/1;
-      public static final double kCircumfrence = 2 * Math.PI * 0.0199;
-      public static final double kRotationConverter = kCircumfrence / kGearing;
-  }
 }

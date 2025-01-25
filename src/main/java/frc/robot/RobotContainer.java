@@ -33,9 +33,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAuto;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.collector.EndEffector;
+import frc.robot.subsystems.collector.EndEffectorIO;
+import frc.robot.subsystems.collector.EndEffectorIOTalonFx;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -59,6 +63,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   public final Drive sys_drive;
+  public final EndEffector sys_endEffector;
 
   // Controller
   private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -85,6 +90,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -95,6 +101,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -105,6 +112,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
     }
 
