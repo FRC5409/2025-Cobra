@@ -71,7 +71,7 @@ public class RobotContainer {
     private final CommandXboxController primaryController = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
 
-    private boolean isTelopAuto = false;
+    public static boolean isTelopAuto = false;
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;

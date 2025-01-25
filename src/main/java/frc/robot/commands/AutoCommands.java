@@ -2,6 +2,9 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
@@ -16,6 +19,7 @@ import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kClosestType;
@@ -48,8 +52,22 @@ public class AutoCommands {
         isLeftEntry = Shuffleboard.getTab("Debug").add("isLeft", false).getEntry();
     }
 
-    public static Command pathfindTo(Drive drive, Supplier<Pose2d> pose, LinearVelocity endVelocity) {
-        return AutoBuilder.pathfindToPose(pose.get(), CONSTRAINTS, endVelocity);
+    public static Command pathfindTo(Drive drive, Supplier<Pose2d> targetPose) {
+        List<Pose2d> poses = new ArrayList<>();
+        poses.addAll(AlignHelper.getStationPoses(kDirection.BOTH));
+        poses.addAll(kReef.TARGETS.values());
+
+        BooleanSupplier[] suppliers = new BooleanSupplier[poses.size()];
+        Command[] commands = new Command[poses.size()];
+
+        for (int i = 0; i < poses.size(); i++) {
+            final int index = i;
+
+            suppliers[i] = () -> poses.get(index).equals(targetPose.get());
+            commands[i] = AutoBuilder.pathfindToPose(poses.get(index), CONSTRAINTS);
+        }
+
+        return CaseCommand.build(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
     }
 
     public static Command pathFindToNearestStation(Drive drive) {
@@ -59,8 +77,8 @@ public class AutoCommands {
                 drive.getPose(), 
                 kClosestType.DISTANCE, 
                 kDirection.BOTH
-            ),
-            MetersPerSecond.of(0.0)
+            )
+            // , MetersPerSecond.of(0.0)
         ).alongWith(
             new WaitThen(
                 () -> {
@@ -73,7 +91,7 @@ public class AutoCommands {
                     return drive.getPose().getTranslation().getDistance(station.getTranslation()) <= DISTANCE_TO_PREPARE.in(Meters);
                 }, 
                 Commands.print("PREPARE INTAKE")
-                .until(() -> true) // TODO: When pickup is achieved
+                .until(() -> false).withTimeout(0.5) // TODO: When pickup is achieved
             )
         ).beforeStarting(() -> AlignHelper.reset(drive.getFieldRelativeSpeeds()));
     }
@@ -84,8 +102,8 @@ public class AutoCommands {
             () -> kReef.TARGETS.getOrDefault(
                 reef.get(), 
                 new Pose2d()
-            ),
-            REEF_END_VELOCITY
+            )
+            // , REEFs_END_VELOCITY
         );
     }
 
@@ -100,7 +118,9 @@ public class AutoCommands {
         return () -> Commands.sequence(
             pathFindToNearestStation(drive),
             pathFindToReef(drive, () -> target),
-            alignToBranch(drive, () -> (isLeftEntry.getBoolean(false) ? kDirection.LEFT : kDirection.RIGHT))
+            alignToBranch(drive, () -> (isLeftEntry.getBoolean(false) ? kDirection.LEFT : kDirection.RIGHT)),
+            Commands.print("Score!"),
+            Commands.waitSeconds(0.5)
         ).repeatedly();
     }
 }
