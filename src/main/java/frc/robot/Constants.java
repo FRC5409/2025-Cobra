@@ -71,8 +71,9 @@ public final class Constants {
   public static final class kAutoAlign {
     public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.5);
 
-    public static final LinearVelocity MAX_VELOCITY         = MetersPerSecond         .of(3.5);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
+    public static final LinearVelocity MAX_VELOCITY          = MetersPerSecond         .of(3.5);
+    public static final LinearVelocity MAX_SAGITTAL_VELOCITY = MetersPerSecond         .of(1.0);
+    public static final LinearAcceleration MAX_ACCELERATION  = MetersPerSecondPerSecond.of(8.0);
 
     public static final double MAX_ANGULAR_VELOCITY     = 8.0;
     public static final double MAX_ANGULAR_ACCELERATION = 20.0;
@@ -97,7 +98,10 @@ public final class Constants {
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
 
-    public static final double FIDUCIAL_AREA_THRESHOLD = 8.0;
+    /**
+     * value of target area (ta) to aim for during fiducial auto align
+     */
+    public static final double FIDUCIAL_AREA_GOAL = 2.0;
   }
 
   public static final class kVision {

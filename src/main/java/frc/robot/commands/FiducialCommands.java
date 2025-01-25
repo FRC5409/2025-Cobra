@@ -12,8 +12,8 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
 
 public class FiducialCommands {
-    private static final PIDConstants SAGITTAL_PID = new PIDConstants(0.02,0.0001,0);
-    private static final PIDConstants ANGULAR_PID = new PIDConstants(0.02,0.0001,0);
+    private static final PIDConstants SAGITTAL_PID = new PIDConstants(1,0.0001,0.001);
+    private static final PIDConstants ANGULAR_PID = new PIDConstants(1,0.0001,0);
 
     /**
      * Aligns to the active fiducial, with an optional offset
@@ -26,7 +26,7 @@ public class FiducialCommands {
                 new ProfiledPIDController(
                         SAGITTAL_PID.kP, SAGITTAL_PID.kI, SAGITTAL_PID.kD,
                         new TrapezoidProfile.Constraints(
-                                kAutoAlign.MAX_VELOCITY.in(Units.MetersPerSecond),
+                                kAutoAlign.MAX_SAGITTAL_VELOCITY.in(Units.MetersPerSecond),
                                 kAutoAlign.MAX_ACCELERATION.in(Units.MetersPerSecondPerSecond)));
 
         ProfiledPIDController angularController =
@@ -45,13 +45,13 @@ public class FiducialCommands {
                         () -> {
                             Vision.VisionOffset t = vision.getTargetOffset();
                             drive.runVelocity(ChassisSpeeds.fromRobotRelativeSpeeds(
-                                    sagittalController.calculate(t.a(), 0),   // move sagittally proportionally to ta
+                                    sagittalController.calculate(t.a(), kAutoAlign.FIDUCIAL_AREA_GOAL),   // move sagittally proportionally to ta
                                     0,
                                     angularController.calculate(drive.getRotation().getDegrees(), t.dx()), // rotate X to face tag
                                     drive.getRotation()));
                         },
                         drive::stop,
                         drive, vision
-                ).until(() -> vision.getTargetOffset().a() >= kAutoAlign.FIDUCIAL_AREA_THRESHOLD));
+                ).onlyWhile(() -> vision.getTargetOffset().a() < kAutoAlign.FIDUCIAL_AREA_GOAL));
     }
 }
