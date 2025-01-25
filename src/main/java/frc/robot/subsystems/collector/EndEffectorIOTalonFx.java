@@ -53,7 +53,7 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
     }
 
     @Override 
-    public void updateInputs(EndEffectorInputs inputs) {
+    public void updateInputs(EndEffectorInput inputs) {
         
     }
 

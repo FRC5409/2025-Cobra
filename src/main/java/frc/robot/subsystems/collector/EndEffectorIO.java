@@ -5,7 +5,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface EndEffectorIO {
 
     @AutoLog
-    public class EndEffectorInputs{
+    public class EndEffectorInput{
         public boolean EndEffectorConnection = false;
         public double EndEffectorVolts = 0.0;
         public double EndEffectorCurrent = 0.0;
@@ -15,5 +15,5 @@ public interface EndEffectorIO {
 
     public default void setVoltage(double volts) {}
     public default void setPosition(double value) {}
-    public default void updateInputs(EndEffectorInputs inputs) {}
+    public default void updateInputs(EndEffectorInput inputs) {}
 } 
