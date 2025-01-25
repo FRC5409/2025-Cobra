@@ -94,11 +94,17 @@ public final class Constants {
   }
 
   public static final class kElevator {
+    public static final int MAIN_MOTOR_ID = 0;
+    public static final int FOLLOWER_MOTOR_ID = 0;
     public static final double CURRENT_LIMIT = 30.0;
     public static final boolean CURRENT_CONFIG = true;
     public static final int kGearing = 9/1;
     public static final double kCircumfrence = 2 * Math.PI * 0.0199;
     public static final double kRotationConverter = kCircumfrence / kGearing;
+    public static final double kP = 0.78;
+    public static final double kI = 0.0;
+    public static final double kD= 0.0;
+
   }
 
   public static final class kVision {

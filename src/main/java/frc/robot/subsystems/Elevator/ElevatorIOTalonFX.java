@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Elevator;
 
+import static edu.wpi.first.units.Units.Kelvin;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -46,9 +48,9 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_encoderConfigs.SensorToMechanismRatio = kElevator.kRotationConverter;
 
         //PID
-        m_pidConfig.kP = 0.78; 
-        m_pidConfig.kI = 0.0; 
-        m_pidConfig.kD = 0.0; 
+        m_pidConfig.kP = kElevator.kP; 
+        m_pidConfig.kI = kElevator.kI;
+        m_pidConfig.kD = kElevator.kD;
 
         m_mainMotorConfig.apply(m_currentConfig);
         m_followerMotorConfig.apply(m_currentConfig);
