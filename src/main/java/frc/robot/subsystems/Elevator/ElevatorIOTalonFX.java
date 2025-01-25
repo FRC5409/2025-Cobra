@@ -36,8 +36,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_followerMotorConfig = m_followerMotor.getConfigurator();
 
         m_currentConfig = new CurrentLimitsConfigs();
-        m_currentConfig.SupplyCurrentLimit = 30.0;
-        m_currentConfig.SupplyCurrentLimitEnable = true;
+        m_currentConfig.SupplyCurrentLimit = kElevator.CURRENT_LIMIT;
+        m_currentConfig.SupplyCurrentLimitEnable = kElevator.CURRENT_CONFIG;
         
         m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
         m_followerMotor.setNeutralMode(NeutralModeValue.Brake);

@@ -11,9 +11,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.Constants.kElevator;
 
-/**
- * @author BN
- */
 public class Elevator extends SubsystemBase{
     private static Elevator instance = null;
 
@@ -34,22 +31,6 @@ public class Elevator extends SubsystemBase{
         sb_tab.addDouble("Elevator Position", () -> io.getPosition());
     }
 
-    /**
-     * Get subsystem
-     * @param io
-     * @return This
-     */
-    public static Elevator createInstance(ElevatorIO io) {
-        if (instance != null) throw new RuntimeException("Elevator has already been created!");
-
-        return instance = new Elevator(io);
-    }
-
-    /**
-     * Manually begin moving
-     * @param voltage
-     * @return the command
-     */
     public Command startManualMove(double voltage) {
         return Commands.runOnce(() -> io.setMotorVoltage(voltage), this);
     }
@@ -61,11 +42,7 @@ public class Elevator extends SubsystemBase{
     public Command ElevatorGo(double setpoint) {
         return Commands.runOnce(() -> io.setSetpoint(setpoint), this);
     }
-
-    /**
-     * Stop all motors
-     * @return The command
-     */
+    
     public Command stopAll() {
         return Commands.runOnce(() -> io.stopMotor(), this);
     }
