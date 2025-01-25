@@ -17,8 +17,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
-
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -30,6 +30,9 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.commands.AutoCommands.kReefPosition;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.FieldMirror;
 
 /**
@@ -80,6 +83,13 @@ public final class Constants {
     public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.0);
     public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.0);
 
+    public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
+        TunerConstants.kSpeedAt12Volts,
+        MAX_AUTO_ALIGN_ACCELERATION,
+        RadiansPerSecond.of(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / Drive.DRIVE_BASE_RADIUS),
+        DegreesPerSecondPerSecond.of(720.0)
+    );
+
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
     public static final Time VELOCITY_TIME_ADJUSTEDMENT = Milliseconds.of(5000);
@@ -89,21 +99,22 @@ public final class Constants {
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
 
-      public static final HashMap<String, Pose2d> TARGETS = new HashMap<>();
+      public static final HashMap<kReefPosition, Pose2d> TARGETS = new HashMap<>();
       static {
-        TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
-        TARGETS.put("FL", new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
-        TARGETS.put("F", new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
-        TARGETS.put("B", new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
-        TARGETS.put("BR", FieldMirror.mirrorPose(TARGETS.get("BL")));
-        TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
+        TARGETS.put(kReefPosition.CLOSE_LEFT,   new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
+        TARGETS.put(kReefPosition.FAR_LEFT,     new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
+        TARGETS.put(kReefPosition.FAR,          new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
+        TARGETS.put(kReefPosition.CLOSE,        new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
+
+        TARGETS.put(kReefPosition.CLOSE_RIGHT,  FieldMirror.mirrorPose(TARGETS.get(kReefPosition.CLOSE_LEFT)));
+        TARGETS.put(kReefPosition.FAR_RIGHT,    FieldMirror.mirrorPose(TARGETS.get(kReefPosition.FAR_LEFT)));
       }
 
       public static final HashMap<String, Pose2d> BRANCHES = new HashMap<>();
       static {
-        for (Entry<String, Pose2d> entry : TARGETS.entrySet()) {
-            BRANCHES.put(entry.getKey() + "L", entry.getValue().transformBy( LEFT_OFFSET_TO_BRANCH));
-            BRANCHES.put(entry.getKey() + "R", entry.getValue().transformBy(RIGHT_OFFSET_TO_BRANCH));
+        for (Entry<kReefPosition, Pose2d> entry : TARGETS.entrySet()) {
+            BRANCHES.put(entry.getKey().name() + ".L", entry.getValue().transformBy( LEFT_OFFSET_TO_BRANCH));
+            BRANCHES.put(entry.getKey().name() + ".R", entry.getValue().transformBy(RIGHT_OFFSET_TO_BRANCH));
         }
       }
     }

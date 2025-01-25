@@ -32,10 +32,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAuto;
+import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -61,13 +63,15 @@ import frc.robot.util.AlignHelper.kDirection;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
-  protected final Drive sys_drive;
-  private final Vision sys_vision;
+    // Subsystems
+    protected final Drive sys_drive;
+    private final Vision sys_vision;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
+
+    private boolean isTelopAuto = false;
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -125,6 +129,7 @@ public class RobotContainer {
             }
         }
 
+        AutoCommands.setupNodeChooser();
         registerCommands();
 
         // Set up auto routines
@@ -278,6 +283,16 @@ public class RobotContainer {
                                                 .getTranslation(),
                                                 new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
+
+        primaryController
+            .back()
+                .onTrue(
+                    new ConditionalCommand(
+                        AutoCommands.telopAutoCommand(sys_drive).get().beforeStarting(() -> isTelopAuto = false), 
+                        Commands.runOnce(() -> isTelopAuto = true),
+                        () -> isTelopAuto
+                    )
+                );
 
         primaryController.y()
             .onTrue(

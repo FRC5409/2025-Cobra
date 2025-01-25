@@ -69,7 +69,7 @@ public class AlignHelper {
         return calculator(robotPose, kClosestType.DISTANCE, poses);
     }
 
-    private static Collection<Pose2d> getStationPoses(kDirection station) {
+    public static Collection<Pose2d> getStationPoses(kDirection station) {
         List<Pose2d> poses = new ArrayList<>();
         for (int i = -1; i < 6; i++) {
             if (station == kDirection.LEFT  || station == kDirection.BOTH)
@@ -82,7 +82,7 @@ public class AlignHelper {
         return poses;
     }
 
-    private static Collection<Pose2d> getBranchPoses(kDirection branch) {
+    public static Collection<Pose2d> getBranchPoses(kDirection branch) {
         List<Pose2d> poses = new ArrayList<>();
         for (Entry<String, Pose2d> entry : kReef.BRANCHES.entrySet()) {
             if (branch == kDirection.BOTH) {
