@@ -39,6 +39,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.FlippingUtil;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -152,32 +154,32 @@ public class DriveCommands {
     // Construct command
     return Commands.run(
             () -> {
-              // Get linear velocity
-              Translation2d linearVelocity =
-                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+                // Get linear velocity
+                Translation2d linearVelocity =
+                    getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
 
-              // Calculate angular speed
-              double omega =
-                  angleController.calculate(
+                // Calculate angular speed
+                double omega =
+                angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                      omega);
+                    new ChassisSpeeds(
+                        linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                        linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                        omega);
               boolean isFlipped =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Red;
+                    DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red;
               drive.runVelocity(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
-                      speeds,
-                      isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation()));
+                        speeds,
+                        isFlipped
+                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                            : drive.getRotation()));
             },
             drive)
 
@@ -185,67 +187,77 @@ public class DriveCommands {
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
-  public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
-    ProfiledPIDController xController =
-      new ProfiledPIDController(
-          kAutoAlign.ALIGN_PID.kP,
-          kAutoAlign.ALIGN_PID.kI,
-          kAutoAlign.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
+        ProfiledPIDController xController =
+        new ProfiledPIDController(
+            kAutoAlign.ALIGN_PID.kP,
+            kAutoAlign.ALIGN_PID.kI,
+            kAutoAlign.ALIGN_PID.kD,
+            new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
-
-    ProfiledPIDController yController =
-      new ProfiledPIDController(
-          kAutoAlign.ALIGN_PID.kP,
-          kAutoAlign.ALIGN_PID.kI,
-          kAutoAlign.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+        ProfiledPIDController yController =
+        new ProfiledPIDController(
+            kAutoAlign.ALIGN_PID.kP,
+            kAutoAlign.ALIGN_PID.kI,
+            kAutoAlign.ALIGN_PID.kD,
+            new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
+        ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION)
+        );
+        angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-    ProfiledPIDController angleController =
-      new ProfiledPIDController(
-          ANGLE_KP,
-          0.0,
-          ANGLE_KD,
-          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-    angleController.enableContinuousInput(-Math.PI, Math.PI);
+        return Commands.parallel(
+            Commands.runOnce(() -> {
+                Pose2d robotPose = drive.getPose();
+                ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
+        
+                xController.reset(robotPose.getX(), speeds.vxMetersPerSecond);
+                yController.reset(robotPose.getY(), speeds.vyMetersPerSecond);
+                angleController.reset(drive.getRotation().getRadians());
+            }),
+            Commands.run(() -> {
+                Pose2d robotPose = drive.getPose();
+                Pose2d targetPose = target.get();
+                if (AutoBuilder.shouldFlip())
+                    targetPose = FlippingUtil.flipFieldPose(targetPose);
+        
+                double xSpeed = xController.calculate(robotPose.getX(), targetPose.getX());
+                double ySpeed = yController.calculate(robotPose.getY(), targetPose.getY());
+        
+                // Calculate angular speed
+                double omega =
+                angleController.calculate(
+                    robotPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+        
+        
+                drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omega, drive.getRotation()));
+            }, drive)
+        ).until(() -> {
+            Pose2d robotPose = drive.getPose();
+            Pose2d targetPose = target.get();
+            if (AutoBuilder.shouldFlip())
+                targetPose = FlippingUtil.flipFieldPose(targetPose);
 
-    return Commands.parallel(
-      Commands.runOnce(() -> {
-        Pose2d robotPose = drive.getPose();
-        ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
-  
-        xController.reset(robotPose.getX(), speeds.vxMetersPerSecond);
-        yController.reset(robotPose.getY(), speeds.vyMetersPerSecond);
-        angleController.reset(drive.getRotation().getRadians());
-      }),
-      Commands.run(() -> {
-        Pose2d robotPose = drive.getPose();
-        Pose2d targetPose = target.get();
-  
-        double xSpeed = xController.calculate(robotPose.getX(), targetPose.getX());
-        double ySpeed = yController.calculate(robotPose.getY(), targetPose.getY());
-  
-        // Calculate angular speed
-        double omega =
-        angleController.calculate(
-            robotPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
-  
-  
-        drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omega, drive.getRotation()));
-      }, drive)
-    ).until(() -> {
-      Pose2d robotPose = drive.getPose();
-      Pose2d targetPose = target.get();
+            double difference = targetPose.getRotation().getRadians() - robotPose.getRotation().getRadians();
 
-      return
-        Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLERANCE.in(Meters) &&
-        Math.abs(drive.getRotation().getRadians() - targetPose.getRotation().getRadians()) < kAutoAlign.ROTATION_TOLERANCE.in(Radians);
-    }).andThen(Commands.runOnce(drive::stop, drive));
+            difference = (difference + Math.PI) % (2 * Math.PI) - Math.PI;
+
+            if (difference < -Math.PI)
+                difference += 2 * Math.PI;
+        
+            return
+                Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLERANCE.in(Meters) &&
+                difference < kAutoAlign.ROTATION_TOLERANCE.in(Radians);
+        }
+    ).andThen(Commands.runOnce(drive::stop, drive));
   }
-
 
   /**
    * Measures the velocity feedforward constants for the drive motors.

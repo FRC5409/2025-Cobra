@@ -15,6 +15,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.subsystems.drive.Drive;
@@ -61,10 +62,15 @@ public class AutoCommands {
         Command[] commands = new Command[poses.size()];
 
         for (int i = 0; i < poses.size(); i++) {
-            final int index = i;
+            final Pose2d pose = poses.get(i);
 
-            suppliers[i] = () -> poses.get(index).equals(targetPose.get());
-            commands[i] = AutoBuilder.pathfindToPose(poses.get(index), CONSTRAINTS);
+            suppliers[i] = () -> pose.equals(targetPose.get());
+
+            commands[i] = new ConditionalCommand(
+                AutoBuilder.pathfindToPoseFlipped(pose, CONSTRAINTS),
+                AutoBuilder.pathfindToPose(pose, CONSTRAINTS),
+                () -> AutoBuilder.shouldFlip()
+            );
         }
 
         return CaseCommand.build(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
@@ -74,7 +80,7 @@ public class AutoCommands {
         return pathfindTo(
             drive, 
             () -> AlignHelper.getClosestStation(
-                drive.getPose(), 
+                drive.getBlueSidePose(), 
                 kClosestType.DISTANCE, 
                 kDirection.BOTH
             )
@@ -83,12 +89,12 @@ public class AutoCommands {
             new WaitThen(
                 () -> {
                     Pose2d station = AlignHelper.getClosestStation(
-                        drive.getPose(), 
+                        drive.getBlueSidePose(), 
                         kClosestType.DISTANCE, 
                         kDirection.BOTH
                     );
 
-                    return drive.getPose().getTranslation().getDistance(station.getTranslation()) <= DISTANCE_TO_PREPARE.in(Meters);
+                    return drive.getBlueSidePose().getTranslation().getDistance(station.getTranslation()) <= DISTANCE_TO_PREPARE.in(Meters);
                 }, 
                 Commands.print("PREPARE INTAKE")
                 .until(() -> true) // TODO: When pickup is achieved
@@ -104,14 +110,14 @@ public class AutoCommands {
                 reef.get(), 
                 new Pose2d()
             )
-            // , REEFs_END_VELOCITY
+            // , REEF_END_VELOCITY
         );
     }
 
     public static Command alignToBranch(Drive drive, Supplier<kDirection> direction) {
         return DriveCommands.alignToPoint(
             drive, 
-            () -> AlignHelper.getClosestReef(drive.getPose(), kClosestType.DISTANCE, direction.get())
+            () -> AlignHelper.getClosestReef(drive.getBlueSidePose(), kClosestType.DISTANCE, direction.get())
         ).beforeStarting(() -> AlignHelper.reset(drive.getFieldRelativeSpeeds()));
     }
 

@@ -26,6 +26,7 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -376,6 +377,14 @@ public class Drive extends SubsystemBase {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  /** Gets the robots position on the blue side (if on red converts to blue) */
+  public Pose2d getBlueSidePose() {
+    if (AutoBuilder.shouldFlip())
+        return FlippingUtil.flipFieldPose(getPose());
+    else
+        return getPose();
   }
 
   /** Returns the current odometry rotation. */

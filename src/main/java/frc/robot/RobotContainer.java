@@ -239,12 +239,12 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "ALIGN_LEFT",
                 DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getPose())));
+                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose())));
 
         NamedCommands.registerCommand(
                 "ALIGN_RIGHT",
                 DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getPose())));
+                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose())));
 
         // TODO: Finish Commands
         NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
@@ -319,7 +319,7 @@ public class RobotContainer {
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
-                        () -> AlignHelper.getClosestElement(sys_drive.getPose(), kDirection.LEFT)
+                        () -> AlignHelper.getClosestElement(sys_drive.getBlueSidePose(), kDirection.LEFT)
                     ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
                 );
 
@@ -328,7 +328,7 @@ public class RobotContainer {
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
-                        () -> AlignHelper.getClosestElement(sys_drive.getPose(), kDirection.RIGHT)
+                        () -> AlignHelper.getClosestElement(sys_drive.getBlueSidePose(), kDirection.RIGHT)
                     ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
                 );
     }

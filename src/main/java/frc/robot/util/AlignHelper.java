@@ -6,14 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
-import com.pathplanner.lib.util.FlippingUtil;
-import com.pathplanner.lib.util.FlippingUtil.FieldSymmetry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.Constants.kAutoAlign.kStation;
@@ -114,18 +110,10 @@ public class AlignHelper {
         if (timer-- <= 0)
             speeds = new ChassisSpeeds();
         
-        boolean shouldFlip = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
-
-        FlippingUtil.symmetryType = FieldSymmetry.kRotational;
-
         double min = -1;
         Pose2d closest = null;
 
-        for (Pose2d branch : poses) {
-            Pose2d pose = branch;
-            if (shouldFlip) 
-                pose = FlippingUtil.flipFieldPose(pose);
-
+        for (Pose2d pose : poses) {
             if (type == kClosestType.DISTANCE) {
                 double dist = estimatedPose.getTranslation().getDistance(pose.getTranslation());
                 if (min == -1 || dist < min) {
