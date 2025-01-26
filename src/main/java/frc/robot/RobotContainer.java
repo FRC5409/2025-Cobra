@@ -288,9 +288,13 @@ public class RobotContainer {
             .back()
                 .onTrue(
                     new ConditionalCommand(
-                        AutoCommands.telopAutoCommand(sys_drive).get().beforeStarting(() -> isTelopAuto = false), 
-                        Commands.runOnce(() -> isTelopAuto = true),
-                        () -> isTelopAuto
+                        AutoCommands.telopAutoCommand(sys_drive).until(() -> !isTelopAuto), 
+                        Commands.none(),
+                        () -> isTelopAuto = !isTelopAuto
+                    ).raceWith(
+                        Commands.waitSeconds(0.5).andThen(
+                            Commands.waitUntil(() -> primaryController.getHID().getBackButton())
+                        )
                     )
                 );
 

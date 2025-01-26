@@ -39,7 +39,7 @@ public class AutoCommands {
     private static final Distance DISTANCE_TO_PREPARE = Meters.of(1.5);
     private static final LinearVelocity REEF_END_VELOCITY = MetersPerSecond.of(0.5);
     
-    private static GenericEntry isLeftEntry;
+    private static GenericEntry isRightEntry;
     private static kReefPosition target = kReefPosition.CLOSE_LEFT;
 
     private AutoCommands() {}
@@ -49,7 +49,7 @@ public class AutoCommands {
             DebugCommand.register(reef.name(), Commands.runOnce(() -> target = reef));
         }
 
-        isLeftEntry = Shuffleboard.getTab("Debug").add("isLeft", false).getEntry();
+        isRightEntry = Shuffleboard.getTab("Debug").add("Score Right", false).getEntry();
     }
 
     public static Command pathfindTo(Drive drive, Supplier<Pose2d> targetPose) {
@@ -91,9 +91,10 @@ public class AutoCommands {
                     return drive.getPose().getTranslation().getDistance(station.getTranslation()) <= DISTANCE_TO_PREPARE.in(Meters);
                 }, 
                 Commands.print("PREPARE INTAKE")
-                .until(() -> false).withTimeout(0.5) // TODO: When pickup is achieved
+                .until(() -> true) // TODO: When pickup is achieved
             )
-        ).beforeStarting(() -> AlignHelper.reset(drive.getFieldRelativeSpeeds()));
+        ).beforeStarting(() -> AlignHelper.reset(drive.getFieldRelativeSpeeds()))
+        .andThen(Commands.waitSeconds(0.5));
     }
 
     public static Command pathFindToReef(Drive drive, Supplier<kReefPosition> reef) {
@@ -114,11 +115,11 @@ public class AutoCommands {
         ).beforeStarting(() -> AlignHelper.reset(drive.getFieldRelativeSpeeds()));
     }
 
-    public static Supplier<Command> telopAutoCommand(Drive drive) {
-        return () -> Commands.sequence(
+    public static Command telopAutoCommand(Drive drive) {
+        return Commands.sequence(
             pathFindToNearestStation(drive),
             pathFindToReef(drive, () -> target),
-            alignToBranch(drive, () -> (isLeftEntry.getBoolean(false) ? kDirection.LEFT : kDirection.RIGHT)),
+            alignToBranch(drive, () -> (isRightEntry.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT)),
             Commands.print("Score!"),
             Commands.waitSeconds(0.5)
         ).repeatedly();
