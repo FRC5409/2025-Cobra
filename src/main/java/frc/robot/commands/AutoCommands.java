@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -41,6 +42,7 @@ public class AutoCommands {
     private static final LinearVelocity REEF_END_VELOCITY = MetersPerSecond.of(0.5);
     
     private static GenericEntry isRightEntry;
+    private static LoggedDashboardChooser<kDirection> stationChooser;
     private static kReefPosition target = kReefPosition.CLOSE_LEFT;
 
     private AutoCommands() {}
@@ -51,6 +53,11 @@ public class AutoCommands {
         }
 
         isRightEntry = Shuffleboard.getTab("Debug").add("Score Right", false).getEntry();
+        stationChooser = new LoggedDashboardChooser<>("Station Select");
+
+        stationChooser.addDefaultOption("Automatic", kDirection.BOTH );
+        stationChooser.addOption(       "Left",      kDirection.LEFT );
+        stationChooser.addOption(       "Right",     kDirection.RIGHT);
     }
 
     public static Command pathfindTo(Drive drive, Supplier<Pose2d> targetPose) {
@@ -82,7 +89,7 @@ public class AutoCommands {
             () -> AlignHelper.getClosestStation(
                 drive.getBlueSidePose(), 
                 kClosestType.DISTANCE, 
-                kDirection.BOTH
+                stationChooser.get()
             )
             // , MetersPerSecond.of(0.0)
         ).alongWith(
