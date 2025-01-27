@@ -27,8 +27,6 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants.kAuto;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -154,22 +152,11 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    Command baseAutoCommand = robotContainer.getAutonomousCommand();
+    Command autoCommand = robotContainer.getAutonomousCommand();
 
-    if (baseAutoCommand == null) return;
-
-    if (kAuto.PRINT_AUTO_TIME) {
-      long startTime = System.currentTimeMillis();
-      autonomousCommand = Commands.sequence(
-        baseAutoCommand,
-        Commands.runOnce(
-          () -> System.out.println("Auto Command took: " + (System.currentTimeMillis() - startTime - 20) / 1000f + " Seconds!")
-        )
-      );
-    } else 
-      autonomousCommand = baseAutoCommand;
+    if (autoCommand == null) return;
     
-    autonomousCommand.schedule();
+    autoCommand.schedule();
   }
 
   /** This function is called periodically during autonomous. */

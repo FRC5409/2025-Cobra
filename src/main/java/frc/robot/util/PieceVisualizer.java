@@ -51,6 +51,8 @@ public class PieceVisualizer {
     private static Supplier<Pose2d> robotPose = null;
     private static ArrayList<GamePiece> gamePieces;
 
+    private PieceVisualizer() {}
+
     /**
      * Confirues and sets up the Game Piece Visualizer.
      * @param robotPose The robots pose

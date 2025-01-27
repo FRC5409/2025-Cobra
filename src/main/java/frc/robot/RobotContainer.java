@@ -14,6 +14,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -50,6 +51,8 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.AutoTimer;
+import frc.robot.util.DebugCommand;
 import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kDirection;
 
@@ -75,6 +78,7 @@ public class RobotContainer {
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
+    private final Supplier<Boolean> runTelop;
 
     // Alerts
     private final Alert primaryDisconnectedAlert = new Alert(
@@ -136,6 +140,8 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>(
                 "Auto Choices",
                 AutoBuilder.buildAutoChooser());
+
+        runTelop = DebugCommand.putNumber("Run Telop Auto", false);
 
         if (kAuto.RESET_ODOM_ON_CHANGE)
             autoChooser
@@ -339,6 +345,12 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        return AutoTimer.start()
+            .alongWith(autoChooser.get())
+            .andThen(
+                AutoTimer.end(kAuto.PRINT_AUTO_TIME).alongWith(
+                    AutoCommands.telopAutoCommand(sys_drive).onlyIf(() -> runTelop.get())
+                )
+            );
     }
 }

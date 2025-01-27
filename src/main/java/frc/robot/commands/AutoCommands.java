@@ -10,10 +10,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -41,7 +39,7 @@ public class AutoCommands {
     private static final Distance DISTANCE_TO_PREPARE = Meters.of(1.5);
     private static final LinearVelocity REEF_END_VELOCITY = MetersPerSecond.of(0.5);
     
-    private static GenericEntry isRightEntry;
+    private static Supplier<Boolean> scoreRight;
     private static LoggedDashboardChooser<kDirection> stationChooser;
     private static kReefPosition target = kReefPosition.CLOSE_LEFT;
 
@@ -52,7 +50,7 @@ public class AutoCommands {
             DebugCommand.register(reef.name(), Commands.runOnce(() -> target = reef));
         }
 
-        isRightEntry = Shuffleboard.getTab("Debug").add("Score Right", false).getEntry();
+        scoreRight = DebugCommand.putNumber("Score Right", false);
         stationChooser = new LoggedDashboardChooser<>("Station Select");
 
         stationChooser.addDefaultOption("Automatic", kDirection.BOTH );
@@ -132,7 +130,7 @@ public class AutoCommands {
         return Commands.sequence(
             pathFindToNearestStation(drive),
             pathFindToReef(drive, () -> target),
-            alignToBranch(drive, () -> (isRightEntry.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT)),
+            alignToBranch(drive, () -> (scoreRight.get() ? kDirection.RIGHT : kDirection.LEFT)),
             Commands.print("Score!"),
             Commands.waitSeconds(0.5)
         ).repeatedly();

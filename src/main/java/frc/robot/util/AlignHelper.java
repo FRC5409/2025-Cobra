@@ -15,6 +15,7 @@ import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.Constants.kAutoAlign.kStation;
 
 public class AlignHelper {
+
     public static enum kClosestType {
         DISTANCE,
         ROTATION
@@ -28,6 +29,8 @@ public class AlignHelper {
 
     private static ChassisSpeeds speeds = new ChassisSpeeds();
     private static int timer = kAutoAlign.TIME_ADJUSTMENT_TIMEOUT;
+
+    private AlignHelper() {}
 
     public static void reset(ChassisSpeeds speeds) {
         AlignHelper.speeds = speeds;
