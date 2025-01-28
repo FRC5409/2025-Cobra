@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.AutoCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -152,11 +153,16 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    CommandScheduler.getInstance().clearComposedCommands();
+
     Command autoCommand = robotContainer.getAutonomousCommand();
 
     if (autoCommand == null) return;
     
     autoCommand.schedule();
+
+    RobotContainer.isTelopAuto = robotContainer.runTelop.get();
+    autoStartingConfigAlert.set(false);
   }
 
   /** This function is called periodically during autonomous. */
@@ -166,13 +172,19 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    autoStartingConfigAlert.set(false);
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+
     if (autonomousCommand != null) {
-      autonomousCommand.cancel();
+        autonomousCommand.cancel();
     }
+
+    if (robotContainer.runTelop.get())
+        AutoCommands.telopAutoCommand(robotContainer.sys_drive).schedule();
   }
 
   /** This function is called periodically during operator control. */

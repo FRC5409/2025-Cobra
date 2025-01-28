@@ -74,7 +74,7 @@ public class AutoCommands {
             commands[i] = new ConditionalCommand(
                 AutoBuilder.pathfindToPoseFlipped(pose, CONSTRAINTS),
                 AutoBuilder.pathfindToPose(pose, CONSTRAINTS),
-                () -> AutoBuilder.shouldFlip()
+                AutoBuilder::shouldFlip
             );
         }
 

@@ -77,8 +77,8 @@ public class RobotContainer {
     public static boolean isTelopAuto = false;
 
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser;
-    private final Supplier<Boolean> runTelop;
+    protected final LoggedDashboardChooser<Command> autoChooser;
+    protected final Supplier<Boolean> runTelop;
 
     // Alerts
     private final Alert primaryDisconnectedAlert = new Alert(
@@ -348,7 +348,8 @@ public class RobotContainer {
         return AutoTimer.start()
             .alongWith(autoChooser.get())
             .andThen(
-                AutoTimer.end(kAuto.PRINT_AUTO_TIME).alongWith(
+                AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
+                .alongWith(
                     AutoCommands.telopAutoCommand(sys_drive).onlyIf(() -> runTelop.get())
                 )
             );
