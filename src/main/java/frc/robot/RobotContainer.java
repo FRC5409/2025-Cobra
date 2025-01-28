@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -47,6 +48,9 @@ import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.collector.EndEffector;
+import frc.robot.subsystems.collector.EndEffectorIO;
+import frc.robot.subsystems.collector.EndEffectorIOTalonFx;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -73,6 +77,7 @@ public class RobotContainer {
   protected final Drive sys_drive;
   private final Vision sys_vision;
   private final Elevator sys_elevator;
+  public final EndEffector sys_endEffector;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -108,6 +113,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight),
                 sys_vision);
         sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
+        sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -121,6 +127,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight),
                 sys_vision);
         sys_elevator = new Elevator(new ElevatorIOSim());
+        sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -134,6 +141,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 sys_vision);
         sys_elevator = new Elevator(new ElevatorIO(){});
+        sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
         
     }
