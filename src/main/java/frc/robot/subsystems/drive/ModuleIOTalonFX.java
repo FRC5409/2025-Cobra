@@ -125,9 +125,19 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
     turnConfig.Feedback.FeedbackSensorSource =
         switch (constants.FeedbackSource) {
-          case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
-          case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
-          case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
+            case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
+            case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
+            case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
+            
+            // TODO: Fix
+            case FusedCANdiPWM1 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case FusedCANdiPWM2 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case RemoteCANdiPWM1 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case RemoteCANdiPWM2 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case SyncCANdiPWM1 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case SyncCANdiPWM2 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case TalonFXS_PulseWidth -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            default -> throw new IllegalArgumentException("Unexpected value: " + constants.FeedbackSource);
         };
     turnConfig.Feedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
