@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -54,6 +55,7 @@ import frc.robot.util.AlignHelper;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.WaitThen;
+import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 
 /**
@@ -137,20 +139,18 @@ public class RobotContainer {
         registerCommands();
 
         // Set up auto routines
-        autoChooser = new LoggedDashboardChooser<>(
-                "Auto Choices",
-                AutoBuilder.buildAutoChooser());
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+        autoChooser.addDefaultOption("None", Commands.none());
 
-        runTelop = DebugCommand.putNumber("Run Telop Auto", false);
-
-        if (kAuto.RESET_ODOM_ON_CHANGE)
-            autoChooser
-                    .getSendableChooser()
-                    .onChange(path -> sys_drive.setPose(getStartingPose()));
-
-        SmartDashboard.putData(
-                "Reset",
-                Commands.runOnce(() -> sys_drive.setPose(getStartingPose())).ignoringDisable(true));
+        for (String auto : AutoBuilder.getAllAutoNames()) {
+            if (auto.endsWith("[M]")) {
+                String autoName = auto.replace("[M]", "");
+                autoChooser.addOption("{L} - " + autoName, new PathPlannerAuto(auto, false));
+                autoChooser.addOption("{R} - " + autoName, new PathPlannerAuto(auto, true ));
+            } else {
+                autoChooser.addOption(auto, new PathPlannerAuto(auto));
+            }
+        }
 
         // Set up SysId routines
         autoChooser.addOption(
@@ -171,6 +171,17 @@ public class RobotContainer {
         autoChooser.addOption(
                 "Drive SysId (Dynamic Reverse)",
                 sys_drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+                runTelop = DebugCommand.putNumber("Run Telop Auto", false);
+
+        if (kAuto.RESET_ODOM_ON_CHANGE)
+            autoChooser
+                    .getSendableChooser()
+                    .onChange(path -> sys_drive.setPose(getStartingPose()));
+
+        SmartDashboard.putData(
+                "Reset",
+                Commands.runOnce(() -> sys_drive.setPose(getStartingPose())).ignoringDisable(true));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -224,16 +235,24 @@ public class RobotContainer {
 
     @AutoLogOutput(key = "Odometry/StartingPose")
     public Pose2d getStartingPose() {
-        String path = autoChooser.getSendableChooser().getSelected();
+        String autoName = autoChooser.getSendableChooser().getSelected();
 
-        if (path.equals("None"))
+        boolean mirror = false;
+        if ((mirror = autoName.startsWith("{R}")) || autoName.startsWith("{L}")) {
+            autoName = autoName.substring(6) + "[M]";
+        }
+
+        if (autoName.equals("None"))
             return new Pose2d();
 
         try {
-            Pose2d pose = PathPlannerAuto.getPathGroupFromAutoFile(path)
-                    .get(0)
-                    .getStartingHolonomicPose()
-                    .get();
+            PathPlannerPath path = PathPlannerAuto.getPathGroupFromAutoFile(autoName)
+                    .get(0);
+    
+            if (mirror)
+                path = path.mirrorPath();
+                    
+            Pose2d pose = path.getStartingHolonomicPose().get();
 
             return AutoBuilder.shouldFlip() ? FlippingUtil.flipFieldPose(pose) : pose;
         } catch (IOException | ParseException e) {
@@ -244,13 +263,45 @@ public class RobotContainer {
     private void registerCommands() {
         NamedCommands.registerCommand(
                 "ALIGN_LEFT",
-                DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose())));
+                new ConditionalCommand(
+                    DriveCommands.alignToPoint(sys_drive,
+                        () -> AlignHelper.getClosestReef(
+                            sys_drive.getBlueSidePose(),
+                            kClosestType.DISTANCE,
+                            kDirection.LEFT
+                        )
+                    ),
+                    DriveCommands.alignToPoint(sys_drive,
+                        () -> AlignHelper.getClosestReef(
+                            sys_drive.getBlueSidePose(),
+                            kClosestType.DISTANCE,
+                            kDirection.RIGHT
+                        )
+                    ),
+                    () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
+                )
+            );
 
         NamedCommands.registerCommand(
                 "ALIGN_RIGHT",
-                DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose())));
+                new ConditionalCommand(
+                    DriveCommands.alignToPoint(sys_drive,
+                        () -> AlignHelper.getClosestReef(
+                            sys_drive.getBlueSidePose(),
+                            kClosestType.DISTANCE,
+                            kDirection.RIGHT
+                        )
+                    ),
+                    DriveCommands.alignToPoint(sys_drive,
+                        () -> AlignHelper.getClosestReef(
+                            sys_drive.getBlueSidePose(),
+                            kClosestType.DISTANCE,
+                            kDirection.LEFT
+                        )
+                    ),
+                    () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
+                )
+            );
 
         // TODO: Finish Commands
         NamedCommands.registerCommand("PREPARE_STATION", Commands.none());

@@ -128,7 +128,7 @@ public class AutoCommands {
 
     public static Command telopAutoCommand(Drive drive) {
         return Commands.sequence(
-            pathFindToNearestStation(drive),
+            pathFindToNearestStation(drive).unless(() -> false), // TODO: Has coral
             pathFindToReef(drive, () -> target),
             alignToBranch(drive, () -> (scoreRight.get() ? kDirection.RIGHT : kDirection.LEFT)),
             Commands.print("Score!"),
