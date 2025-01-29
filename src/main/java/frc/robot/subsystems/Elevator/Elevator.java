@@ -50,6 +50,10 @@ public class Elevator extends SubsystemBase{
     public Command stopAll() {
         return Commands.runOnce(() -> io.stopMotor(), this);
     }
+    
+    public double getPosition() {
+        return io.getPosition();
+    }
 
     @Override
     public void periodic() {

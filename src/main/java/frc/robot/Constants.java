@@ -97,6 +97,8 @@ public final class Constants {
       public static final int ENDEFFECTOR_MOTOR_ID = 0;
       public static final boolean CURRENT_CONFIG = true;
       public static final int CURRENT_LIMIT = 30;
+      public static final double VOLTAGE_INTAKE = 3;
+      public static final double VOLTAGE_SCORE = -3;
   }
 
   public static final class kElevator {
@@ -110,6 +112,14 @@ public final class Constants {
     public static final double kP = 0.78;
     public static final double kI = 0.0;
     public static final double kD= 0.0;
+    public static final class kSetpoints{
+        public static final double kLOW = 0;
+        public static final double kL1 = 1;
+        public static final double kL2 = 2;
+        public static final double kL3 = 3;
+        public static final double kL4 = 4;
+    }
+
 
   }
 

@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kElevator;
 import frc.robot.Constants.kEndEffector;
@@ -62,6 +63,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
+import frc.robot.commands.scoring.L1Scoring;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -78,6 +80,9 @@ public class RobotContainer {
   private final Vision sys_vision;
   private final Elevator sys_elevator;
   public final EndEffector sys_endEffector;
+
+  // Commands
+  private final L1Scoring seq_L1Score;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -98,6 +103,7 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+
         DriverStation.silenceJoystickConnectionWarning(true);
 
     switch (Constants.currentMode) {
@@ -145,6 +151,8 @@ public class RobotContainer {
       }
         
     }
+        // Commands
+        seq_L1Score = new L1Scoring(sys_elevator, sys_endEffector);
 
         registerCommands();
 
@@ -290,6 +298,7 @@ public class RobotContainer {
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
 
+        primaryController.a().onTrue(seq_L1Score);
         // primaryController.a()
         // .onTrue(sys_elevator.ElevatorGo(10))
         // .onFalse(sys_elevator.stopAll());

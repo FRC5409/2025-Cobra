@@ -1,6 +1,9 @@
 package frc.robot.subsystems.collector;
 
 import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class EndEffector extends SubsystemBase {
@@ -10,6 +13,10 @@ public class EndEffector extends SubsystemBase {
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
+    }
+
+    public Command setVoltage(double voltage) {
+        return Commands.runOnce(() -> io.setVoltage(voltage), this);
     }
 
     @Override
