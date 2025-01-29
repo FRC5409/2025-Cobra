@@ -23,10 +23,10 @@ public class L1Scoring extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kL1)),
         Commands.waitSeconds(0.1), 
-        Commands.waitUntil(() -> Math.abs(sys_elevator.getPosition()) >= Math.abs(kSetpoints.kL1)),
+        Commands.waitUntil(() -> Math.abs(sys_elevator.getPosition()) >= Math.abs(kSetpoints.kL1)), // TODO: Move into subsystem with .alongwith
         Commands.waitSeconds(0.2), 
         Commands.runOnce(() -> sys_endEffector.setVoltage(kEndEffector.VOLTAGE_SCORE)), 
-        Commands.waitSeconds(1), // Add Sensor detection here
+        Commands.waitSeconds(1), // TODO: Add Sensor detection here
         Commands.runOnce(() -> sys_endEffector.setVoltage(0)), 
         Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
 
