@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -71,6 +72,7 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
+    private final Joystick primaryJoystick = new Joystick(0);
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -82,6 +84,7 @@ public class RobotContainer {
     private final Alert secondaryDisconnectedAlert = new Alert(
             "Secondary Controller Disconnected!",
             AlertType.kError);
+
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -260,12 +263,19 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     sys_drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            sys_drive,
-            () -> -primaryController.getLeftY(),
-            () -> -primaryController.getLeftX(),
-            () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
-        )
+        // DriveCommands.joystickDrive(
+        //     sys_drive,
+        //     () -> -primaryController.getLeftY(),
+        //     () -> -primaryController.getLeftX(),
+        //     () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+        // )
+        
+            DriveCommands.joystickDrive(
+                sys_drive, 
+                () -> -primaryJoystick.getY(),
+                () -> - primaryJoystick.getX(),
+                () -> -(primaryJoystick.getZ())
+            )
     );
 
         primaryController.x().onTrue(DriveCommands.setSpeedHigh(sys_drive));
