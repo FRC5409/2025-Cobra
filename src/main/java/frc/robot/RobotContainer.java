@@ -64,6 +64,7 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
 import frc.robot.commands.scoring.L1Scoring;
+import frc.robot.commands.scoring.SubPickup;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -83,6 +84,7 @@ public class RobotContainer {
 
   // Commands
   private final L1Scoring seq_L1Score;
+  private final SubPickup seq_pickUp;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -153,6 +155,7 @@ public class RobotContainer {
     }
         // Commands
         seq_L1Score = new L1Scoring(sys_elevator, sys_endEffector);
+        seq_pickUp = new SubPickup(sys_elevator, sys_endEffector);
 
         registerCommands();
 
@@ -299,6 +302,8 @@ public class RobotContainer {
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
 
         primaryController.a().onTrue(seq_L1Score);
+
+        primaryController.b().onTrue(seq_pickUp);
         // primaryController.a()
         // .onTrue(sys_elevator.ElevatorGo(10))
         // .onFalse(sys_elevator.stopAll());

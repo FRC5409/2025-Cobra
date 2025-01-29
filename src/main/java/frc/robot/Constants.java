@@ -118,6 +118,7 @@ public final class Constants {
         public static final double kL2 = 2;
         public static final double kL3 = 3;
         public static final double kL4 = 4;
+        public static final double kPickUp = 2;
     }
 
 

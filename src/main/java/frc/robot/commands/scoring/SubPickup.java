@@ -16,20 +16,20 @@ import frc.robot.subsystems.collector.EndEffector;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class L1Scoring extends SequentialCommandGroup {
-  /** Creates a new L1Scoring. */
-  public L1Scoring(Elevator sys_elevator, EndEffector sys_endEffector) {
+public class SubPickup extends SequentialCommandGroup {
+  /** Creates a new SubPickup. */
+  public SubPickup(Elevator sys_elevator, EndEffector sys_endEffector) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kL1)),
-        Commands.waitSeconds(0.1), 
-        Commands.waitUntil(() -> Math.abs(sys_elevator.getPosition()) >= Math.abs(kSetpoints.kL1)),
-        Commands.waitSeconds(0.2), 
-        Commands.runOnce(() -> sys_endEffector.setVoltage(kEndEffector.VOLTAGE_SCORE)), 
-        Commands.waitSeconds(1), // Add Sensor detection here
-        Commands.runOnce(() -> sys_endEffector.setVoltage(0)), 
-        Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
+    addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kPickUp)),
+    Commands.waitSeconds(0.1), 
+    Commands.waitUntil(() -> Math.abs(sys_elevator.getPosition()) >= Math.abs(kSetpoints.kPickUp)),
+    Commands.runOnce(() -> sys_endEffector.setVoltage(kEndEffector.VOLTAGE_SCORE)), 
+    Commands.waitSeconds(1),
+    Commands.runOnce(() -> sys_endEffector.setVoltage(0)), 
+    Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
 
+    
     );
   }
 }
