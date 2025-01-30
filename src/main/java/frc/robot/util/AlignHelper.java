@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.Constants.kAutoAlign.kStation;
@@ -133,5 +134,16 @@ public class AlignHelper {
         }
 
         return closest;
+    }
+
+    public static Angle rotationDifference(Rotation2d r1, Rotation2d r2) {
+        double difference = r1.getRadians() - r2.getRadians();
+
+        difference = (difference + Math.PI) % (2 * Math.PI) - Math.PI;
+
+        if (difference < -Math.PI)
+            difference += 2 * Math.PI;
+
+        return Radians.of(difference);
     }
 }

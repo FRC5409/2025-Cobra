@@ -401,7 +401,7 @@ public class RobotContainer {
             .andThen(
                 AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
                 .alongWith(
-                    AutoCommands.telopAutoCommand(sys_drive).onlyIf(() -> runTelop.get())
+                    AutoCommands.telopAutoCommand(sys_drive).onlyIf(runTelop::get)
                 )
             );
     }

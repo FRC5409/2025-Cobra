@@ -18,9 +18,13 @@
           {
             "axis": "y",
             "degrees": 0
+          },
+          {
+            "axis": "z",
+            "degrees": -20
           }
         ],
-        "position": [0.0, 0.0, 0.425],
+        "position": [0.118, 0.218, 0.38],
         "resolution": [1280, 800],
         "fov": 80
       }

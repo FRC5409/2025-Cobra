@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.AlignHelper;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -245,16 +247,11 @@ public class DriveCommands {
             if (AutoBuilder.shouldFlip())
                 targetPose = FlippingUtil.flipFieldPose(targetPose);
 
-            double difference = targetPose.getRotation().getRadians() - robotPose.getRotation().getRadians();
-
-            difference = (difference + Math.PI) % (2 * Math.PI) - Math.PI;
-
-            if (difference < -Math.PI)
-                difference += 2 * Math.PI;
+            Angle difference = AlignHelper.rotationDifference(targetPose.getRotation(), robotPose.getRotation());
         
             return
                 Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLERANCE.in(Meters) &&
-                difference < kAutoAlign.ROTATION_TOLERANCE.in(Radians);
+                difference.lt(kAutoAlign.ROTATION_TOLERANCE);
         }
     ).andThen(Commands.runOnce(drive::stop, drive));
   }

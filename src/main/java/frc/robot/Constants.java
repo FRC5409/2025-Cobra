@@ -64,7 +64,6 @@ public final class Constants {
   }
 
   public static final class kAuto {
-    /** @throws IllegalArgumentException If true and the auto command is ran twice */
     public static final boolean PRINT_AUTO_TIME = false;
 
     /** When this is true the robot will set it's position where the path starts when the auto is selected. */
