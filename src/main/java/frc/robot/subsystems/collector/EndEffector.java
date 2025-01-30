@@ -34,6 +34,18 @@ public class EndEffector extends SubsystemBase {
             );
 
     }
+    public Command runUntilCoralNotDetected(double voltage) {
+        return Commands.parallel(
+                Commands.runOnce(() -> io.setVoltage(voltage), this),
+                Commands.waitUntil(
+                    () -> coralDetected == false
+            )
+        ).andThen(
+            Commands.waitSeconds(0.5),
+            Commands.runOnce(()-> io.setVoltage(0),this)
+            );
+
+    }
 
     public Command setVoltage(double voltage){
         return Commands.runOnce(() -> io.setVoltage(voltage), this);
