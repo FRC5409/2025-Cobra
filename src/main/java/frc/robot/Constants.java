@@ -99,6 +99,9 @@ public final class Constants {
       public static final int CURRENT_LIMIT = 30;
       public static final double VOLTAGE_INTAKE = 3;
       public static final double VOLTAGE_SCORE = -3;
+      public static final int TIMOFFLIGHT_SENSORID = 0;
+      public static final int TIMEOFFLIGHT_DISTANCE_VALIDATION = 80;
+
   }
 
   public static final class kElevator {
