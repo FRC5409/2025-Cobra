@@ -44,7 +44,8 @@ public class Elevator extends SubsystemBase{
     }
 
     public Command ElevatorGo(double setpoint) {
-        return Commands.runOnce(() -> io.setSetpoint(setpoint), this);
+        return Commands.runOnce(() -> io.setSetpoint(setpoint), this)
+        .until(() -> Math.abs(setpoint - getPosition()) <= 5);
     }
 
     public Command stopAll() {
