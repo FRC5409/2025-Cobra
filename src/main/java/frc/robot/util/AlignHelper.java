@@ -141,9 +141,12 @@ public class AlignHelper {
 
         difference = (difference + Math.PI) % (2 * Math.PI) - Math.PI;
 
-        if (difference < -Math.PI)
+        while (difference < -Math.PI)
             difference += 2 * Math.PI;
 
-        return Radians.of(difference);
+        while (difference > Math.PI)
+            difference -= 2 * Math.PI;
+
+        return Radians.of(Math.abs(difference));
     }
 }
