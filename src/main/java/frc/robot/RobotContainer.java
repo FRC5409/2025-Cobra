@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import java.io.IOException;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
@@ -25,6 +27,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -41,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAuto;
 import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.AutoCommands.kReefPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -345,7 +349,29 @@ public class RobotContainer {
             .back()
                 .onTrue(
                     new ConditionalCommand(
-                        AutoCommands.telopAutoCommand(sys_drive).until(() -> !isTelopAuto), 
+                        AutoCommands.telopAutoCommand(sys_drive).alongWith(
+                            Commands.run(() -> {
+                                if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
+
+                                Angle targetAngle = Radians.of(Math.atan2(primaryController.getRightY(), primaryController.getRightX()));
+
+                                double degrees = targetAngle.in(Degrees);
+                                if (degrees > -120 && degrees <= -60)
+                                    AutoCommands.target = kReefPosition.CLOSE;
+                                else if (degrees > -60 && degrees <= 0)
+                                    AutoCommands.target = kReefPosition.CLOSE_LEFT;
+                                else if (degrees > 0 && degrees <= 60)
+                                    AutoCommands.target = kReefPosition.FAR_LEFT;
+                                else if (degrees > 60 && degrees <= 120)
+                                    AutoCommands.target = kReefPosition.FAR;
+                                else if (degrees > 120 && degrees <= 180)
+                                    AutoCommands.target = kReefPosition.FAR_RIGHT;
+                                else
+                                    AutoCommands.target = kReefPosition.CLOSE_RIGHT;
+
+                                // AutoCommands.target = 
+                            })
+                        ).until(() -> !isTelopAuto), 
                         Commands.none(),
                         () -> isTelopAuto = !isTelopAuto
                     ).raceWith(

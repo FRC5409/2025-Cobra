@@ -50,7 +50,7 @@ public class AutoCommands {
     
     private static Supplier<Boolean> scoreRight;
     private static LoggedDashboardChooser<kDirection> stationChooser;
-    private static kReefPosition target = kReefPosition.CLOSE_LEFT;
+    public  static kReefPosition target = kReefPosition.CLOSE_LEFT;
 
     private AutoCommands() {}
 
@@ -124,7 +124,7 @@ public class AutoCommands {
 
                             Angle difference = AlignHelper.rotationDifference(robotTravel, robotGoal);
 
-                            return difference.lte(Degrees.of(40));
+                            return difference.lte(Degrees.of(45));
                         }
                     )
                 );
