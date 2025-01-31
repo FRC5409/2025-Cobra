@@ -22,10 +22,9 @@ public class L4Scoring extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kL4)),
-        Commands.waitSeconds(0.1), 
-        Commands.waitSeconds(0.2), 
-        Commands.runOnce(() -> sys_endEffector.setVoltage(kEndEffector.VOLTAGE_SCORE)), 
-        Commands.waitSeconds(1), // TODO: Add Sensor detection here
+        Commands.waitSeconds(0.1), // TODO: Pivot
+        Commands.runOnce(() -> sys_endEffector.runUntilCoralNotDetected(kEndEffector.VOLTAGE_SCORE)), 
+        Commands.waitSeconds(1), 
         Commands.runOnce(() -> sys_endEffector.setVoltage(0)), 
         Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
 

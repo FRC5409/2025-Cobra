@@ -23,9 +23,8 @@ public class SubPickup extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kPickUp)),
     Commands.waitSeconds(0.1), 
-    Commands.runOnce(() -> sys_endEffector.setVoltage(kEndEffector.VOLTAGE_SCORE)), 
-    Commands.waitSeconds(1), //TODO: Sensor Detection
-    Commands.runOnce(() -> sys_endEffector.setVoltage(0)), 
+    Commands.runOnce(() -> sys_endEffector.runUntilCoralDetected(kEndEffector.VOLTAGE_SCORE)), 
+    Commands.waitSeconds(1), 
     Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
 
     

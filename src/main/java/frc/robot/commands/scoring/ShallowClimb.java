@@ -4,16 +4,27 @@
 
 package frc.robot.commands.scoring;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
+import frc.robot.Constants.kElevator.kSetpoints;
+import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.collector.EndEffector;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ShallowClimb extends SequentialCommandGroup {
   /** Creates a new ShallowClimb. */
-  public ShallowClimb() {
+  public ShallowClimb(Elevator sys_elevator, EndEffector sys_endEffector) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kL4)),
+    Commands.waitSeconds(5),
+    Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kCage))
+    
+    );
   }
 }
