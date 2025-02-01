@@ -8,17 +8,17 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 public class CaseCommand {
     private CaseCommand() {}
 
-    public static final Command build(BooleanSupplier[] conditonals, Command[] commands, Command otherwise) {
-        if (conditonals.length != commands.length) throw new IllegalArgumentException("Case Command recieved a different length for conditionals and commands");
+    public static final Command buildCondtional(BooleanSupplier[] conditionals, Command[] commands, Command otherwise) {
+        if (conditionals.length != commands.length) throw new IllegalArgumentException("Case Command recieved a different length for conditionals and commands");
 
-        if (conditonals.length == 0) return otherwise;
+        if (conditionals.length == 0) return otherwise;
 
         return new ConditionalCommand(
             commands[0],
-            build(
+            buildCondtional(
                 Arrays.copyOfRange(
-                    conditonals,
-                    1, conditonals.length
+                    conditionals,
+                    1, conditionals.length
                 ),
                 Arrays.copyOfRange(
                     commands,
@@ -26,7 +26,29 @@ public class CaseCommand {
                 ),
                 otherwise
             ),
-            conditonals[0]
+            conditionals[0]
+        );
+    }
+
+    public static final Command buildSelector(BooleanSupplier[] conditionals, Command[] commands, Command otherwise) {
+        if (conditionals.length != commands.length) throw new IllegalArgumentException("Case Command recieved a different length for conditionals and commands");
+
+        if (conditionals.length == 0) return otherwise;
+
+        return new SelectorCommand(
+            commands[0],
+            buildSelector(
+                Arrays.copyOfRange(
+                    conditionals,
+                    1, conditionals.length
+                ),
+                Arrays.copyOfRange(
+                    commands,
+                    1, commands.length
+                ),
+                otherwise
+            ),
+            conditionals[0]
         );
     }
 }

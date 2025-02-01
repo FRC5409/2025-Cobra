@@ -138,7 +138,7 @@ public class AutoCommands {
                 commands[i] = AutoBuilder.pathfindToPoseFlipped(pose, CONSTRAINTS);
         }
 
-        return CaseCommand.build(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
+        return CaseCommand.buildSelector(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
     }
 
     public static Command pathFindToNearestStation(Drive drive) {
