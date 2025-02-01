@@ -3,9 +3,12 @@
 
 package frc.robot.subsystems.Elevator;
 
+import java.util.concurrent.Flow.Publisher;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
@@ -15,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.Constants.kElevator;
+import frc.robot.util.StructHelper;
 
 public class Elevator extends SubsystemBase{
 
@@ -24,6 +28,7 @@ public class Elevator extends SubsystemBase{
 
     // Shuffleboard
     private final ShuffleboardTab sb_tab;
+    public Pose3d elevatorPose;
 
     public Elevator(ElevatorIO io) {
         // IO
@@ -33,6 +38,10 @@ public class Elevator extends SubsystemBase{
         // Shuffleboard
         sb_tab = Shuffleboard.getTab("Elevator");
         sb_tab.addDouble("Elevator Position", () -> io.getPosition());
+
+        elevatorPose = new Pose3d();
+        StructHelper.publishStruct("Elevator", Pose3d.struct, ()->this.elevatorPose);
+
     }
 
     public Command startManualMove(double voltage) {
@@ -55,5 +64,7 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
         // This method will be called once per scheduler run
         io.updateInputs(inputs);
+        Logger.processInputs("Elevator", inputs);
+        elevatorPose = new Pose3d(0,0,inputs.mainMotorPosition, new Rotation3d());
     }
 }

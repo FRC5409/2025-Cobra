@@ -282,13 +282,13 @@ public class RobotContainer {
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
 
-        // primaryController.a()
-        // .onTrue(sys_elevator.ElevatorGo(10))
-        // .onFalse(sys_elevator.stopAll());
+        primaryController.a()
+        .onTrue(sys_elevator.ElevatorGo(10))
+        .onFalse(sys_elevator.stopAll());
 
-        // primaryController.b()
-        // .onTrue(sys_elevator.ElevatorGo(0))
-        // .onFalse(sys_elevator.stopAll());
+        primaryController.b()
+        .onTrue(sys_elevator.ElevatorGo(0))
+        .onFalse(sys_elevator.stopAll());
         
         // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
 
