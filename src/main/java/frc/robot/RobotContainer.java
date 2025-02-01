@@ -14,6 +14,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -35,10 +36,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
+
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kElevator;
 import frc.robot.Constants.kEndEffector;
@@ -64,6 +69,9 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
 import frc.robot.commands.scoring.L1Scoring;
+import frc.robot.commands.scoring.L2Scoring;
+import frc.robot.commands.scoring.L3Scoring;
+import frc.robot.commands.scoring.L4Scoring;
 import frc.robot.commands.scoring.SubPickup;
 
 /**
@@ -75,6 +83,7 @@ import frc.robot.commands.scoring.SubPickup;
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+
 public class RobotContainer {
   // Subsystems
   protected final Drive sys_drive;
@@ -83,7 +92,11 @@ public class RobotContainer {
   public final EndEffector sys_endEffector;
 
   // Commands
-  private final L1Scoring seq_L1Score;
+  private enum ScoringLevel {
+    LEVEL1, LEVEL2, LEVEL3, LEVEL4
+  }
+  private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
+  private Command selectScoringCommand;
   private final SubPickup seq_pickUp;
 
     // Controller
@@ -154,7 +167,16 @@ public class RobotContainer {
         
     }
         // Commands
-        seq_L1Score = new L1Scoring(sys_elevator, sys_endEffector);
+        selectScoringCommand = new SelectCommand<>(
+            Map.of(
+                ScoringLevel.LEVEL1, new L1Scoring(sys_elevator, sys_endEffector),
+                ScoringLevel.LEVEL2, new L2Scoring(sys_elevator, sys_endEffector),
+                ScoringLevel.LEVEL3, new L3Scoring(sys_elevator, sys_endEffector),
+                ScoringLevel.LEVEL4, new L4Scoring(sys_elevator, sys_endEffector)
+            ),
+            () -> selectedScoringLevel
+        );
+        
         seq_pickUp = new SubPickup(sys_elevator, sys_endEffector);
 
         registerCommands();
@@ -301,8 +323,15 @@ public class RobotContainer {
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
 
-        primaryController.a().onTrue(seq_L1Score);
+        // Secondary Controller for Selecting Scoring Level
+        secondaryController.x().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL1));
+        secondaryController.y().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL2));
+        secondaryController.a().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL3));
+        secondaryController.b().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL4));
+        
+        primaryController.start().onTrue(selectScoringCommand);
 
+        // Intake From SubStation
         primaryController.b().onTrue(seq_pickUp);
         // primaryController.a()
         // .onTrue(sys_elevator.ElevatorGo(10))
