@@ -40,7 +40,7 @@ public class EndEffector extends SubsystemBase {
                 Commands.waitUntil(() -> inputs.EndEffectorCurrent > 25),
                 Commands.runOnce(() -> io.setVoltage(-6), this), 
                 Commands.waitSeconds(0.25)
-            ).until(()-> false)     //TODO: add sensor returns false here
+            ).until(()-> !coralDetected)    
             .finallyDo(()-> io.setVoltage(0));
 
     }
