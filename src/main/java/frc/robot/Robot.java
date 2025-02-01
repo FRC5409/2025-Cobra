@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.AutoCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -184,7 +183,7 @@ public class Robot extends LoggedRobot {
     }
 
     if (robotContainer.runTelop.get())
-        AutoCommands.telopAutoCommand(robotContainer.sys_drive).schedule();
+        robotContainer.telopAutoCommand.schedule();
   }
 
   /** This function is called periodically during operator control. */

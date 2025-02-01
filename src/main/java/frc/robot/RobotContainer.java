@@ -73,8 +73,11 @@ import frc.robot.util.AlignHelper.kDirection;
  */
 public class RobotContainer {
     // Subsystems
-    protected final Drive sys_drive;
-    private final Vision sys_vision;
+    protected final Drive  sys_drive;
+    private   final Vision sys_vision;
+
+    // Commands
+    protected final Command telopAutoCommand;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -141,6 +144,31 @@ public class RobotContainer {
 
         AutoCommands.setupNodeChooser();
         registerCommands();
+
+        // Commands
+        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive).alongWith(
+                Commands.run(() -> {
+                    if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
+
+                    Angle targetAngle = Radians.of(Math.atan2(primaryController.getRightY(), primaryController.getRightX()));
+
+                    double degrees = targetAngle.in(Degrees);
+                    if (degrees > -120 && degrees <= -60)
+                        AutoCommands.target = kReefPosition.CLOSE;
+                    else if (degrees > -60 && degrees <= 0)
+                        AutoCommands.target = kReefPosition.CLOSE_LEFT;
+                    else if (degrees > 0 && degrees <= 60)
+                        AutoCommands.target = kReefPosition.FAR_LEFT;
+                    else if (degrees > 60 && degrees <= 120)
+                        AutoCommands.target = kReefPosition.FAR;
+                    else if (degrees > 120 && degrees <= 180)
+                        AutoCommands.target = kReefPosition.FAR_RIGHT;
+                    else
+                        AutoCommands.target = kReefPosition.CLOSE_RIGHT;
+
+                    // AutoCommands.target = 
+                })
+            ).onlyWhile(() -> isTelopAuto);
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -351,31 +379,7 @@ public class RobotContainer {
             .back()
                 .whileFalse(
                     Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
-                    .andThen(
-                        AutoCommands.telopAutoCommand(sys_drive).alongWith(
-                            Commands.run(() -> {
-                                if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
-
-                                Angle targetAngle = Radians.of(Math.atan2(primaryController.getRightY(), primaryController.getRightX()));
-
-                                double degrees = targetAngle.in(Degrees);
-                                if (degrees > -120 && degrees <= -60)
-                                    AutoCommands.target = kReefPosition.CLOSE;
-                                else if (degrees > -60 && degrees <= 0)
-                                    AutoCommands.target = kReefPosition.CLOSE_LEFT;
-                                else if (degrees > 0 && degrees <= 60)
-                                    AutoCommands.target = kReefPosition.FAR_LEFT;
-                                else if (degrees > 60 && degrees <= 120)
-                                    AutoCommands.target = kReefPosition.FAR;
-                                else if (degrees > 120 && degrees <= 180)
-                                    AutoCommands.target = kReefPosition.FAR_RIGHT;
-                                else
-                                    AutoCommands.target = kReefPosition.CLOSE_RIGHT;
-
-                                // AutoCommands.target = 
-                            })
-                        )
-                    ).onlyWhile(() -> isTelopAuto)
+                        .andThen(telopAutoCommand)
                 );
 
         primaryController.leftBumper()
