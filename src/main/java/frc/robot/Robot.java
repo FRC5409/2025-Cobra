@@ -171,7 +171,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    autoStartingConfigAlert.set(false);
+    CommandScheduler.getInstance().clearComposedCommands();
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
@@ -184,6 +184,8 @@ public class Robot extends LoggedRobot {
 
     if (robotContainer.runTelop.get())
         robotContainer.telopAutoCommand.schedule();
+
+    autoStartingConfigAlert.set(false);
   }
 
   /** This function is called periodically during operator control. */
