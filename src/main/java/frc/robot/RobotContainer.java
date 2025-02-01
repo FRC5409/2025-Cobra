@@ -406,6 +406,7 @@ public class RobotContainer {
 
         primaryController
             .povLeft()
+            .and(() -> !isTelopAuto)
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
@@ -415,6 +416,7 @@ public class RobotContainer {
 
         primaryController
             .povRight()
+            .and(() -> !isTelopAuto)
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
