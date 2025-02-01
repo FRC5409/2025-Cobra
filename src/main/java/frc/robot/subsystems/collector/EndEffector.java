@@ -35,15 +35,13 @@ public class EndEffector extends SubsystemBase {
 
     }
     public Command runUntilCoralNotDetected(double voltage) {
-        return Commands.parallel(
+        return Commands.repeatingSequence(
                 Commands.runOnce(() -> io.setVoltage(voltage), this),
-                Commands.waitUntil(
-                    () -> coralDetected == false
-            )
-        ).andThen(
-            Commands.waitSeconds(0.5),
-            Commands.runOnce(()-> io.setVoltage(0),this)
-            );
+                Commands.waitUntil(() -> inputs.EndEffectorCurrent > 25),
+                Commands.runOnce(() -> io.setVoltage(-6), this), 
+                Commands.waitSeconds(0.25)
+            ).until(()-> false)     //TODO: add sensor returns false here
+            .finallyDo(()-> io.setVoltage(0));
 
     }
 
