@@ -17,9 +17,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -48,9 +50,9 @@ public class AutoCommands {
     private static final Distance DISTANCE_TO_PREPARE = Meters.of(1.5);
     private static final LinearVelocity REEF_END_VELOCITY = MetersPerSecond.of(1.5);
     
-    private static Supplier<Boolean> scoreRight;
-    private static LoggedDashboardChooser<kDirection> stationChooser;
-    public  static kReefPosition target = kReefPosition.CLOSE_LEFT;
+    public static GenericEntry scoreRight;
+    public static LoggedDashboardChooser<kDirection> stationChooser;
+    public static kReefPosition target = kReefPosition.CLOSE_LEFT;
 
     private AutoCommands() {}
 
@@ -59,7 +61,11 @@ public class AutoCommands {
             DebugCommand.register(reef.name(), Commands.runOnce(() -> target = reef));
         }
 
-        scoreRight = DebugCommand.putNumber("Score Right", false);
+        scoreRight = Shuffleboard.getTab("Debug")
+                        .add("Score Right", false)
+                        .getEntry();
+
+
         stationChooser = new LoggedDashboardChooser<>("Station Select");
 
         stationChooser.addDefaultOption("Automatic", kDirection.BOTH );
@@ -112,7 +118,7 @@ public class AutoCommands {
                             );
 
                             Translation2d target = pose
-                                .transformBy(scoreRight.get() ? kReef.RIGHT_OFFSET_TO_BRANCH : kReef.LEFT_OFFSET_TO_BRANCH)
+                                .transformBy(scoreRight.getBoolean(false) ? kReef.RIGHT_OFFSET_TO_BRANCH : kReef.LEFT_OFFSET_TO_BRANCH)
                                 .getTranslation();
 
                             Rotation2d robotGoal = Rotation2d.fromRadians(
@@ -184,7 +190,7 @@ public class AutoCommands {
         return Commands.sequence(
             pathFindToNearestStation(drive).unless(() -> false), // TODO: Has coral
             pathFindToReef(drive, () -> target),
-            alignToBranch(drive, () -> (scoreRight.get() ? kDirection.RIGHT : kDirection.LEFT)),
+            alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT)),
             Commands.print("Score!"),
             Commands.waitSeconds(0.5)
         ).repeatedly();

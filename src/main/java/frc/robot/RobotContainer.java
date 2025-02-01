@@ -180,12 +180,12 @@ public class RobotContainer {
 
         if (kAuto.RESET_ODOM_ON_CHANGE)
             autoChooser
-                    .getSendableChooser()
-                    .onChange(path -> sys_drive.setPose(getStartingPose()));
+                .getSendableChooser()
+                .onChange(path -> sys_drive.setPose(getStartingPose()));
 
         SmartDashboard.putData(
-                "Reset",
-                Commands.runOnce(() -> sys_drive.setPose(getStartingPose())).ignoringDisable(true));
+            "Reset",
+            Commands.runOnce(() -> sys_drive.setPose(getStartingPose())).ignoringDisable(true));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -234,6 +234,8 @@ public class RobotContainer {
                 Commands.runOnce(() -> {
                     primaryDisconnectedAlert.set(!primaryController.isConnected());
                     secondaryDisconnectedAlert.set(!secondaryController.isConnected());
+
+                    sys_drive.setPose(getStartingPose());
                 }).ignoringDisable(true));
     }
 
@@ -347,8 +349,9 @@ public class RobotContainer {
 
         primaryController
             .back()
-                .onTrue(
-                    new ConditionalCommand(
+                .whileFalse(
+                    Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
+                    .andThen(
                         AutoCommands.telopAutoCommand(sys_drive).alongWith(
                             Commands.run(() -> {
                                 if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
@@ -371,15 +374,15 @@ public class RobotContainer {
 
                                 // AutoCommands.target = 
                             })
-                        ).until(() -> !isTelopAuto), 
-                        Commands.none(),
-                        () -> isTelopAuto = !isTelopAuto
-                    ).raceWith(
-                        Commands.waitSeconds(0.5).andThen(
-                            Commands.waitUntil(() -> primaryController.getHID().getBackButton())
                         )
-                    )
+                    ).onlyWhile(() -> isTelopAuto)
                 );
+
+        primaryController.leftBumper()
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
+
+        primaryController.rightBumper()
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
         primaryController.y()
             .onTrue(
