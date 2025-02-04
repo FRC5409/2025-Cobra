@@ -5,6 +5,8 @@ import org.littletonrobotics.junction.Logger;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,6 +18,7 @@ public class EndEffector extends SubsystemBase {
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
     private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
     private boolean coralDetected = false;
+    private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
@@ -60,6 +63,7 @@ public class EndEffector extends SubsystemBase {
             coralDetected = false;
         }
         // System.out.println(tof.getRange());  --- Use when testing
+        alert.set(!inputs.EndEffectorConnection);
     }
 
     @Override
