@@ -5,10 +5,6 @@ package frc.robot.subsystems.Elevator;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -16,8 +12,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import frc.robot.Constants.kElevator;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.kElevator;
 
 public class Elevator extends SubsystemBase{
 
@@ -28,8 +23,8 @@ public class Elevator extends SubsystemBase{
     // Shuffleboard
     private final ShuffleboardTab sb_tab;
 
-    private final Alert elevatorAlert = new Alert("Both Elevator Motors are Disconnected!!!", AlertType.kError);
-
+    private final Alert leftElevatorAlert = new Alert("The Left Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
+    private final Alert rightElevatorAlert = new Alert("The Rigth Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
     public Elevator(ElevatorIO io) {
         // IO
         this.io = io;
@@ -65,6 +60,7 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
         // This method will be called once per scheduler run
         io.updateInputs(inputs);
-        elevatorAlert.set(!inputs.mainMotorConnected && !inputs.followerMotorConnected);
+        leftElevatorAlert.set(!inputs.mainMotorConnected);
+        rightElevatorAlert.set(!inputs.followerMotorConnected);
     }
 }
