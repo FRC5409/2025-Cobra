@@ -16,10 +16,16 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.HashMap;
+
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -55,6 +61,9 @@ public final class Constants {
     public static final Mass ROBOT_FULL_MASS = Pounds.of(125.0);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(9.2437679288);
     public static final double WHEEL_COF = 1.2;
+
+    public static final Distance TRACK_SIZE  = Inches.of(22.73196447);
+    public static final Distance BUMPER_SIZE = Inches.of(35);
   }
 
   public static final class kAuto {
@@ -104,5 +113,20 @@ public final class Constants {
      * Frames allowed without latency update before flagged as disconnected
      */
     public static final int DISCONNECTION_TIMEOUT = 5;
+  }
+
+  public static final class kSimulator {
+    public static final String[] GAME_PIECE_VISUALIZE_LIST = {"Algae", "Coral"};
+
+    public static final class kDriveSim {
+      public static final SwerveModuleSimulationConfig MODULE_CONFIG = 
+              COTS.ofMark4i(DCMotor.getKrakenX60Foc(1), DCMotor.getKrakenX60Foc(1), kDrive.WHEEL_COF, 2);
+
+      public static final DriveTrainSimulationConfig DRIVETRAIN_CONFIG = DriveTrainSimulationConfig.Default()
+              .withGyro(COTS.ofPigeon2())
+              .withSwerveModule(kDriveSim.MODULE_CONFIG)
+              .withTrackLengthTrackWidth(kDrive.TRACK_SIZE, kDrive.TRACK_SIZE)
+              .withBumperSize(kDrive.BUMPER_SIZE, kDrive.BUMPER_SIZE);
+    }
   }
 }

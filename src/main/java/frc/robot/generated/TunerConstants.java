@@ -20,13 +20,13 @@ public class TunerConstants {
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
-    private static final Slot0Configs steerGains = new Slot0Configs()
+    public static final Slot0Configs steerGains = new Slot0Configs()
         .withKP(1450).withKI(0).withKD(30.0)
         .withKS(0.1).withKV(2.66).withKA(0)
         .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
-    private static final Slot0Configs driveGains = new Slot0Configs()
+    public static final Slot0Configs driveGains = new Slot0Configs()
         .withKP(35.0).withKI(0).withKD(0.5)
         .withKS(3.38125).withKV(0.81554);
 
@@ -87,7 +87,7 @@ public class TunerConstants {
     private static final int kPigeonId = 14;
 
     // These are only used for simulation
-    private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.004);
+    public static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.004);
     private static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.025);
     // Simulated voltage necessary to overcome friction
     private static final Voltage kSteerFrictionVoltage = Volts.of(0.2);
