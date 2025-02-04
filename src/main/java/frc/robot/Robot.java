@@ -13,13 +13,18 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,17 +34,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAuto;
+import frc.robot.Constants.kSimulator;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.util.PieceVisualizer;
 import frc.robot.util.StructHelper;
-import org.littletonrobotics.junction.LogFileUtil;
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGReader;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -206,17 +204,15 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    final Drive drive = robotContainer.sys_drive;
-
-    PieceVisualizer.configure(() -> drive.getPose());
-    
-    // EXAMPLE GAME PIECE
-    PieceVisualizer.addGamePiece(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
+    SimulatedArena.getInstance().resetFieldForAuto();
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    PieceVisualizer.update();
+    SimulatedArena.getInstance().simulationPeriodic();
+
+    for (String gamePiece: kSimulator.GAME_PIECE_VISUALIZE_LIST)
+      Logger.recordOutput("FieldSimulation/"+gamePiece, SimulatedArena.getInstance().getGamePiecesArrayByType(gamePiece));
   }
 }
