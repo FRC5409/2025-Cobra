@@ -58,8 +58,8 @@ public final class Constants {
   }
 
   public static final class kDrive {
-    public static final Mass ROBOT_FULL_MASS = Pounds.of(125.0);
-    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(9.2437679288);
+    public static final Mass ROBOT_FULL_MASS = Kilograms.of(25.034);
+    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(2.881);
     public static final double WHEEL_COF = 1.2;
   }
 

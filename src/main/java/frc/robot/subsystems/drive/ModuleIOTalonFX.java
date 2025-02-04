@@ -30,6 +30,7 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -88,6 +89,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<AngularVelocity> turnVelocity;
   private final StatusSignal<Voltage> turnAppliedVolts;
   private final StatusSignal<Current> turnCurrent;
+
+  // Inputs from cancoder
+  private final StatusSignal<MagnetHealthValue> magneticHealth;
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
@@ -180,6 +184,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnAppliedVolts = turnTalon.getMotorVoltage();
     turnCurrent = turnTalon.getStatorCurrent();
 
+    // Cancoder status signals
+    magneticHealth = cancoder.getMagnetHealth();
+
     // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
         Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
@@ -219,6 +226,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
+
+    inputs.magnetHealth = magneticHealth.getValue();
 
     // Update odometry inputs
     inputs.odometryTimestamps =

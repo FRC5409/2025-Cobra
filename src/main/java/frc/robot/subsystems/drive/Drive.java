@@ -15,8 +15,10 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
@@ -28,7 +30,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
-
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -63,61 +64,49 @@ import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
 
 public class Drive extends SubsystemBase {
-  // TunerConstants doesn't include these constants, so they are declared locally
-  static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
-      ? 250.0
-      : 100.0;
-  public static final double DRIVE_BASE_RADIUS = Math.max(
-      Math.max(
-          Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-          Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
-      Math.max(
-          Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-          Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+    // TunerConstants doesn't include these constants, so they are declared locally
+    static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
+        ? 250.0
+        : 100.0;
+    public static final double DRIVE_BASE_RADIUS = Math.max(
+        Math.max(
+            Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+            Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+        Math.max(
+            Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+            Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
-  // PathPlanner config constants
-  private static final RobotConfig PP_CONFIG = new RobotConfig(
-      kDrive.ROBOT_FULL_MASS.in(Kilograms),
-      kDrive.ROBOT_MOI.in(KilogramSquareMeters),
-      new ModuleConfig(
-          TunerConstants.FrontLeft.WheelRadius,
-          TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-          kDrive.WHEEL_COF,
-          DCMotor.getKrakenX60Foc(1)
-              .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-          TunerConstants.FrontLeft.SlipCurrent,
-          1),
-      getModuleTranslations());
+    private final RobotConfig PP_CONFIG;
 
-  static final Lock odometryLock = new ReentrantLock();
-  private final GyroIO gyroIO;
-  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-  private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-  private final SysIdRoutine sysId;
-  private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
-      AlertType.kError);
+    static final Lock odometryLock = new ReentrantLock();
+    private final GyroIO gyroIO;
+    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+    private final SysIdRoutine sysId;
+    private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
+        AlertType.kError);
 
-  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
-  private Rotation2d rawGyroRotation = new Rotation2d();
-  private SwerveModulePosition[] lastModulePositions = // For delta tracking
-      new SwerveModulePosition[] {
-          new SwerveModulePosition(),
-          new SwerveModulePosition(),
-          new SwerveModulePosition(),
-          new SwerveModulePosition()
-      };
-  private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
-      lastModulePositions, new Pose2d());
+    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+    private Rotation2d rawGyroRotation = new Rotation2d();
+    private SwerveModulePosition[] lastModulePositions = // For delta tracking
+        new SwerveModulePosition[] {
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition()
+        };
+    private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
+        lastModulePositions, new Pose2d());
 
-  private final Vision vision;
+    private final Vision vision;
 
-  public Drive(
-      GyroIO gyroIO,
-      ModuleIO flModuleIO,
-      ModuleIO frModuleIO,
-      ModuleIO blModuleIO,
-      ModuleIO brModuleIO,
-      Vision vision) {
+    public Drive(
+        GyroIO gyroIO,
+        ModuleIO flModuleIO,
+        ModuleIO frModuleIO,
+        ModuleIO blModuleIO,
+        ModuleIO brModuleIO,
+        Vision vision) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
@@ -130,6 +119,27 @@ public class Drive extends SubsystemBase {
 
     // Start odometry thread
     PhoenixOdometryThread.getInstance().start();
+
+    RobotConfig config;
+    try {
+        config = RobotConfig.fromGUISettings();
+    } catch (IOException | ParseException e) {
+        System.out.println("Couldnt get RobotConfig from GUI... Defaulting to Constants");
+        config = new RobotConfig(
+            kDrive.ROBOT_FULL_MASS.in(Kilograms),
+            kDrive.ROBOT_MOI.in(KilogramSquareMeters),
+            new ModuleConfig(
+                TunerConstants.FrontLeft.WheelRadius,
+                TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+                kDrive.WHEEL_COF,
+                DCMotor.getKrakenX60Foc(1)
+                    .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+                TunerConstants.FrontLeft.SlipCurrent,
+                1),
+            getModuleTranslations());
+    }
+
+    PP_CONFIG = config;
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
