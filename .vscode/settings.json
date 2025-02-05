@@ -79,5 +79,6 @@
   "editor.formatOnSave": false,
   "workbench.tree.indent": 8,
   "editor.detectIndentation": false,
-  "editor.indentSize": 4
+"editor.indentSize": 2,
+"editor.tabSize": 2
 }
