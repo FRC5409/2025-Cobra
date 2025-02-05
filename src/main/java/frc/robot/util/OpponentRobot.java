@@ -9,6 +9,10 @@ import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.littletonrobotics.junction.Logger;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,11 +32,12 @@ public class OpponentRobot extends SubsystemBase {
     private static final AngularVelocity MAX_TURN_SPEED = RadiansPerSecond.of(Math.PI * 2.0);
 
     protected static DriveTrainSimulationConfig opponentConfig;
+    protected static RobotConfig PPConfig;
 
     private final SelfControlledSwerveDriveSimulation driveSimulation;
 
     public OpponentRobot(Pose2d fieldPose) {
-        if (opponentConfig == null)
+        if (opponentConfig == null) {
             opponentConfig = DriveTrainSimulationConfig.Default()
             .withGyro(() -> new GyroSimulation(0.0, 0.0))
             .withRobotMass(Pounds.of(114.9))
@@ -46,6 +51,8 @@ public class OpponentRobot extends SubsystemBase {
                     2
                 )
             );
+
+        }
 
         final SwerveDriveSimulation sim = new SwerveDriveSimulation(
             opponentConfig, 
@@ -75,8 +82,20 @@ public class OpponentRobot extends SubsystemBase {
     }
 
     public Command followDrive(PathPlannerPath path) {
-        // TODO: Finish
-        return Commands.none();
+        final PPHolonomicDriveController driveController =
+            new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0));
+
+        return new PathfindingCommand(
+            path, 
+            path.getGlobalConstraints(),
+            () -> driveSimulation.getActualPoseInSimulationWorld(),
+            () -> driveSimulation.getActualSpeedsRobotRelative(), 
+            (speeds, ff) -> driveSimulation.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            driveController,
+            PPConfig,
+            () -> true,
+            this
+        );
     }
 
     @Override
