@@ -17,8 +17,13 @@ import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
 import java.util.function.Supplier;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -27,6 +32,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -42,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.kAuto;
+import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
@@ -49,6 +56,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
@@ -75,6 +83,8 @@ public class RobotContainer {
     // Subsystems
     protected final Drive  sys_drive;
     private   final Vision sys_vision;
+
+    private SwerveDriveSimulation simConfig;
 
     // Commands
     protected final Command telopAutoCommand;
@@ -118,14 +128,36 @@ public class RobotContainer {
             }
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
+                final DriveTrainSimulationConfig driveConfig = DriveTrainSimulationConfig.Default()
+                    .withGyro(COTS.ofPigeon2())
+                    .withRobotMass(kDrive.ROBOT_FULL_MASS)
+                    .withTrackLengthTrackWidth(Meters.of(0.578), Meters.of(0.578))
+                    .withBumperSize(Meters.of(0.881), Meters.of(0.881))
+                    .withSwerveModule(
+                        COTS.ofMark4i(
+                            DCMotor.getKrakenX60Foc(1),
+                            DCMotor.getKrakenX60Foc(1),
+                            1.20,
+                            2
+                        )
+                    );
+                
+                simConfig = new SwerveDriveSimulation(
+                    driveConfig,
+                    new Pose2d(3, 3, new Rotation2d())
+                );
+
+                SimulatedArena.getInstance().addDriveTrainSimulation(simConfig);
+                SimulatedArena.getInstance().resetFieldForAuto();
+
                 sys_vision = new Vision(new VisionIO() {});
                 sys_drive =
                     new Drive(
-                        new GyroIO() {},
-                        new ModuleIOSim(TunerConstants.FrontLeft),
-                        new ModuleIOSim(TunerConstants.FrontRight),
-                        new ModuleIOSim(TunerConstants.BackLeft),
-                        new ModuleIOSim(TunerConstants.BackRight),
+                        new GyroIOSim(simConfig.getGyroSimulation()),
+                        new ModuleIOSim(simConfig.getModules()[0]),
+                        new ModuleIOSim(simConfig.getModules()[1]),
+                        new ModuleIOSim(simConfig.getModules()[2]),
+                        new ModuleIOSim(simConfig.getModules()[3]),
                         sys_vision);
             }
             default -> {
@@ -265,6 +297,15 @@ public class RobotContainer {
 
                     sys_drive.setPose(getStartingPose());
                 }).ignoringDisable(true));
+    }
+
+    public void updateSim() {
+        SimulatedArena.getInstance().simulationPeriodic();
+        Logger.recordOutput("Simulation/RobotPose", simConfig.getSimulatedDriveTrainPose());
+        Logger.recordOutput(
+                "Simulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput(
+                "Simulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
     @AutoLogOutput(key = "Odometry/StartingPose")

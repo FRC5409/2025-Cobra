@@ -13,13 +13,9 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -28,9 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.util.PieceVisualizer;
 import frc.robot.util.StructHelper;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -205,18 +199,11 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {
-    final Drive drive = robotContainer.sys_drive;
-
-    PieceVisualizer.configure(() -> drive.getPose());
-    
-    // EXAMPLE GAME PIECE
-    PieceVisualizer.addGamePiece(() -> new Transform3d(Meters.of(0.0), Meters.of(0.0), Meters.of(0.5), new Rotation3d()));
-  }
+  public void simulationInit() {}
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    PieceVisualizer.update();
+    robotContainer.updateSim();
   }
 }
