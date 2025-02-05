@@ -47,6 +47,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.Mode;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
@@ -241,11 +242,11 @@ public class RobotContainer {
         if (kAuto.RESET_ODOM_ON_CHANGE)
             autoChooser
                 .getSendableChooser()
-                .onChange(path -> sys_drive.setPose(getStartingPose()));
+                .onChange(path -> resetPose());
 
         SmartDashboard.putData(
             "Reset",
-            Commands.runOnce(() -> sys_drive.setPose(getStartingPose())).ignoringDisable(true));
+            Commands.runOnce(() -> resetPose()).ignoringDisable(true));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -295,7 +296,7 @@ public class RobotContainer {
                     primaryDisconnectedAlert.set(!primaryController.isConnected());
                     secondaryDisconnectedAlert.set(!secondaryController.isConnected());
 
-                    sys_drive.setPose(getStartingPose());
+                    resetPose();
                 }).ignoringDisable(true));
     }
 
@@ -306,6 +307,14 @@ public class RobotContainer {
                 "Simulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "Simulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    }
+
+    private void resetPose() {
+        Pose2d startingPose = getStartingPose();
+        if (Constants.currentMode == Mode.SIM)
+            simConfig.setSimulationWorldPose(startingPose);
+
+        sys_drive.setPose(startingPose);
     }
 
     @AutoLogOutput(key = "Odometry/StartingPose")

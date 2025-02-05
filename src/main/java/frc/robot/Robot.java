@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.StructHelper;
+import frc.robot.Constants.Mode;
+import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -156,6 +158,9 @@ public class Robot extends LoggedRobot {
 
     RobotContainer.isTelopAuto = robotContainer.runTelop.get();
     autoStartingConfigAlert.set(false);
+
+    if (Constants.currentMode == Mode.SIM)
+        SimulatedArena.getInstance().resetFieldForAuto();
   }
 
   /** This function is called periodically during autonomous. */
