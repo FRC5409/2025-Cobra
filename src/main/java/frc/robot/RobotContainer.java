@@ -15,6 +15,12 @@ package frc.robot;
 
 import java.io.IOException;
 
+import edu.wpi.first.math.system.plant.DCMotor;
+import frc.robot.subsystems.drive.*;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -42,17 +48,13 @@ import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
+
+import static edu.wpi.first.units.Units.Inches;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -67,6 +69,7 @@ public class RobotContainer {
   // Subsystems
   protected final Drive sys_drive;
   private final Vision sys_vision;
+  public final SwerveDriveSimulation sim_drive;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -89,6 +92,14 @@ public class RobotContainer {
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
+        sim_drive = new SwerveDriveSimulation(
+                DriveTrainSimulationConfig.Default()
+                        .withGyro(COTS.ofPigeon2())
+                        .withSwerveModule(COTS.ofMark4i(DCMotor.getFalcon500Foc(1), DCMotor.getFalcon500Foc(1), 1.2, 2))
+                        .withTrackLengthTrackWidth(Inches.of(22.73196447), Inches.of(22.73196447))
+                        .withBumperSize(Inches.of(35), Inches.of(35)),
+                new Pose2d());
+
     switch (Constants.currentMode) {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
@@ -108,10 +119,10 @@ public class RobotContainer {
         sys_drive =
             new Drive(
                 new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight),
+                new ModuleIOSim(sim_drive.getModules()[0], TunerConstants.FrontLeft),
+                new ModuleIOSim(sim_drive.getModules()[1],TunerConstants.FrontRight),
+                new ModuleIOSim(sim_drive.getModules()[2],TunerConstants.BackLeft),
+                new ModuleIOSim(sim_drive.getModules()[3],TunerConstants.BackRight),
                 sys_vision);
       }
       default -> {

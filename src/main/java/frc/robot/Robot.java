@@ -205,6 +205,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     SimulatedArena.getInstance().resetFieldForAuto();
+    SimulatedArena.getInstance().addDriveTrainSimulation(robotContainer.sim_drive);
   }
 
   /** This function is called periodically whilst in simulation. */
@@ -212,7 +213,7 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
 
-    for (String gamePiece: kSimulator.GAME_PIECE_VISUALIZE_LIST)
-      Logger.recordOutput("FieldSimulation/"+gamePiece, SimulatedArena.getInstance().getGamePiecesArrayByType(gamePiece));
+    for (String gamePiece : kSimulator.GAME_PIECE_VISUALIZE_LIST)
+      Logger.recordOutput("FieldSimulation/" + gamePiece, SimulatedArena.getInstance().getGamePiecesArrayByType(gamePiece));
   }
 }
