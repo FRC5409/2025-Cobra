@@ -64,9 +64,11 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.DebugCommand;
+import frc.robot.util.OpponentRobot;
 import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
@@ -151,7 +153,7 @@ public class RobotContainer {
                 SimulatedArena.getInstance().addDriveTrainSimulation(simConfig);
                 SimulatedArena.getInstance().resetFieldForAuto();
 
-                sys_vision = new Vision(new VisionIO() {});
+                sys_vision = new Vision(new VisionIOSim(simConfig));
                 sys_drive =
                     new Drive(
                         new GyroIOSim(simConfig.getGyroSimulation()),
@@ -160,6 +162,10 @@ public class RobotContainer {
                         new ModuleIOSim(simConfig.getModules()[2]),
                         new ModuleIOSim(simConfig.getModules()[3]),
                         sys_vision);
+
+                final OpponentRobot sys_opponent = 
+                    new OpponentRobot(new Pose2d(3, 3, Rotation2d.fromDegrees(0.0)));
+                sys_opponent.setDefaultCommand(sys_opponent.joystickDrive(secondaryController));
             }
             default -> {
                 // Replayed robot, disable IO implementations
