@@ -34,6 +34,7 @@ import frc.robot.util.FieldMirror;
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
+
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
@@ -91,6 +92,24 @@ public final class Constants {
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
+  }
+
+  public static final class kArmPivot {
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kG = 0.0;
+
+    public static final double   ARM_GEARING      = 10.0/1.0;
+    public static final Distance ARM_DRUM_RADIUS  = Inches.of(0.944);
+    public static final MomentOfInertia ARM_MOI   = KilogramSquareMeters.of(0.10);
+    public static final Distance ARM_LENGTH       = Inches.of(12.0);
+    public static final Mass     ARM_MASS         = Pounds.of(11.0);
+
+    public static final Angle minAngles = Radians.of(0);
+    public static final Angle maxAngles = Radians.of(90);
+
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
   }
 
   public static final class kEndEffector {

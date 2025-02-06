@@ -42,14 +42,16 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SelectCommand;
-
 import frc.robot.Constants.kAuto;
-import frc.robot.Constants.kElevator;
-import frc.robot.Constants.kEndEffector;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -67,6 +69,9 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
+
+import static edu.wpi.first.units.Units.Degrees;
+
 import frc.robot.util.WaitThen;
 import frc.robot.commands.scoring.L1Scoring;
 import frc.robot.commands.scoring.L2Scoring;
@@ -86,6 +91,8 @@ import frc.robot.commands.scoring.SubPickup;
 
 public class RobotContainer {
   // Subsystems
+  private final ArmPivot sys_armPivot;
+
   protected final Drive sys_drive;
   private final Vision sys_vision;
   private final Elevator sys_elevator;
@@ -130,9 +137,12 @@ public class RobotContainer {
                 new GyroIOPigeon2(),
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
+
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight),
+                
                 sys_vision);
+                sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
         sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
         sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
       }
@@ -147,6 +157,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight),
                 sys_vision);
+        sys_armPivot = new ArmPivot(new ArmPivotIOSim());
         sys_elevator = new Elevator(new ElevatorIOSim());
         sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
@@ -161,6 +172,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 sys_vision);
+        sys_armPivot = new ArmPivot(new ArmPivotIO() {});
         sys_elevator = new Elevator(new ElevatorIO(){});
         sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
@@ -318,7 +330,48 @@ public class RobotContainer {
             () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
         )
     );
+    
+    // Set drive speed to low
+    primaryController.x()
+      .onTrue(
+        DriveCommands.setSpeedHigh(sys_drive)
+      );
 
+    // Set drive speed to high
+    primaryController.y()
+      .onTrue(
+        DriveCommands.setSpeedLow(sys_drive)
+      );
+
+    primaryController.a()
+      .onTrue(
+        sys_armPivot.moveArm(Degrees.of(3))
+      );
+
+      primaryController.b()
+      .onTrue(
+        sys_armPivot.moveArm(Degrees.of(90))
+      );
+   
+    // Reset gyro to 0° when Start button is pressed
+    primaryController.start()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                    sys_drive.setPose(
+                            new Pose2d(sys_drive.getPose().getTranslation(), new Rotation2d())),
+                    sys_drive
+                ).ignoringDisable(true));
+
+    // primaryController.leftBumper()
+    //     .whileTrue(
+    //         DriveCommands.alignToPoint(drive, () -> AlignHelper.getClosestReef(drive.getPose()))
+    //     );
+
+    primaryController.leftBumper()
+        .whileTrue(
+            DriveCommands.alignToPoint(sys_drive, () -> AlignHelper.getClosestReef(sys_drive.getPose()).transformBy(kReef.LEFT_OFFSET_TO_BRANCH))
+        );
         primaryController.x().onTrue(DriveCommands.setSpeedHigh(sys_drive));
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
@@ -331,7 +384,7 @@ public class RobotContainer {
         
         primaryController.start().onTrue(selectScoringCommand);
 
-        // Intake From SubStation
+        // Intake From 
         primaryController.b().onTrue(seq_pickUp);
         // primaryController.a()
         // .onTrue(sys_elevator.ElevatorGo(10))
