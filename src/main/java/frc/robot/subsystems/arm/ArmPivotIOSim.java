@@ -107,9 +107,6 @@ public class ArmPivotIOSim implements ArmPivotIO{
             armSim.setInputVoltage((volatge));
             armSim.update(0.02);
 
-            // System.out.println(armSim.getAngleRads());
-
-
             arm.setAngle(Units.radiansToDegrees(armSim.getAngleRads()));
 
             current = armSim.getCurrentDrawAmps();

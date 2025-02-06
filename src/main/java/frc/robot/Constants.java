@@ -85,6 +85,7 @@ public final class Constants {
     public static final double kP = 0.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
+    public static final double kG = 0.0;
 
     public static final double   ARM_GEARING      = 10.0/1.0;
     public static final Distance ARM_DRUM_RADIUS  = Inches.of(0.944);

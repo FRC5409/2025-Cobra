@@ -80,7 +80,7 @@ public class RobotContainer {
 
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0));
+        sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -102,7 +102,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-      sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0));
+      sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
       }
     }
 

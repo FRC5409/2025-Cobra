@@ -24,9 +24,5 @@ public interface ArmPivotIO {
 
     public default void moveArm(Angle armPositionRad) {}
 
-    // public default void increaseAngleSim() {}
-
-    // public default void decreaseAngleSim() {}
-
     public default void stop() {}
 }
