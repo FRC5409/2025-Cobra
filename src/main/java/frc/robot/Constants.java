@@ -22,6 +22,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -49,19 +51,30 @@ public final class Constants {
   }
 
   public static final class kDrive {
-    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
-    public static final PIDConstants ROTATION_PID = new PIDConstants(5.0, 0.0, 0.0);
-
-    public static final PIDConstants ALIGN_PID = new PIDConstants(10.0, 0.0, 0.0);
-
     public static final Mass ROBOT_FULL_MASS = Pounds.of(125.0);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(9.2437679288);
     public static final double WHEEL_COF = 1.2;
   }
 
+  public static final class kAuto {
+    /** @throws IllegalArgumentException If this the auto command is ran twice */
+    public static final boolean PRINT_AUTO_TIME = false;
+
+    /** When this is true the robot will set it's position where the path starts when the auto is selected. */
+    public static final boolean RESET_ODOM_ON_CHANGE = true;
+
+    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0 , 0.0, 0.0);
+    public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0 , 0.0, 0.0);
+  }
+
   public static final class kAutoAlign {
+    public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.5);
+
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
+
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
-    public static final Angle ROTATION_TOLLERANCE = Degrees.of(1.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
 
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
@@ -97,5 +110,52 @@ public final class Constants {
     public static final Angle maxAngles = Radians.of(90);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
+  }
+}
+
+  public static final class kEndEffector {
+      public static final int ENDEFFECTOR_MOTOR_ID = 0;
+      public static final boolean CURRENT_CONFIG = true;
+      public static final int CURRENT_LIMIT = 30;
+      public static final double VOLTAGE_INTAKE = 3;
+      public static final double VOLTAGE_SCORE = -3;
+      public static final int TIMOFFLIGHT_SENSORID = 0;
+      public static final int TIMEOFFLIGHT_DISTANCE_VALIDATION = 80;
+
+  }
+
+  public static final class kElevator {
+    public static final int MAIN_MOTOR_ID = 20;
+    public static final int FOLLOWER_MOTOR_ID = 21;
+    public static final double CURRENT_LIMIT = 30.0;
+    public static final boolean CURRENT_CONFIG = true;
+    public static final int kGearing = 9/1;
+    public static final double kCircumfrence = 2 * Math.PI * 0.0199;
+    public static final double kRotationConverter = kCircumfrence / kGearing;
+    public static final double kP = 0.78;
+    public static final double kI = 0.0;
+    public static final double kD= 0.0;
+    public static final class kSetpoints{
+        public static final double kLOW = 0;
+        public static final double kL1 = 1;
+        public static final double kL2 = 2;
+        public static final double kL3 = 3;
+        public static final double kL4 = 4;
+        public static final double kCage = 5;
+        public static final double kPickUp = 2;
+    }
+
+
+  }
+
+  public static final class kVision {
+    public static final String CAM_NAME = "limelight";
+
+    public static final int FIDUCIAL_TRUST_THRESHOLD = 1;
+
+    /**
+     * Frames allowed without latency update before flagged as disconnected
+     */
+    public static final int DISCONNECTION_TIMEOUT = 5;
   }
 }
