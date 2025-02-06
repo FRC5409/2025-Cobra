@@ -352,6 +352,14 @@ public class RobotContainer {
       .onTrue(
         sys_armPivot.moveArm(Degrees.of(90))
       );
+
+    primaryController.povDown()
+    .onTrue(sys_elevator.ElevatorGo(0))
+    .onFalse(sys_elevator.stopAll());
+
+    primaryController.povUp()
+    .onTrue(sys_elevator.ElevatorGo(10))
+    .onFalse(sys_elevator.stopAll());
    
     // Reset gyro to 0° when Start button is pressed
     primaryController.start()
