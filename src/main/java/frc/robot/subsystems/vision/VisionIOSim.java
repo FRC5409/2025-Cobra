@@ -57,7 +57,7 @@ public class VisionIOSim implements VisionIO {
             AprilTagFieldLayout tagLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.kDefaultField.m_resourceFile);
             sim_vision.addAprilTags(tagLayout);
 
-            poseEstimator = new PhotonPoseEstimator(tagLayout, PoseStrategy.AVERAGE_BEST_TARGETS, ROBOT_CAM_OFFSET);
+            poseEstimator = new PhotonPoseEstimator(tagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, ROBOT_CAM_OFFSET);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load PV AprilTag layout '" + AprilTagFields.kDefaultField + "': " + AprilTagFields.kDefaultField.m_resourceFile);
         }
@@ -84,6 +84,8 @@ public class VisionIOSim implements VisionIO {
 
         prevEstPose = Optional.of(pe.get().estimatedPose);
 
+        if (pe.get().targetsUsed.size() < 2) return null;   // minimum tag threshold
+
         return new PoseEstimate(
             pe.get().estimatedPose.toPose2d(), 
             pe.get().timestampSeconds, 
@@ -102,7 +104,7 @@ public class VisionIOSim implements VisionIO {
                     t.bestCameraToTarget.getTranslation().plus(ROBOT_CAM_OFFSET.getTranslation()).getNorm(), 
                     t.poseAmbiguity)
             ).toList().toArray(new RawFiducial[]{}),
-        true);
+        false);
     }
 
     @Override
