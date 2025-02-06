@@ -96,7 +96,7 @@ public class VisionIOSim implements VisionIO {
                     t.bestCameraToTarget.getTranslation().plus(ROBOT_CAM_OFFSET.getTranslation()).getNorm(), 
                     t.poseAmbiguity)
             ).toList().toArray(new RawFiducial[]{}),
-        false);
+        true);
     }
 
     @Override
