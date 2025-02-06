@@ -33,7 +33,7 @@ public class ArmPivot extends SubsystemBase {
 
     
     // public Command increaseAngleSim() {
-    //     return Commands.runOnce(() -> io.increaseAngleSim(), this);
+    //     return Commands.runOnce(() -> io.increaseAngleSim(), this);oooo
     // }
 
     // public Command decreaseAngleSim() {
