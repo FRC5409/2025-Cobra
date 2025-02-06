@@ -185,7 +185,7 @@ public class RobotContainer {
         registerCommands();
 
         // Commands
-        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive).alongWith(
+        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, () -> primaryController.getHID().getPOV() != -1).alongWith(
                 Commands.run(() -> {
                     if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
 
@@ -439,10 +439,17 @@ public class RobotContainer {
                 );
 
         primaryController.leftBumper()
+            .and(() -> isTelopAuto)
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
 
         primaryController.rightBumper()
+            .and(() -> isTelopAuto)
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
+
+        primaryController.rightBumper()
+            .and(() -> !isTelopAuto)
+            .onTrue( Commands.runOnce(() -> sys_drive.coastMode()).ignoringDisable(true))
+            .onFalse(Commands.runOnce(() -> sys_drive.brakeMode()).ignoringDisable(true));
 
         primaryController.y()
             .onTrue(
@@ -492,7 +499,7 @@ public class RobotContainer {
             .andThen(
                 AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
                 .alongWith(
-                    AutoCommands.telopAutoCommand(sys_drive).onlyIf(runTelop::get)
+                    AutoCommands.telopAutoCommand(sys_drive, () -> false).onlyIf(runTelop::get)
                 )
             );
     }

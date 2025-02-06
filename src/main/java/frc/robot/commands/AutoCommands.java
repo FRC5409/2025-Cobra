@@ -186,11 +186,15 @@ public class AutoCommands {
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
-    public static Command telopAutoCommand(Drive drive) {
+    public static Command telopAutoCommand(Drive drive, BooleanSupplier waitBeforeScoring) {
         return Commands.sequence(
             pathFindToNearestStation(drive).unless(() -> false), // TODO: Has coral
             pathFindToReef(drive, () -> target),
             alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT)),
+            Commands.sequence(
+                Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
+                Commands.waitSeconds(0.25)
+            ).onlyIf(waitBeforeScoring),
             Commands.print("Score!"),
             Commands.waitSeconds(0.5)
         ).repeatedly();
