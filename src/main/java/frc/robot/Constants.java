@@ -111,7 +111,6 @@ public final class Constants {
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
   }
-}
 
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 0;

@@ -42,17 +42,16 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SelectCommand;
-
 import frc.robot.Constants.kAuto;
-import frc.robot.Constants.kElevator;
-import frc.robot.Constants.kEndEffector;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.arm.ArmPivotIO;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -73,7 +72,6 @@ import frc.robot.util.AlignHelper;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.robot.util.WaitThen;
 import frc.robot.commands.scoring.L1Scoring;
 import frc.robot.commands.scoring.L2Scoring;
@@ -93,7 +91,6 @@ import frc.robot.commands.scoring.SubPickup;
 
 public class RobotContainer {
   // Subsystems
-  private final Drive sys_drive;
   private final ArmPivot sys_armPivot;
 
   protected final Drive sys_drive;
@@ -142,11 +139,10 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
 
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
-        sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
-
                 new ModuleIOTalonFX(TunerConstants.BackRight),
+                
                 sys_vision);
+                sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
         sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
         sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
       }
@@ -159,10 +155,9 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
-        sys_armPivot = new ArmPivot(new ArmPivotIOSim());
                 new ModuleIOSim(TunerConstants.BackRight),
                 sys_vision);
+        sys_armPivot = new ArmPivot(new ArmPivotIOSim());
         sys_elevator = new Elevator(new ElevatorIOSim());
         sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
@@ -175,10 +170,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
-      sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
                 new ModuleIO() {},
                 sys_vision);
+        sys_armPivot = new ArmPivot(new ArmPivotIO() {});
         sys_elevator = new Elevator(new ElevatorIO(){});
         sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
@@ -390,7 +384,7 @@ public class RobotContainer {
         
         primaryController.start().onTrue(selectScoringCommand);
 
-        // Intake From SubStation
+        // Intake From 
         primaryController.b().onTrue(seq_pickUp);
         // primaryController.a()
         // .onTrue(sys_elevator.ElevatorGo(10))
