@@ -5,12 +5,14 @@ import org.littletonrobotics.junction.Logger;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.kEndEffector;
+import frc.robot.util.StructHelper;
 
 public class EndEffector extends SubsystemBase {
 
@@ -19,10 +21,14 @@ public class EndEffector extends SubsystemBase {
     private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
     private boolean coralDetected = false;
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
+    private Pose3d endEffectorPose;
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
         tof.setRangingMode(RangingMode.Short, 50);
+
+        endEffectorPose = new Pose3d();
+        StructHelper.publishStruct("EndEffector", Pose3d.struct, ()-> this.endEffectorPose);
     }
 
     public Command runUntilCoralDetected(double voltage) {
