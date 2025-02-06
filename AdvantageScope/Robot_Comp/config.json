@@ -2,15 +2,19 @@
   "name": "comp",
   "rotations": [
     {
-      "axis": "y",
-      "degrees": 180
-    },
-    {
-      "axis": "z",
-      "degrees": 90
-    }
+        "axis": "x",
+        "degrees": 90
+      },
+      {
+        "axis": "y",
+        "degrees": 0
+      },
+      {
+        "axis": "z",
+        "degrees": 90
+      }
   ],
-  "position": [0, -0.15, 0.25],
+  "position": [0.352, 0.33, 0.01],
   "cameras": [
     {
       "name": "FRONT_CAM",
@@ -44,23 +48,6 @@
       "zeroedPosition": [0.0175, -0.16, 0.075]
     },
     {
-        "zeroedRotations": [
-          {
-            "axis": "x",
-            "degrees": 0
-          },
-          {
-            "axis": "y",
-            "degrees": 180
-          },
-          {
-            "axis": "z",
-            "degrees": 180
-          }
-        ],
-        "zeroedPosition": [0.0175, -0.16, 0.075]
-      }, 
-      {
         "zeroedRotations": [
           {
             "axis": "x",
