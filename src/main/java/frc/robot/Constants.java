@@ -30,10 +30,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.util.FieldMirror;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always
- * "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics
- * sim) and "replay"
+ * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
+ * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
@@ -74,8 +72,8 @@ public final class Constants {
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
 
-    public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.0);
-    public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.0);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
 
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
@@ -84,8 +82,8 @@ public final class Constants {
       static {
         TARGETS.put("BL", new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
         TARGETS.put("FL", new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
-        TARGETS.put("F", new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
-        TARGETS.put("B", new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
+        TARGETS.put("F" , new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
+        TARGETS.put("B" , new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
         TARGETS.put("BR", FieldMirror.mirrorPose(TARGETS.get("BL")));
         TARGETS.put("FR", FieldMirror.mirrorPose(TARGETS.get("FL")));
       }
@@ -93,6 +91,41 @@ public final class Constants {
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
     }
+  }
+
+  public static final class kEndEffector {
+      public static final int ENDEFFECTOR_MOTOR_ID = 0;
+      public static final boolean CURRENT_CONFIG = true;
+      public static final int CURRENT_LIMIT = 30;
+      public static final double VOLTAGE_INTAKE = 3;
+      public static final double VOLTAGE_SCORE = -3;
+      public static final int TIMOFFLIGHT_SENSORID = 0;
+      public static final int TIMEOFFLIGHT_DISTANCE_VALIDATION = 80;
+
+  }
+
+  public static final class kElevator {
+    public static final int MAIN_MOTOR_ID = 20;
+    public static final int FOLLOWER_MOTOR_ID = 21;
+    public static final double CURRENT_LIMIT = 30.0;
+    public static final boolean CURRENT_CONFIG = true;
+    public static final int kGearing = 9/1;
+    public static final double kCircumfrence = 2 * Math.PI * 0.0199;
+    public static final double kRotationConverter = kCircumfrence / kGearing;
+    public static final double kP = 0.78;
+    public static final double kI = 0.0;
+    public static final double kD= 0.0;
+    public static final class kSetpoints{
+        public static final double kLOW = 0;
+        public static final double kL1 = 1;
+        public static final double kL2 = 2;
+        public static final double kL3 = 3;
+        public static final double kL4 = 4;
+        public static final double kCage = 5;
+        public static final double kPickUp = 2;
+    }
+
+
   }
 
   public static final class kVision {

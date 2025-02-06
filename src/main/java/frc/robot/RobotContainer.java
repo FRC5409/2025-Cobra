@@ -14,6 +14,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -35,13 +36,27 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
+
 import frc.robot.Constants.kAuto;
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIO;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.collector.EndEffector;
+import frc.robot.subsystems.collector.EndEffectorIO;
+import frc.robot.subsystems.collector.EndEffectorIOTalonFx;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -53,6 +68,11 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
+import frc.robot.commands.scoring.L1Scoring;
+import frc.robot.commands.scoring.L2Scoring;
+import frc.robot.commands.scoring.L3Scoring;
+import frc.robot.commands.scoring.L4Scoring;
+import frc.robot.commands.scoring.SubPickup;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -63,10 +83,21 @@ import frc.robot.util.WaitThen;
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+
 public class RobotContainer {
   // Subsystems
   protected final Drive sys_drive;
   private final Vision sys_vision;
+  private final Elevator sys_elevator;
+  public final EndEffector sys_endEffector;
+
+  // Commands
+  private enum ScoringLevel {
+    LEVEL1, LEVEL2, LEVEL3, LEVEL4
+  }
+  private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
+  private Command selectScoringCommand;
+  private final SubPickup seq_pickUp;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -87,6 +118,7 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+
         DriverStation.silenceJoystickConnectionWarning(true);
 
     switch (Constants.currentMode) {
@@ -101,6 +133,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight),
                 sys_vision);
+        sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
+        sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
       }
       case SIM -> {
         // Sim robot, instantiate physics sim IO implementations
@@ -113,6 +147,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight),
                 sys_vision);
+        sys_elevator = new Elevator(new ElevatorIOSim());
+        sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -125,8 +161,23 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 sys_vision);
+        sys_elevator = new Elevator(new ElevatorIO(){});
+        sys_endEffector = new EndEffector(new EndEffectorIO() {});
       }
+        
     }
+        // Commands
+        selectScoringCommand = new SelectCommand<>(
+            Map.of(
+                ScoringLevel.LEVEL1, new L1Scoring(sys_elevator, sys_endEffector),
+                ScoringLevel.LEVEL2, new L2Scoring(sys_elevator, sys_endEffector),
+                ScoringLevel.LEVEL3, new L3Scoring(sys_elevator, sys_endEffector),
+                ScoringLevel.LEVEL4, new L4Scoring(sys_elevator, sys_endEffector)
+            ),
+            () -> selectedScoringLevel
+        );
+        
+        seq_pickUp = new SubPickup(sys_elevator, sys_endEffector);
 
         registerCommands();
 
@@ -272,6 +323,24 @@ public class RobotContainer {
 
         primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
 
+        // Secondary Controller for Selecting Scoring Level
+        secondaryController.x().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL1));
+        secondaryController.y().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL2));
+        secondaryController.a().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL3));
+        secondaryController.b().onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL4));
+        
+        primaryController.start().onTrue(selectScoringCommand);
+
+        // Intake From SubStation
+        primaryController.b().onTrue(seq_pickUp);
+        // primaryController.a()
+        // .onTrue(sys_elevator.ElevatorGo(10))
+        // .onFalse(sys_elevator.stopAll());
+
+        // primaryController.b()
+        // .onTrue(sys_elevator.ElevatorGo(0))
+        // .onFalse(sys_elevator.stopAll());
+        
         // primaryController.x().onTrue(DriveCommands.increaseSpeed(sys_drive));
 
         // primaryController.y().onTrue(DriveCommands.decreaseSpeed(sys_drive));
