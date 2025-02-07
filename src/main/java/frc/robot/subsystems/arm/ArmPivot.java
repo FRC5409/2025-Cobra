@@ -44,6 +44,6 @@ public class ArmPivot extends SubsystemBase {
         // publisher.set(poseA);
         // arrayPublisher.set(new Pose3d[] {poseA, poseB});   
         Logger.processInputs("Arm", inputs);
-        endEffectorPose = new Pose3d(new Translation3d(0.22, -0.055, 0.338 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, inputs.positionRad, 0));
+        endEffectorPose = new Pose3d(new Translation3d(0.22, -0.055, 0.143 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, inputs.positionRad, 0));
     }
 }

@@ -27,7 +27,7 @@ public class ElevatorIOSim implements ElevatorIO {
     // private MechanismLigament2d endEffectorMech;
 
     public ElevatorIOSim() {
-        elevatorSim = new ElevatorSim(DCMotor.getFalcon500Foc(2), 9.0 /1.0, 3.446, 0.0199, 0.0, 1.066, true, 0.0);
+        elevatorSim = new ElevatorSim(DCMotor.getFalcon500Foc(2), 9.0 /1.0, 3.446, 0.0199, 0.0, 0.684, true, 0.0);
 
         PID = new PIDController(1.0, 0.0, 0.0);
         mech = new Mechanism2d(0.927, 10);

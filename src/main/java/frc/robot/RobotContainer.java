@@ -358,7 +358,7 @@ public class RobotContainer {
     .onFalse(sys_elevator.stopAll());
 
     primaryController.povUp()
-    .onTrue(sys_elevator.ElevatorGo(10))
+    .onTrue(sys_elevator.ElevatorGo(0.870))
     .onFalse(sys_elevator.stopAll());
    
     // Reset gyro to 0° when Start button is pressed
