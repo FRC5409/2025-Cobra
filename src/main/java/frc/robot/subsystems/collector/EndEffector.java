@@ -6,12 +6,14 @@ import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.kEndEffector;
+import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.util.StructHelper;
 
 public class EndEffector extends SubsystemBase {
@@ -75,6 +77,8 @@ public class EndEffector extends SubsystemBase {
     @Override
     public void simulationPeriodic() {
         // This method will be called once per scheduler run during simulation
+        endEffectorPose = new Pose3d(0,0, Elevator.getElevatorStage2Pose3dPose(), new Rotation3d());
+
     }
 
 }

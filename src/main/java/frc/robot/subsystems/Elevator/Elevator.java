@@ -26,7 +26,8 @@ public class Elevator extends SubsystemBase{
     // Shuffleboard
     private final ShuffleboardTab sb_tab;
 
-    private Pose3d elevatorPose;
+    private static Pose3d elevatorPose;
+    private static Pose3d elevatorPoseStage2;
 
     private final Alert leftElevatorAlert = new Alert("The Left Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
     private final Alert rightElevatorAlert = new Alert("The Rigth Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
@@ -40,7 +41,9 @@ public class Elevator extends SubsystemBase{
         sb_tab.addDouble("Elevator Position", () -> io.getPosition());
 
         elevatorPose = new Pose3d();
-        StructHelper.publishStruct("Elevator", Pose3d.struct, ()->this.elevatorPose);        
+        elevatorPoseStage2 = new Pose3d();
+        StructHelper.publishStruct("Elevator", Pose3d.struct, ()->this.elevatorPose);  
+        StructHelper.publishStruct("Elevator Stage 2", Pose3d.struct, ()->this.elevatorPoseStage2);      
     }
 
     public Command startManualMove(double voltage) {
@@ -71,5 +74,14 @@ public class Elevator extends SubsystemBase{
         leftElevatorAlert.set(!inputs.mainMotorConnected);
         rightElevatorAlert.set(!inputs.followerMotorConnected);
         elevatorPose = new Pose3d(0,0,inputs.mainMotorPosition, new Rotation3d());
+        elevatorPoseStage2 = new Pose3d(0,0,2*inputs.mainMotorPosition, new Rotation3d());
+    }
+
+    public static double getElevatorPose3dPos() {
+        return elevatorPose.getZ();
+    }
+
+    public static double getElevatorStage2Pose3dPose() {
+        return elevatorPoseStage2.getZ();
     }
 }

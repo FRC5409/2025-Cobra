@@ -29,7 +29,7 @@ public interface ElevatorIO {
 
     public default void zeroEncoder() {}
 
-    public default double getPosition() { return 0.0; }
+    public default double getPosition() {return 0.0;}
 
     public default void setSetpoint(double setpoint) {}
     
