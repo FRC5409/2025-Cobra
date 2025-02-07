@@ -14,7 +14,6 @@
 
 package frc.robot.commands;
 
-
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -27,6 +26,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -34,15 +34,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.AlignHelper;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.FlippingUtil;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
+  private static final double TRIGGER_DEADBAND = 0.01;
   private static final double ANGLE_KP = 5.0;
   private static final double ANGLE_KD = 0.4;
   private static final double ANGLE_MAX_VELOCITY = 8.0;
@@ -101,10 +105,13 @@ public class DriveCommands {
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
           // Apply rotation deadband
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), TRIGGER_DEADBAND);
 
           // Square rotation value for more precise control
-          omega = Math.copySign(Math.pow(Math.abs(omega), 5.0 / 2.0), omega);
+          omega = Math.copySign(Math.pow(Math.abs(omega), 2.0), omega);
+
+          if (Math.abs(omega) >= TRIGGER_DEADBAND)
+            omega += Math.copySign(0.05, omega);
 
           // Convert to field relative speeds & send command
 
@@ -149,32 +156,32 @@ public class DriveCommands {
     // Construct command
     return Commands.run(
             () -> {
-              // Get linear velocity
-              Translation2d linearVelocity =
-                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+                // Get linear velocity
+                Translation2d linearVelocity =
+                    getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
 
-              // Calculate angular speed
-              double omega =
-                  angleController.calculate(
+                // Calculate angular speed
+                double omega =
+                angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                      omega);
+                    new ChassisSpeeds(
+                        linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                        linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                        omega);
               boolean isFlipped =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Red;
+                    DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red;
               drive.runVelocity(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
-                      speeds,
-                      isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation()));
+                        speeds,
+                        isFlipped
+                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                            : drive.getRotation()));
             },
             drive)
 
@@ -182,67 +189,72 @@ public class DriveCommands {
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
-  public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
-    ProfiledPIDController xController =
-      new ProfiledPIDController(
-          kAutoAlign.ALIGN_PID.kP,
-          kAutoAlign.ALIGN_PID.kI,
-          kAutoAlign.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
+        ProfiledPIDController xController =
+        new ProfiledPIDController(
+            kAutoAlign.ALIGN_PID.kP,
+            kAutoAlign.ALIGN_PID.kI,
+            kAutoAlign.ALIGN_PID.kD,
+            new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
-
-    ProfiledPIDController yController =
-      new ProfiledPIDController(
-          kAutoAlign.ALIGN_PID.kP,
-          kAutoAlign.ALIGN_PID.kI,
-          kAutoAlign.ALIGN_PID.kD,
-          new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+        ProfiledPIDController yController =
+        new ProfiledPIDController(
+            kAutoAlign.ALIGN_PID.kP,
+            kAutoAlign.ALIGN_PID.kI,
+            kAutoAlign.ALIGN_PID.kD,
+            new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
         );
 
+        ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION)
+        );
+        angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-    ProfiledPIDController angleController =
-      new ProfiledPIDController(
-          ANGLE_KP,
-          0.0,
-          ANGLE_KD,
-          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-    angleController.enableContinuousInput(-Math.PI, Math.PI);
+        return Commands.parallel(
+            Commands.runOnce(() -> {
+                Pose2d robotPose = drive.getPose();
+                ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
+        
+                xController.reset(robotPose.getX(), speeds.vxMetersPerSecond);
+                yController.reset(robotPose.getY(), speeds.vyMetersPerSecond);
+                angleController.reset(drive.getRotation().getRadians());
+            }),
+            Commands.run(() -> {
+                Pose2d robotPose = drive.getPose();
+                Pose2d targetPose = target.get();
+                if (AutoBuilder.shouldFlip())
+                    targetPose = FlippingUtil.flipFieldPose(targetPose);
+        
+                double xSpeed = xController.calculate(robotPose.getX(), targetPose.getX());
+                double ySpeed = yController.calculate(robotPose.getY(), targetPose.getY());
+        
+                // Calculate angular speed
+                double omega =
+                angleController.calculate(
+                    robotPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+        
+        
+                drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omega, drive.getRotation()));
+            }, drive)
+        ).until(() -> {
+            Pose2d robotPose = drive.getPose();
+            Pose2d targetPose = target.get();
+            if (AutoBuilder.shouldFlip())
+                targetPose = FlippingUtil.flipFieldPose(targetPose);
 
-    return Commands.parallel(
-      Commands.runOnce(() -> {
-        Pose2d robotPose = drive.getPose();
-        ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
-  
-        xController.reset(robotPose.getX(), speeds.vxMetersPerSecond);
-        yController.reset(robotPose.getY(), speeds.vyMetersPerSecond);
-        angleController.reset(drive.getRotation().getRadians());
-      }),
-      Commands.run(() -> {
-        Pose2d robotPose = drive.getPose();
-        Pose2d targetPose = target.get();
-  
-        double xSpeed = xController.calculate(robotPose.getX(), targetPose.getX());
-        double ySpeed = yController.calculate(robotPose.getY(), targetPose.getY());
-  
-        // Calculate angular speed
-        double omega =
-        angleController.calculate(
-            robotPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
-  
-  
-        drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omega, drive.getRotation()));
-      }, drive)
-    ).until(() -> {
-      Pose2d robotPose = drive.getPose();
-      Pose2d targetPose = target.get();
-
-      return
-        Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
-        Math.abs(drive.getRotation().getRadians() - targetPose.getRotation().getRadians()) < kAutoAlign.ROTATION_TOLLERANCE.in(Radians);
-    }).andThen(Commands.runOnce(drive::stop, drive));
+            Angle difference = AlignHelper.rotationDifference(targetPose.getRotation(), robotPose.getRotation());
+        
+            return
+                Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLERANCE.in(Meters) &&
+                difference.lt(kAutoAlign.ROTATION_TOLERANCE);
+        }
+    ).andThen(Commands.runOnce(drive::stop, drive));
   }
-
 
   /**
    * Measures the velocity feedforward constants for the drive motors.

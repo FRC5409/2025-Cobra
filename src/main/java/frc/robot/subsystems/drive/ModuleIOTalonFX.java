@@ -30,6 +30,7 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -89,6 +90,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Voltage> turnAppliedVolts;
   private final StatusSignal<Current> turnCurrent;
 
+  // Inputs from cancoder
+  private final StatusSignal<MagnetHealthValue> magneticHealth;
+
   // Connection debouncers
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
@@ -125,10 +129,19 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
     turnConfig.Feedback.FeedbackSensorSource =
         switch (constants.FeedbackSource) {
-                  case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
-                  case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
-                  case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
-                    default -> throw new IllegalArgumentException("Unexpected value: " + constants.FeedbackSource);
+            case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
+            case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
+            case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
+            
+            // TODO: Fix
+            case FusedCANdiPWM1 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case FusedCANdiPWM2 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case RemoteCANdiPWM1 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case RemoteCANdiPWM2 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case SyncCANdiPWM1 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case SyncCANdiPWM2 -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            case TalonFXS_PulseWidth -> throw new UnsupportedOperationException("Unimplemented case: " + constants.FeedbackSource);
+            default -> throw new IllegalArgumentException("Unexpected value: " + constants.FeedbackSource);
         };
     turnConfig.Feedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
@@ -171,6 +184,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnAppliedVolts = turnTalon.getMotorVoltage();
     turnCurrent = turnTalon.getStatorCurrent();
 
+    // Cancoder status signals
+    magneticHealth = cancoder.getMagnetHealth();
+
     // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
         Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
@@ -203,7 +219,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
     // Update turn inputs
-    inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
+    inputs.magnetHealth = magneticHealth.getValue();
+    inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK()) && inputs.magnetHealth != MagnetHealthValue.Magnet_Invalid;
     inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
     inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
     inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());
