@@ -15,6 +15,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Map;
 import java.io.IOException;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
@@ -43,6 +44,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -54,6 +61,19 @@ import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
+import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIO;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.collector.EndEffector;
+import frc.robot.subsystems.collector.EndEffectorIO;
+import frc.robot.subsystems.collector.EndEffectorIOTalonFx;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -66,6 +86,12 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.WaitThen;
+import frc.robot.commands.scoring.L1Scoring;
+import frc.robot.commands.scoring.L2Scoring;
+import frc.robot.commands.scoring.L3Scoring;
+import frc.robot.commands.scoring.L4Scoring;
+import frc.robot.commands.scoring.SubPickup;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
@@ -82,15 +108,27 @@ import frc.robot.util.AlignHelper.kDirection;
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+
 public class RobotContainer {
+    private enum ScoringLevel {
+      LEVEL1, LEVEL2, LEVEL3, LEVEL4
+    }
+  
     // Subsystems
-    protected final Drive  sys_drive;
-    private   final Vision sys_vision;
+    protected final Drive       sys_drive;
+    protected final Vision      sys_vision;
+    protected final Elevator    sys_elevator;
+    protected final EndEffector sys_endEffector;
+    protected final ArmPivot    sys_armPivot;
 
     private SwerveDriveSimulation simConfig;
 
     // Commands
     protected final Command telopAutoCommand;
+  
+    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
+    private Command selectScoringCommand;
+    private final SubPickup seq_pickUp;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -114,6 +152,7 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+
         DriverStation.silenceJoystickConnectionWarning(true);
 
         switch (Constants.currentMode) {
@@ -128,6 +167,10 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight),
                         sys_vision);
+              
+                sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
+                sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
+                sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
             }
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
@@ -144,6 +187,10 @@ public class RobotContainer {
                             2
                         )
                     );
+              
+                sys_armPivot = new ArmPivot(new ArmPivotIOSim());
+                sys_elevator = new Elevator(new ElevatorIOSim());
+                sys_endEffector = new EndEffector(new EndEffectorIO() {});
                 
                 simConfig = new SwerveDriveSimulation(
                     driveConfig,
@@ -178,6 +225,9 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         sys_vision);
+                sys_armPivot = new ArmPivot(new ArmPivotIO() {});
+                sys_elevator = new Elevator(new ElevatorIO(){});
+                sys_endEffector = new EndEffector(new EndEffectorIO() {});
             }
         }
 

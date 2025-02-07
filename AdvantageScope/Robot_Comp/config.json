@@ -1,7 +1,7 @@
 {
-    "name": "Comp",
-    "rotations": [
-      {
+  "name": "comp",
+  "rotations": [
+    {
         "axis": "x",
         "degrees": 90
       },
@@ -13,6 +13,77 @@
         "axis": "z",
         "degrees": 90
       }
+  ],
+  "position": [0.352, 0.33, 0.01],
+  "cameras": [
+    {
+      "name": "FRONT_CAM",
+      "rotations": [
+        {
+          "axis": "y",
+          "degrees": 0
+        }
+      ],
+      "position": [0.0, 0.0, 0.425],
+      "resolution": [1280, 800],
+      "fov": 80
+    }
+  ], 
+  "components": [
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 0
+        },
+        {
+          "axis": "y",
+          "degrees": 180
+        },
+        {
+          "axis": "z",
+          "degrees": 180
+        }
+      ],
+      "zeroedPosition": [0.0175, -0.16, 0.075]
+    },
+    {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 90
+          },
+          {
+            "axis": "y",
+            "degrees": 180
+          },
+          {
+            "axis": "z",
+            "degrees": 90
+          }
+        ],
+        "zeroedPosition": [0, -0.1, 0.305]
+      }, 
+      {
+        "zeroedRotations": [
+          {
+            "axis": "x",
+            "degrees": 0
+          },
+          {
+            "axis": "y",
+            "degrees": 180
+          },
+          {
+            "axis": "z",
+            "degrees": -90
+          }
+        ],
+        "zeroedPosition": [0,0,0]
+      }
+  ]
+}
+=======
     ],
     "position": [0.352, 0.33, 0],
     "cameras": [
@@ -34,4 +105,3 @@
       }
     ]
   }
-  

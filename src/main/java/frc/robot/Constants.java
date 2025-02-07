@@ -36,12 +36,11 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.FieldMirror;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always
- * "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics
- * sim) and "replay"
+ * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
+ * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
+
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
@@ -79,8 +78,8 @@ public final class Constants {
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
-    public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.0);
-    public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.0);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
@@ -131,6 +130,59 @@ public final class Constants {
             new Rotation2d()
         );
     }
+  }
+
+  public static final class kArmPivot {
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kG = 0.0;
+
+    public static final double   ARM_GEARING      = 10.0/1.0;
+    public static final Distance ARM_DRUM_RADIUS  = Inches.of(0.944);
+    public static final MomentOfInertia ARM_MOI   = KilogramSquareMeters.of(0.10);
+    public static final Distance ARM_LENGTH       = Inches.of(12.0);
+    public static final Mass     ARM_MASS         = Pounds.of(11.0);
+
+    public static final Angle minAngles = Radians.of(0);
+    public static final Angle maxAngles = Radians.of(90);
+
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
+  }
+
+  public static final class kEndEffector {
+      public static final int ENDEFFECTOR_MOTOR_ID = 0;
+      public static final boolean CURRENT_CONFIG = true;
+      public static final int CURRENT_LIMIT = 30;
+      public static final double VOLTAGE_INTAKE = 3;
+      public static final double VOLTAGE_SCORE = -3;
+      public static final int TIMOFFLIGHT_SENSORID = 0;
+      public static final int TIMEOFFLIGHT_DISTANCE_VALIDATION = 80;
+
+  }
+
+  public static final class kElevator {
+    public static final int MAIN_MOTOR_ID = 20;
+    public static final int FOLLOWER_MOTOR_ID = 21;
+    public static final double CURRENT_LIMIT = 30.0;
+    public static final boolean CURRENT_CONFIG = true;
+    public static final int kGearing = 9/1;
+    public static final double kCircumfrence = 2 * Math.PI * 0.0199;
+    public static final double kRotationConverter = kCircumfrence / kGearing;
+    public static final double kP = 0.78;
+    public static final double kI = 0.0;
+    public static final double kD= 0.0;
+    public static final class kSetpoints{
+        public static final double kLOW = 0;
+        public static final double kL1 = 1;
+        public static final double kL2 = 2;
+        public static final double kL3 = 3;
+        public static final double kL4 = 4;
+        public static final double kCage = 5;
+        public static final double kPickUp = 2;
+    }
+
+
   }
 
   public static final class kVision {
