@@ -250,8 +250,8 @@ public class DriveCommands {
             Angle difference = AlignHelper.rotationDifference(targetPose.getRotation(), robotPose.getRotation());
         
             return
-                Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLERANCE.in(Meters) &&
-                difference.lt(kAutoAlign.ROTATION_TOLERANCE);
+                Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
+                difference.lt(kAutoAlign.ROTATION_TOLLERANCE);
         }
     ).andThen(Commands.runOnce(drive::stop, drive));
   }

@@ -21,12 +21,12 @@ public class L1Scoring extends SequentialCommandGroup {
   public L1Scoring(Elevator sys_elevator, EndEffector sys_endEffector) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kL1)),
+    addCommands(Commands.runOnce(() -> sys_elevator.elevatorGo(kSetpoints.kL1)),
         Commands.waitSeconds(0.1), 
         Commands.runOnce(() -> sys_endEffector.runUntilCoralNotDetected(kEndEffector.VOLTAGE_SCORE)), 
         Commands.waitSeconds(1),
         Commands.runOnce(() -> sys_endEffector.setVoltage(0)), 
-        Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
+        Commands.runOnce(() -> sys_elevator.elevatorGo(kSetpoints.kLOW))
 
     );
   }

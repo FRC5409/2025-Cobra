@@ -54,9 +54,12 @@ public class Elevator extends SubsystemBase{
         return Commands.runOnce(() -> io.zeroEncoder(), this);
     }
 
-    public Command ElevatorGo(double setpoint) {
-        return Commands.runOnce(() -> io.setSetpoint(setpoint), this)
-        .until(() -> Math.abs(setpoint - getPosition()) <= 5);
+    public Command elevatorGo(double setpoint) {
+        return Commands.sequence(
+            Commands.runOnce(() -> io.setSetpoint(setpoint), this),
+            Commands.waitUntil(() -> Math.abs(setpoint - getPosition()) <= 0.05),
+            Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
+        );
     }
 
     public Command stopAll() {

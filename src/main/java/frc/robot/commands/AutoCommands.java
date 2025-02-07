@@ -28,6 +28,11 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
+import frc.robot.RobotContainer.ScoringLevel;
+import frc.robot.commands.scoring.ScoreCommand;
+import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.collector.EndEffector;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.CaseCommand;
@@ -186,7 +191,7 @@ public class AutoCommands {
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
-    public static Command telopAutoCommand(Drive drive, BooleanSupplier waitBeforeScoring) {
+    public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, BooleanSupplier waitBeforeScoring) {
         return Commands.sequence(
             pathFindToNearestStation(drive).unless(() -> false), // TODO: Has coral
             pathFindToReef(drive, () -> target),
@@ -195,7 +200,7 @@ public class AutoCommands {
                 Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
                 Commands.waitSeconds(0.25)
             ).onlyIf(waitBeforeScoring),
-            Commands.print("Score!"),
+            new ScoreCommand(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL4),
             Commands.waitSeconds(0.5)
         ).repeatedly();
     }

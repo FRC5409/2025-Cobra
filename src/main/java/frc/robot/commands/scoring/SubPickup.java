@@ -21,11 +21,11 @@ public class SubPickup extends SequentialCommandGroup {
   public SubPickup(Elevator sys_elevator, EndEffector sys_endEffector) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kPickUp)),
+    addCommands(Commands.runOnce(() -> sys_elevator.elevatorGo(kSetpoints.kPickUp)),
     Commands.waitSeconds(0.1), 
     Commands.runOnce(() -> sys_endEffector.runUntilCoralDetected(kEndEffector.VOLTAGE_SCORE)), 
     Commands.waitSeconds(1), 
-    Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kLOW))
+    Commands.runOnce(() -> sys_elevator.elevatorGo(kSetpoints.kLOW))
 
     
     );

@@ -21,9 +21,9 @@ public class ShallowClimb extends SequentialCommandGroup {
   public ShallowClimb(Elevator sys_elevator, EndEffector sys_endEffector) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kL4)),
+    addCommands(Commands.runOnce(() -> sys_elevator.elevatorGo(kSetpoints.kL4)),
     Commands.waitSeconds(5),
-    Commands.runOnce(() -> sys_elevator.ElevatorGo(kSetpoints.kCage))
+    Commands.runOnce(() -> sys_elevator.elevatorGo(kSetpoints.kCage))
     
     );
   }

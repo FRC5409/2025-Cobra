@@ -15,7 +15,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.Map;
 import java.io.IOException;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
@@ -44,16 +43,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
@@ -67,6 +60,7 @@ import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.Constants.kElevator;
 import frc.robot.Constants.kEndEffector;
+import frc.robot.Constants.kElevator.kSetpoints;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -87,15 +81,9 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
-import frc.robot.commands.scoring.L1Scoring;
-import frc.robot.commands.scoring.L2Scoring;
-import frc.robot.commands.scoring.L3Scoring;
-import frc.robot.commands.scoring.L4Scoring;
-import frc.robot.commands.scoring.SubPickup;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
-import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 
@@ -110,8 +98,19 @@ import frc.robot.util.AlignHelper.kDirection;
  */
 
 public class RobotContainer {
-    private enum ScoringLevel {
-      LEVEL1, LEVEL2, LEVEL3, LEVEL4
+    public static enum ScoringLevel {
+      LEVEL1(kSetpoints.kL1, Degrees.of(20.0)),
+      LEVEL2(kSetpoints.kL2, Degrees.of(20.0)),
+      LEVEL3(kSetpoints.kL3, Degrees.of(20.0)),
+      LEVEL4(kSetpoints.kL4, Degrees.of(25.0));
+
+      public final double elevatorSetpoint;
+      public final Angle pivotAngle;
+
+      private ScoringLevel(double elevatorSetpoint, Angle pivotAngle) {
+        this.elevatorSetpoint = elevatorSetpoint;
+        this.pivotAngle = pivotAngle;
+      }
     }
   
     // Subsystems
@@ -127,8 +126,6 @@ public class RobotContainer {
     protected final Command telopAutoCommand;
   
     private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
-    private Command selectScoringCommand;
-    private final SubPickup seq_pickUp;
 
     // Controller
     private final CommandXboxController primaryController = new CommandXboxController(0);
@@ -235,7 +232,7 @@ public class RobotContainer {
         registerCommands();
 
         // Commands
-        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, () -> primaryController.getHID().getPOV() != -1).alongWith(
+        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, () -> primaryController.getHID().getPOV() != -1).alongWith(
                 Commands.run(() -> {
                     if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
 
@@ -549,7 +546,7 @@ public class RobotContainer {
             .andThen(
                 AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
                 .alongWith(
-                    AutoCommands.telopAutoCommand(sys_drive, () -> false).onlyIf(runTelop::get)
+                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, () -> false).onlyIf(runTelop::get)
                 )
             );
     }
