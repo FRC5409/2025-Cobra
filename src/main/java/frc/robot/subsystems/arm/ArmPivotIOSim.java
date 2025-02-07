@@ -114,6 +114,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
 
         inputs.connected = true;
         inputs.positionAngles = arm.getAngle();
+        inputs.positionRad = Units.degreesToRadians(inputs.positionAngles);
         inputs.targetAngle = controller.getSetpoint();
         inputs.voltage = volatge;
         inputs.current = current;

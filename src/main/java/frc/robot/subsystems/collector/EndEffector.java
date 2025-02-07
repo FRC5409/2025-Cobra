@@ -23,14 +23,11 @@ public class EndEffector extends SubsystemBase {
     private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
     private boolean coralDetected = false;
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
-    private Pose3d endEffectorPose;
+
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
         tof.setRangingMode(RangingMode.Short, 50);
-
-        endEffectorPose = new Pose3d();
-        StructHelper.publishStruct("EndEffector", Pose3d.struct, ()-> this.endEffectorPose);
     }
 
     public Command runUntilCoralDetected(double voltage) {
@@ -77,8 +74,6 @@ public class EndEffector extends SubsystemBase {
     @Override
     public void simulationPeriodic() {
         // This method will be called once per scheduler run during simulation
-        endEffectorPose = new Pose3d(0,0, Elevator.getElevatorStage2Pose3dPose(), new Rotation3d());
-
     }
 
 }

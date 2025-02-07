@@ -4,6 +4,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,10 +18,8 @@ import frc.robot.util.StructHelper;
 public class ArmPivot extends SubsystemBase {
     private ArmPivotIO io;
     private static ArmPivotInputsAutoLogged inputs;
-    // Pose3d poseA = new Pose3d();
-    // Pose3d poseB = new Pose3d();
-
-    private Pose3d armPose;
+  
+    public Pose3d endEffectorPose;
 
     // StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
     // .getStructTopic("MyPose", Pose3d.struct).publish();
@@ -30,8 +30,8 @@ public class ArmPivot extends SubsystemBase {
         this.io = io;
         inputs = new ArmPivotInputsAutoLogged();
 
-        armPose = new Pose3d();
-        StructHelper.publishStruct("Arm", Pose3d.struct, () -> this.armPose);
+        endEffectorPose = new Pose3d();
+        StructHelper.publishStruct("End Effector location", Pose3d.struct, () -> this.endEffectorPose);
     }
 
     public Command moveArm(Angle positionRad) {
@@ -44,7 +44,6 @@ public class ArmPivot extends SubsystemBase {
         // publisher.set(poseA);
         // arrayPublisher.set(new Pose3d[] {poseA, poseB});   
         Logger.processInputs("Arm", inputs);
-
-        armPose = new Pose3d(0,0, Elevator.getElevatorStage2Pose3dPose(), new Rotation3d());
+        endEffectorPose = new Pose3d(new Translation3d(), new Rotation3d(0, inputs.positionRad, 0)).transformBy(new Transform3d(0.22, -0.055, 0.338+Elevator.getElevatorStage2Pose3dPose().getZ(), new Rotation3d()));
     }
 }

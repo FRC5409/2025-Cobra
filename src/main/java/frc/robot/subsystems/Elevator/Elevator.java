@@ -77,11 +77,7 @@ public class Elevator extends SubsystemBase{
         elevatorPoseStage2 = new Pose3d(0,0,2*inputs.mainMotorPosition, new Rotation3d());
     }
 
-    public static double getElevatorPose3dPos() {
-        return elevatorPose.getZ();
-    }
-
-    public static double getElevatorStage2Pose3dPose() {
-        return elevatorPoseStage2.getZ();
+    public static Pose3d getElevatorStage2Pose3dPose() {
+        return elevatorPoseStage2;
     }
 }
