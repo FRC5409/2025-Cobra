@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
@@ -84,6 +85,7 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
 import frc.robot.util.AutoTimer;
+import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
 import frc.robot.util.AlignHelper.kClosestType;
@@ -119,6 +121,10 @@ public class RobotContainer {
     private final CommandXboxController secondaryController = new CommandXboxController(1);
 
     public static boolean isTelopAuto = false;
+
+    @SuppressWarnings("unused")
+    private static final boolean runOpponent = false
+        && Constants.currentMode == Mode.SIM;
 
     // Dashboard inputs
     protected final LoggedDashboardChooser<Command> autoChooser;
@@ -194,9 +200,11 @@ public class RobotContainer {
                         new ModuleIOSim(simConfig.getModules()[3]),
                         sys_vision);
 
-                final OpponentRobot sys_opponent = 
-                    new OpponentRobot(new Pose2d(3, 3, Rotation2d.fromDegrees(0.0)));
-                sys_opponent.setDefaultCommand(sys_opponent.joystickDrive(secondaryController));
+                if (runOpponent) {
+                    final OpponentRobot sys_opponent = 
+                        new OpponentRobot(new Pose2d(3, 3, Rotation2d.fromDegrees(0.0)));
+                    sys_opponent.setDefaultCommand(sys_opponent.joystickDrive(secondaryController));
+                }
             }
             default -> {
                 // Replayed robot, disable IO implementations
@@ -219,7 +227,7 @@ public class RobotContainer {
         registerCommands();
 
         // Commands
-        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, () -> primaryController.getHID().getPOV() != -1).alongWith(
+        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(), () -> primaryController.getHID().getPOV() != -1).alongWith(
                 Commands.run(() -> {
                     if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
 
@@ -357,6 +365,24 @@ public class RobotContainer {
         sys_drive.setPose(startingPose);
     }
 
+    private Command getLevelSelectorCommand() {
+        ScoringLevel[] levels = ScoringLevel.values();
+        BooleanSupplier[] conditionals = new BooleanSupplier[levels.length];
+        Command[] commands = new Command[levels.length];
+
+        for (int i = 0; i < conditionals.length; i++) {
+            final int index = i;
+            conditionals[i] = () -> levels[index] == selectedScoringLevel;
+            commands[i] = new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, levels[index], false);
+        }
+
+        return CaseCommand.buildSelector(
+            conditionals, 
+            commands, 
+            Commands.print("Error: Couldn't find selected level to go to")
+        );
+    }
+
     @AutoLogOutput(key = "Odometry/StartingPose")
     public Pose2d getStartingPose() {
         String autoName = autoChooser.getSendableChooser().getSelected();
@@ -386,10 +412,10 @@ public class RobotContainer {
 
     private void registerCommands() {
         // DEBUG COMMANDS
-        DebugCommand.register("Score L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1));
-        DebugCommand.register("Score L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2));
-        DebugCommand.register("Score L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3));
-        DebugCommand.register("Score L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4));
+        DebugCommand.register("Score L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, true));
+        DebugCommand.register("Score L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, true));
+        DebugCommand.register("Score L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, true));
+        DebugCommand.register("Score L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, true));
 
         // NAMED COMMANDS
         NamedCommands.registerCommand(
@@ -439,10 +465,18 @@ public class RobotContainer {
         NamedCommands.registerCommand("STATION_PICKUP", Commands.waitSeconds(0.35));
         NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot));
 
-        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1));
-        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2));
-        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3));
-        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4));
+        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, true));
+        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, true));
+        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, true));
+        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, true));
+
+        NamedCommands.registerCommand("RELEASE", 
+            new ConditionalCommand(
+                Commands.waitSeconds(0.2),
+                sys_endEffector.runUntilCoralNotDetected(3), 
+                () -> Constants.currentMode == Mode.SIM
+            )
+        );
     }
 
     /**
@@ -461,10 +495,6 @@ public class RobotContainer {
                 () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
             )
         );
-
-        primaryController.x().onTrue(DriveCommands.setSpeedHigh(sys_drive));
-
-        primaryController.y().onTrue(DriveCommands.setSpeedLow(sys_drive));
 
         // Reset gyro to 0° when Start button is pressed
         primaryController
@@ -497,9 +527,16 @@ public class RobotContainer {
             .onTrue( Commands.runOnce(() -> sys_drive.coastMode()).ignoringDisable(true))
             .onFalse(Commands.runOnce(() -> sys_drive.brakeMode()).ignoringDisable(true));
 
-        primaryController.y()
-            .onTrue(
-                DriveCommands.setSpeedLow(sys_drive) 
+        primaryController.a()
+            .onTrue(getLevelSelectorCommand())
+            .onFalse(
+                new ConditionalCommand(
+                    Commands.waitSeconds(0.2),
+                    sys_endEffector.runUntilCoralNotDetected(3), 
+                    () -> Constants.currentMode == Mode.SIM
+                ).andThen(
+                    new IdleCommand(sys_elevator, sys_armPivot)
+                )
             );
 
         // Reset gyro to 0° when Start button is pressed
@@ -514,24 +551,60 @@ public class RobotContainer {
                                 sys_drive).ignoringDisable(true));
 
         primaryController
-            .povLeft()
+            .leftBumper()
             .and(() -> !isTelopAuto)
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
-                        () -> AlignHelper.getClosestElement(sys_drive.getBlueSidePose(), kDirection.LEFT)
+                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
                     ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-                );
+                    .alongWith(getLevelSelectorCommand())
+                    .andThen(
+                        new ConditionalCommand(
+                            Commands.waitSeconds(0.2),
+                            sys_endEffector.runUntilCoralNotDetected(3), 
+                            () -> Constants.currentMode == Mode.SIM
+                        ),
+                        new IdleCommand(sys_elevator, sys_armPivot)
+                    )
+                ).onFalse(new IdleCommand(sys_elevator, sys_armPivot));
 
         primaryController
-            .povRight()
+            .rightBumper()
             .and(() -> !isTelopAuto)
                 .whileTrue(
                     DriveCommands.alignToPoint(
                         sys_drive, 
-                        () -> AlignHelper.getClosestElement(sys_drive.getBlueSidePose(), kDirection.RIGHT)
+                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
                     ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-                );
+                    .alongWith(getLevelSelectorCommand())
+                    .andThen(
+                        new ConditionalCommand(
+                            Commands.waitSeconds(0.2),
+                            sys_endEffector.runUntilCoralNotDetected(3), 
+                            () -> Constants.currentMode == Mode.SIM
+                        ),
+                        new IdleCommand(sys_elevator, sys_armPivot)
+                    )
+                ).onFalse(new IdleCommand(sys_elevator, sys_armPivot));
+
+        primaryController.povLeft()
+            .and(() -> !isTelopAuto)
+            .whileTrue(
+                DriveCommands.alignToPoint(
+                    sys_drive, 
+                    () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
+                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+            );
+
+        secondaryController.a()
+            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL1));
+        secondaryController.b()
+            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL2));
+        secondaryController.x()
+            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL3));
+        secondaryController.y()
+            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL4));
     }
 
     /**
@@ -545,7 +618,7 @@ public class RobotContainer {
             .andThen(
                 AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
                 .alongWith(
-                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, () -> false).onlyIf(runTelop::get)
+                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(), () -> false).onlyIf(runTelop::get)
                 )
             );
     }

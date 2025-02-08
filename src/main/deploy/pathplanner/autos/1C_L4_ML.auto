@@ -25,7 +25,13 @@
         {
           "type": "named",
           "data": {
-            "name": "IDLE"
+            "name": "RELEASE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RELEASE"
           }
         }
       ]

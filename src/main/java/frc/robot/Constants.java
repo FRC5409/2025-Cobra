@@ -79,7 +79,7 @@ public final class Constants {
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
-    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(4.0);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
@@ -156,7 +156,7 @@ public final class Constants {
         LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
         LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
         LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(Meters.of(0.68), Degrees.of(68));
+        LEVEL4(Meters.of(0.68), Degrees.of(68.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;

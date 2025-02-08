@@ -26,10 +26,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Constants.ScoringLevel;
+import frc.robot.Constants;
+import frc.robot.Constants.Mode;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
-import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -191,17 +191,21 @@ public class AutoCommands {
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
-    public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, BooleanSupplier waitBeforeScoring) {
+    public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, Command scoringCommand, BooleanSupplier waitBeforeScoring) {
         return Commands.sequence(
             pathFindToNearestStation(drive).unless(() -> false), // TODO: Has coral
             pathFindToReef(drive, () -> target),
-            alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT)),
+            alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT))
+                .alongWith(scoringCommand),
             Commands.sequence(
                 Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
                 Commands.waitSeconds(0.25)
             ).onlyIf(waitBeforeScoring),
-            new ScoreCommand(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL4), // TODO: Selected coral
-            Commands.waitSeconds(0.5)
+            new ConditionalCommand(
+                Commands.waitSeconds(0.2),
+                sys_endeffector.runUntilCoralNotDetected(3),
+                () -> Constants.currentMode == Mode.SIM
+            )
         ).repeatedly();
     }
 }
