@@ -3,10 +3,11 @@
 
 package frc.robot.subsystems.Elevator;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import org.littletonrobotics.junction.Logger;
-
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -29,8 +30,8 @@ public class Elevator extends SubsystemBase{
     private static Pose3d elevatorPose;
     private static Pose3d elevatorPoseStage2;
 
-    private final Alert leftElevatorAlert = new Alert("The Left Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
-    private final Alert rightElevatorAlert = new Alert("The Rigth Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
+    private final Alert leftElevatorAlert  = new Alert("The Left Elevator Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
+    private final Alert rightElevatorAlert = new Alert("The Right Elevator Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
     public Elevator(ElevatorIO io) {
         // IO
         this.io = io;
@@ -42,8 +43,8 @@ public class Elevator extends SubsystemBase{
 
         elevatorPose = new Pose3d();
         elevatorPoseStage2 = new Pose3d();
-        StructHelper.publishStruct("Elevator", Pose3d.struct, ()->this.elevatorPose);  
-        StructHelper.publishStruct("Elevator Stage 2", Pose3d.struct, ()->this.elevatorPoseStage2);      
+        StructHelper.publishStruct("Elevator", Pose3d.struct, ()->Elevator.elevatorPose);  
+        StructHelper.publishStruct("Elevator Stage 2", Pose3d.struct, ()->Elevator.elevatorPoseStage2);      
     }
 
     public Command startManualMove(double voltage) {
@@ -54,10 +55,10 @@ public class Elevator extends SubsystemBase{
         return Commands.runOnce(() -> io.zeroEncoder(), this);
     }
 
-    public Command elevatorGo(double setpoint) {
+    public Command elevatorGo(Distance setpoint) {
         return Commands.sequence(
-            Commands.runOnce(() -> io.setSetpoint(setpoint), this),
-            Commands.waitUntil(() -> Math.abs(setpoint - getPosition()) <= 0.05),
+            Commands.runOnce(() -> io.setSetpoint(setpoint.in(Meters)), this),
+            Commands.waitUntil(() -> Math.abs(setpoint.in(Meters) - getPosition()) <= 0.02),
             Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
         );
     }

@@ -48,11 +48,13 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.Constants.Mode;
+import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
+import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.arm.ArmPivotIO;
@@ -60,7 +62,6 @@ import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.Constants.kElevator;
 import frc.robot.Constants.kEndEffector;
-import frc.robot.Constants.kElevator.kSetpoints;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -98,21 +99,6 @@ import frc.robot.util.AlignHelper.kDirection;
  */
 
 public class RobotContainer {
-    public static enum ScoringLevel {
-      LEVEL1(kSetpoints.kL1, Degrees.of(20.0)),
-      LEVEL2(kSetpoints.kL2, Degrees.of(20.0)),
-      LEVEL3(kSetpoints.kL3, Degrees.of(20.0)),
-      LEVEL4(kSetpoints.kL4, Degrees.of(25.0));
-
-      public final double elevatorSetpoint;
-      public final Angle pivotAngle;
-
-      private ScoringLevel(double elevatorSetpoint, Angle pivotAngle) {
-        this.elevatorSetpoint = elevatorSetpoint;
-        this.pivotAngle = pivotAngle;
-      }
-    }
-  
     // Subsystems
     protected final Drive       sys_drive;
     protected final Vision      sys_vision;
@@ -398,6 +384,13 @@ public class RobotContainer {
     }
 
     private void registerCommands() {
+        // DEBUG COMMANDS
+        DebugCommand.register("Score L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1));
+        DebugCommand.register("Score L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2));
+        DebugCommand.register("Score L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3));
+        DebugCommand.register("Score L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4));
+
+        // NAMED COMMANDS
         NamedCommands.registerCommand(
                 "ALIGN_LEFT",
                 new ConditionalCommand(

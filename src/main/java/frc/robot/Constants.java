@@ -150,6 +150,21 @@ public final class Constants {
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
   }
 
+    public static enum ScoringLevel {
+        LEVEL1(Meters.of(0.05), Degrees.of(15.0)),
+        LEVEL2(Meters.of(0.18), Degrees.of(20.0)),
+        LEVEL3(Meters.of(0.38), Degrees.of(20.0)),
+        LEVEL4(Meters.of(0.68), Degrees.of(30.0));
+
+        public final Distance elevatorSetpoint;
+        public final Angle pivotAngle;
+
+        private ScoringLevel(Distance elevatorSetpoint, Angle pivotAngle) {
+            this.elevatorSetpoint = elevatorSetpoint;
+            this.pivotAngle = pivotAngle;
+        }
+    }
+
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 0;
       public static final boolean CURRENT_CONFIG = true;
@@ -166,22 +181,12 @@ public final class Constants {
     public static final int FOLLOWER_MOTOR_ID = 21;
     public static final double CURRENT_LIMIT = 30.0;
     public static final boolean CURRENT_CONFIG = true;
-    public static final int kGearing = 9/1;
+    public static final double kGearing = 9.0/1.0;
     public static final double kCircumfrence = 2 * Math.PI * 0.0199;
     public static final double kRotationConverter = kCircumfrence / kGearing;
     public static final double kP = 0.78;
     public static final double kI = 0.0;
-    public static final double kD= 0.0;
-    public static final class kSetpoints{
-        public static final double kLOW = 0;
-        public static final double kL1 = 1;
-        public static final double kL2 = 2;
-        public static final double kL3 = 3;
-        public static final double kL4 = 4;
-        public static final double kCage = 5;
-        public static final double kPickUp = 2;
-    }
-
+    public static final double kD = 0.0;
 
   }
 

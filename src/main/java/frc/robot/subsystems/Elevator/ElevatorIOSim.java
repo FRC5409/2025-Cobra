@@ -61,6 +61,11 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
+    public double getPosition() {
+        return elevatorSim.getPositionMeters();
+    }
+
+    @Override
     public void updateInputs(ElevatorInputs inputs) {
         double volts = 0.0;
         double current = 0.0;
