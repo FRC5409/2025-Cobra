@@ -1,8 +1,6 @@
 package frc.robot.subsystems.arm;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -80,9 +78,14 @@ public class ArmPivotIOSim implements ArmPivotIO{
     }
 
     @Override
-    public void moveArm(Angle angle) {
-        controller.setSetpoint(angle.in(Radians));
+    public void setSetpoint(Angle angle) {
+        controller.setSetpoint(-angle.in(Radians));
         isRunning = true;
+    }
+
+    @Override
+    public Angle getPosition() {
+        return Radians.of(armSim.getAngleRads());
     }
 
     @Override
@@ -113,13 +116,11 @@ public class ArmPivotIOSim implements ArmPivotIO{
         }
 
         inputs.connected = true;
-        inputs.positionAngles = arm.getAngle();
-        inputs.positionRad = Units.degreesToRadians(inputs.positionAngles);
-        inputs.targetAngle = controller.getSetpoint();
+        inputs.positionRad = -armSim.getAngleRads();
+        inputs.positionAngles = Units.radiansToDegrees(inputs.positionRad);
+        inputs.targetAngle = -controller.getSetpoint();
         inputs.voltage = volatge;
         inputs.current = current;
         inputs.temperature = 0.0;
     }
-
-    // SmartDashboard.putData("Mech2d", mech);
 }

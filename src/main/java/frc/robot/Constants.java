@@ -144,8 +144,8 @@ public final class Constants {
     public static final Distance ARM_LENGTH       = Inches.of(12.0);
     public static final Mass     ARM_MASS         = Pounds.of(11.0);
 
-    public static final Angle minAngles = Radians.of(0);
-    public static final Angle maxAngles = Radians.of(90);
+    public static final Angle minAngles = Degrees.of(-90);
+    public static final Angle maxAngles = Degrees.of(Math.PI);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
   }
