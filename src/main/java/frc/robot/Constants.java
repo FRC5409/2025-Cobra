@@ -145,18 +145,18 @@ public final class Constants {
     public static final Mass     ARM_MASS         = Pounds.of(8.75);
 
     public static final Angle minAngles = Degrees.of(-90);
-    public static final Angle maxAngles = Degrees.of(Math.PI);
+    public static final Angle maxAngles = Degrees.of(90);
 
-    public static final Angle IDLE_SETPOINT = Degrees.of(8);
+    public static final Angle IDLE_SETPOINT = Degrees.of(82);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(2.0, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {
-        LEVEL1(Meters.of(0.05), Degrees.of(15.0)),
-        LEVEL2(Meters.of(0.16), Degrees.of(18.0)),
-        LEVEL3(Meters.of(0.36), Degrees.of(18.0)),
-        LEVEL4(Meters.of(0.68), Degrees.of(22.0));
+        LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
+        LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
+        LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
+        LEVEL4(Meters.of(0.68), Degrees.of(68));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
