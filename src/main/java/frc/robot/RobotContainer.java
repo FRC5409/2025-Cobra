@@ -514,15 +514,6 @@ public class RobotContainer {
                                 sys_drive).ignoringDisable(true));
 
         primaryController
-            .povUp()
-                .onTrue(
-                    new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1)
-                )
-                .onFalse(
-                    new IdleCommand(sys_elevator, sys_armPivot)
-                );
-
-        primaryController
             .povLeft()
             .and(() -> !isTelopAuto)
                 .whileTrue(

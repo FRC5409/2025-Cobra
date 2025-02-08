@@ -1,8 +1,6 @@
 package frc.robot.subsystems.arm;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -42,8 +40,9 @@ public class ArmPivotIOSim implements ArmPivotIO{
             kArmPivot.minAngles.in(Radians),
             kArmPivot.maxAngles.in(Radians),
             true,
-            0.5
+            -Math.PI
         );
+        armSim.update(0.02);
 
         controller = new PIDController(
             kArmPivot.SIMULATED_PID_VALUES.kP,
