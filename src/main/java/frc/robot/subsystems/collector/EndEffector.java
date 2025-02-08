@@ -5,69 +5,90 @@ import org.littletonrobotics.junction.Logger;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.kEndEffector;
-import frc.robot.subsystems.Elevator.Elevator;
-import frc.robot.util.StructHelper;
 
 public class EndEffector extends SubsystemBase {
 
     private final EndEffectorIO io;
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
-    private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
+
+    private final TimeOfFlight tof;
     private boolean coralDetected = false;
+
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
+        
+        tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
         tof.setRangingMode(RangingMode.Short, 50);
     }
-
+    // Run until coral is detected then wait 50ms then stop
     public Command runUntilCoralDetected(double voltage) {
         return Commands.parallel(
-                Commands.runOnce(() -> io.setVoltage(voltage), this),
+                Commands.runOnce(
+                    () -> io.setVoltage(voltage), this),
                 Commands.waitUntil(
                     () -> coralDetected
-            )
-        ).andThen(
+                )
+        )
+        .andThen(
             Commands.waitSeconds(0.5),
-            Commands.runOnce(()-> io.setVoltage(0),this)
-            );
+            Commands.runOnce(
+                ()-> io.setVoltage(0),this
+            )
+        );
 
     }
+    // Run until coral is no longer detected, if spike in current, wait then rerun
     public Command runUntilCoralNotDetected(double voltage) {
         return Commands.repeatingSequence(
-                Commands.runOnce(() -> io.setVoltage(voltage), this),
-                Commands.waitUntil(() -> inputs.EndEffectorCurrent > 25),
-                Commands.runOnce(() -> io.setVoltage(-6), this), 
+                Commands.runOnce(
+                    () -> io.setVoltage(voltage), 
+                    this
+                ),
+                Commands.waitUntil(
+                    () -> inputs.EndEffectorCurrent > 25
+                ),
+                Commands.runOnce(
+                    () -> io.setVoltage(-voltage), 
+                    this
+                ), 
                 Commands.waitSeconds(0.25)
-            ).until(()-> !coralDetected)    
-            .finallyDo(()-> io.setVoltage(0));
-
+            ).until(
+                ()-> !coralDetected
+            )    
+            .finallyDo(
+                ()-> io.setVoltage(0)
+            );
     }
 
     public Command setVoltage(double voltage){
-        return Commands.runOnce(() -> io.setVoltage(voltage), this);
+        return Commands.runOnce(
+            () -> io.setVoltage(voltage), 
+            this
+        );
     }
 
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+
+        // Logging
         io.updateInputs(inputs);
         Logger.processInputs("EndEffector", inputs);
-        if (tof.getRange() <= kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION){
-            coralDetected = true;
-        } else {
-            coralDetected = false;
-        }
+
+        // Check if coral is detected
+        coralDetected = tof.getRange() <= kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION;
         // System.out.println(tof.getRange());  --- Use when testing
+
+        // Alert if motor is not connected
         alert.set(!inputs.EndEffectorConnection);
     }
 

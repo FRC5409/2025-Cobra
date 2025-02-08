@@ -167,7 +167,6 @@ public final class Constants {
 
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 0;
-      public static final boolean CURRENT_CONFIG = true;
       public static final int CURRENT_LIMIT = 30;
       public static final double VOLTAGE_INTAKE = 3;
       public static final double VOLTAGE_SCORE = -3;
