@@ -4,13 +4,11 @@ import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -24,7 +22,7 @@ import frc.robot.Constants.kArmPivot;
 public class ArmPivotIOTalonFX implements ArmPivotIO {
     private TalonFX armMotor;
     private CANcoder canCoderSensor;
-    private final PositionVoltage positionVoltage;
+    private final PositionTorqueCurrentFOC positionVoltage;
     private final double motorArmRatio = 1;
     private final double sensorOffset = 0.0;
 
@@ -49,13 +47,14 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
         armMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        positionVoltage = new PositionVoltage(0).withSlot(0);
+        positionVoltage = new PositionTorqueCurrentFOC(0).withSlot(0);
 
         Slot0Configs slot0Configs = new Slot0Configs();
         slot0Configs.kP = kArmPivot.kP;
         slot0Configs.kI = kArmPivot.kI;
         slot0Configs.kD = kArmPivot.kD;
         slot0Configs.kG = kArmPivot.kG;
+        slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
 
         armMotor.getConfigurator().apply(slot0Configs);
     }
@@ -66,8 +65,13 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
     }
     
     @Override
-    public void moveArm(Angle armPositionRad) {
+    public void setSetpoint(Angle armPositionRad) {
         armMotor.setControl(positionVoltage.withPosition(armPositionRad));
+    }
+
+    @Override
+    public Angle getPosition() {
+        return armMotor.getPosition().getValue();
     }
 
     @Override

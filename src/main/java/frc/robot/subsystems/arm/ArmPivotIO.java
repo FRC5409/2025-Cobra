@@ -1,5 +1,7 @@
 package frc.robot.subsystems.arm;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.units.measure.Angle;
@@ -22,7 +24,9 @@ public interface ArmPivotIO {
 
     public default void updateInputs(ArmPivotInputs inputs) {}
 
-    public default void moveArm(Angle armPositionRad) {}
+    public default void setSetpoint(Angle armPositionRad){}
+
+    public default Angle getPosition() {return Degrees.of(0);}
 
     public default void stop() {}
 }

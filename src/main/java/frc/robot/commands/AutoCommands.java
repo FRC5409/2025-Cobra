@@ -200,7 +200,7 @@ public class AutoCommands {
                 Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
                 Commands.waitSeconds(0.25)
             ).onlyIf(waitBeforeScoring),
-            new ScoreCommand(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL4),
+            new ScoreCommand(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL4), // TODO: Selected coral
             Commands.waitSeconds(0.5)
         ).repeatedly();
     }

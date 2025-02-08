@@ -3,7 +3,7 @@
 
 package frc.robot.subsystems.Elevator;
 
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.*;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -32,7 +32,6 @@ public class Elevator extends SubsystemBase{
     private final Alert leftElevatorAlert  = new Alert("The Left Elevator Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
     private final Alert rightElevatorAlert = new Alert("The Right Elevator Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
     public Elevator(ElevatorIO io) {
-        // IO
         this.io = io;
         inputs = new ElevatorInputsAutoLogged();
 
@@ -52,8 +51,8 @@ public class Elevator extends SubsystemBase{
 
     public Command elevatorGo(Distance setpoint) {
         return Commands.sequence(
-            Commands.runOnce(() -> io.setSetpoint(setpoint.in(Meters)), this),
-            Commands.waitUntil(() -> Math.abs(setpoint.in(Meters) - getPosition()) <= 0.02),
+            Commands.runOnce(() -> io.setSetpoint(setpoint), this),
+            Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025))),
             Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
         );
     }
@@ -62,7 +61,7 @@ public class Elevator extends SubsystemBase{
         return Commands.runOnce(() -> io.stopMotor(), this);
     }
     
-    public double getPosition() {
+    public Distance getPosition() {
         return io.getPosition();
     }
 
