@@ -179,7 +179,6 @@ public final class Constants {
     public static final int MAIN_MOTOR_ID = 20;
     public static final int FOLLOWER_MOTOR_ID = 21;
     public static final double CURRENT_LIMIT = 30.0;
-    public static final boolean CURRENT_CONFIG = true;
     public static final double kGearing = 9.0/1.0;
     public static final double kCircumfrence = 2 * Math.PI * 0.0199;
     public static final double kRotationConverter = kCircumfrence / kGearing;

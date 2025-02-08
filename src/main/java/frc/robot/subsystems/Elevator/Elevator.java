@@ -5,13 +5,13 @@ package frc.robot.subsystems.Elevator;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,7 +25,6 @@ public class Elevator extends SubsystemBase{
     private final ElevatorInputsAutoLogged inputs;
 
     // Shuffleboard
-    private final ShuffleboardTab sb_tab;
 
     private static Pose3d elevatorPose;
     private static Pose3d elevatorPoseStage2;
@@ -36,10 +35,6 @@ public class Elevator extends SubsystemBase{
         // IO
         this.io = io;
         inputs = new ElevatorInputsAutoLogged();
-
-        // Shuffleboard
-        sb_tab = Shuffleboard.getTab("Elevator");
-        sb_tab.addDouble("Elevator Position", () -> io.getPosition());
 
         elevatorPose = new Pose3d();
         elevatorPoseStage2 = new Pose3d();
@@ -75,8 +70,9 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
         // This method will be called once per scheduler run
         io.updateInputs(inputs);
-        leftElevatorAlert.set(!inputs.mainMotorConnected);
-        rightElevatorAlert.set(!inputs.followerMotorConnected);
+        Logger.processInputs("Elevator", inputs);
+        leftElevatorAlert.set(!inputs.mainMotorConnection);
+        rightElevatorAlert.set(!inputs.followerMotorConnection);
         elevatorPose = new Pose3d(0,0,inputs.mainMotorPosition, new Rotation3d());
         elevatorPoseStage2 = new Pose3d(0,0,2*inputs.mainMotorPosition, new Rotation3d());
     }

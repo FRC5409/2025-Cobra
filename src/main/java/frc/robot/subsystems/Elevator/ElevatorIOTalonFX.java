@@ -1,7 +1,9 @@
 package frc.robot.subsystems.Elevator;
 
-import static edu.wpi.first.units.Units.Kelvin;
+import java.io.ObjectInputFilter.Status;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -9,9 +11,10 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.kElevator;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
@@ -27,8 +30,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private FeedbackConfigs m_encoderConfigs;
     private Slot0Configs m_pidConfig = new Slot0Configs();
 
-    private PositionVoltage m_request = new PositionVoltage(0).withSlot(0);;
-    private ShuffleboardTab sb_elevator;    
+    private PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+
+    private StatusSignal<Voltage> mainDeviceVoltage;
+    private StatusSignal<Current> mainDeviceCurrent;
+    private StatusSignal<Temperature> mainDeviceTemp;
+    private StatusSignal<Voltage> secondaryrDeviceVoltage;
+    private StatusSignal<Current> secondaryDeviceCurrent;
+    private StatusSignal<Temperature> secondaryDeviceTemp;
 
     public ElevatorIOTalonFX(int mainMotorID, int followerMotorID) {
         m_mainMotor = new TalonFX(mainMotorID);
@@ -39,7 +48,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         m_currentConfig = new CurrentLimitsConfigs();
         m_currentConfig.SupplyCurrentLimit = kElevator.CURRENT_LIMIT;
-        m_currentConfig.SupplyCurrentLimitEnable = kElevator.CURRENT_CONFIG;
+        m_currentConfig.SupplyCurrentLimitEnable = true;
         
         m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
         m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -57,9 +66,25 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         m_mainMotorConfig.apply(m_pidConfig);
         m_followerMotorConfig.apply(m_pidConfig);
-        
-        sb_elevator  = Shuffleboard.getTab("Elevator");
-        sb_elevator.addDouble("Position", ()->m_mainMotor.getPosition().getValueAsDouble());
+
+        mainDeviceVoltage = m_mainMotor.getMotorVoltage();
+        mainDeviceCurrent = m_mainMotor.getSupplyCurrent();
+        mainDeviceTemp  = m_mainMotor.getDeviceTemp();
+        secondaryrDeviceVoltage = m_followerMotor.getMotorVoltage();
+        secondaryDeviceCurrent = m_followerMotor.getSupplyCurrent();
+        secondaryDeviceTemp = m_followerMotor.getDeviceTemp();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50,
+            mainDeviceVoltage,
+            mainDeviceCurrent,
+            mainDeviceTemp,
+            secondaryrDeviceVoltage,
+            secondaryDeviceCurrent, 
+            secondaryDeviceTemp
+        );
+        m_mainMotor.optimizeBusUtilization();
+        m_followerMotor.optimizeBusUtilization();
     }
 
     @Override
@@ -89,16 +114,24 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
     @Override
     public void updateInputs(ElevatorInputs inputs) {
-        inputs.mainMotorConnected = m_mainMotor.isAlive();
-        inputs.mainAppliedVoltage = m_mainMotor.get()*RobotController.getBatteryVoltage();
-        inputs.mainAppliedCurrent = m_mainMotor.getSupplyCurrent().getValueAsDouble();
-        inputs.mainMotorTemperature = m_mainMotor.getDeviceTemp().getValueAsDouble();
+        inputs.mainMotorConnection = BaseStatusSignal.refreshAll(
+            mainDeviceVoltage, 
+            mainDeviceCurrent, 
+            mainDeviceTemp
+        ).isOK();
+        inputs.mainAppliedVoltage = mainDeviceVoltage.getValueAsDouble();
+        inputs.mainAppliedCurrent = mainDeviceCurrent.getValueAsDouble();
+        inputs.mainMotorTemperature = mainDeviceTemp.getValueAsDouble();
         inputs.mainMotorPosition = m_mainMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
         
-        inputs.followerMotorConnected = m_followerMotor.isAlive();
-        inputs.followerAppliedVoltage = m_followerMotor.get()*RobotController.getBatteryVoltage();
-        inputs.followerAppliedCurrent = m_followerMotor.getSupplyCurrent().getValueAsDouble();
-        inputs.followerMotorTemperature = m_followerMotor.getDeviceTemp().getValueAsDouble();
-        inputs.followerMotorPosition = m_followerMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
+        inputs.followerMotorConnection = BaseStatusSignal.refreshAll(
+            secondaryrDeviceVoltage, 
+            secondaryDeviceCurrent, 
+            secondaryDeviceTemp
+            ).isOK();
+            inputs.followerAppliedVoltage = secondaryrDeviceVoltage.getValueAsDouble();
+            inputs.followerAppliedCurrent = secondaryDeviceCurrent.getValueAsDouble();
+            inputs.followerMotorTemperature = secondaryDeviceTemp.getValueAsDouble();        
+            inputs.followerMotorPosition = m_followerMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
     }
 }
