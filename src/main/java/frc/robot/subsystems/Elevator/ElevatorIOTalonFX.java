@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Current;
@@ -30,7 +30,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private FeedbackConfigs m_encoderConfigs;
     private Slot0Configs m_pidConfig = new Slot0Configs();
 
-    private PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+    private PositionTorqueCurrentFOC m_request = new PositionTorqueCurrentFOC(0).withSlot(0);
 
     private StatusSignal<Voltage> mainDeviceVoltage;
     private StatusSignal<Current> mainDeviceCurrent;
