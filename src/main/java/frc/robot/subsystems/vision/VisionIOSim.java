@@ -36,7 +36,7 @@ public class VisionIOSim implements VisionIO {
 
     private static volatile VisionIOSim globalThis = null;
 
-    private static final Transform3d ROBOT_CAM_OFFSET = new Transform3d(new Translation3d(0.118, 0.218, 0.38), new Rotation3d(0,0,-20));
+    private static final Transform3d ROBOT_CAM_OFFSET = new Transform3d(new Translation3d(-0.118, 0.218, 0.38), new Rotation3d(0,0,-20));
 
     public VisionIOSim(SwerveDriveSimulation sim) {
         if (globalThis != null) throw new IllegalArgumentException("You cannot create more than one VisionIOSim!");
@@ -45,7 +45,7 @@ public class VisionIOSim implements VisionIO {
         this.sim_vision = new VisionSystemSim("PV-simsystem");
 
         SimCameraProperties prop = new SimCameraProperties();
-        prop.setCalibration(1280, 600, Rotation2d.fromDegrees(97.6524449259));
+        prop.setCalibration(1280, 800, Rotation2d.fromDegrees(97.6524449259));
         prop.setCalibError(0.25, 0.08);
         prop.setFPS(20);
         prop.setAvgLatencyMs(35);
