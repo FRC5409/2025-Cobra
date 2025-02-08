@@ -57,9 +57,9 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_encoderConfigs.SensorToMechanismRatio = kElevator.kRotationConverter;
 
         //PID
-        m_pidConfig.kP = kElevator.kP; 
-        m_pidConfig.kI = kElevator.kI;
-        m_pidConfig.kD = kElevator.kD;
+        m_pidConfig.kP = kElevator.TALONFX_PID.kP; 
+        m_pidConfig.kI = kElevator.TALONFX_PID.kI;
+        m_pidConfig.kD = kElevator.TALONFX_PID.kD;
 
         m_mainMotorConfig.apply(m_currentConfig);
         m_followerMotorConfig.apply(m_currentConfig);
@@ -128,10 +128,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             secondaryrDeviceVoltage, 
             secondaryDeviceCurrent, 
             secondaryDeviceTemp
-            ).isOK();
-            inputs.followerAppliedVoltage = secondaryrDeviceVoltage.getValueAsDouble();
-            inputs.followerAppliedCurrent = secondaryDeviceCurrent.getValueAsDouble();
-            inputs.followerMotorTemperature = secondaryDeviceTemp.getValueAsDouble();        
-            inputs.followerMotorPosition = m_followerMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
+        ).isOK();
+        inputs.followerAppliedVoltage = secondaryrDeviceVoltage.getValueAsDouble();
+        inputs.followerAppliedCurrent = secondaryDeviceCurrent.getValueAsDouble();
+        inputs.followerMotorTemperature = secondaryDeviceTemp.getValueAsDouble();        
+        inputs.followerMotorPosition = m_followerMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
     }
 }

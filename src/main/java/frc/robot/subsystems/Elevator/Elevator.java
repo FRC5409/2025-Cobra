@@ -24,11 +24,11 @@ public class Elevator extends SubsystemBase{
     private final ElevatorIO io;
     private final ElevatorInputsAutoLogged inputs;
 
-    // Shuffleboard
-
+    //Initiazlie Pose3d object
     private static Pose3d elevatorPose;
     private static Pose3d elevatorPoseStage2;
 
+    //Setup alerts for elevator motors connection
     private final Alert leftElevatorAlert  = new Alert("The Left Elevator Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
     private final Alert rightElevatorAlert = new Alert("The Right Elevator Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
     public Elevator(ElevatorIO io) {

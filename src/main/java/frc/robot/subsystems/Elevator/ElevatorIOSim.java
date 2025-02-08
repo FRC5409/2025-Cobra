@@ -1,13 +1,14 @@
 package frc.robot.subsystems.Elevator;
 
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import frc.robot.Constants.kElevator;
 
 public class ElevatorIOSim implements ElevatorIO {
 
@@ -15,24 +16,18 @@ public class ElevatorIOSim implements ElevatorIO {
     private ElevatorSim elevatorSim;
     private PIDController PID;
 
-    private Mechanism2d mech;
-    private MechanismRoot2d mainMotor;
-    private MechanismRoot2d followerMotor;
-    private MechanismLigament2d mainMotorMech;
-    private MechanismLigament2d followerMotorMech;
-    // private MechanismLigament2d endEffectorMech;
-
     public ElevatorIOSim() {
-        elevatorSim = new ElevatorSim(DCMotor.getFalcon500Foc(2), 9.0 /1.0, 24.017716, 0.0199, 0.0, 0.684, true, 0.0);
-
-        PID = new PIDController(9, 0.0, 0.0);
-        mech = new Mechanism2d(0.927, 10);
-        mainMotor = mech.getRoot("mainMotor", 0.25, 0);
-        followerMotor = mech.getRoot("followerMotor", 0.75, 0);
-
-        mainMotorMech = mainMotor.append(new MechanismLigament2d("elevator", 1.066, 90));
-        followerMotorMech = followerMotor.append(new MechanismLigament2d("elevator", 1.066, 90));
-
+        elevatorSim = new ElevatorSim(
+            DCMotor.getFalcon500Foc(2), 
+            kElevator.kGearing, 
+            kElevator.ELEVATOR_MASS.in(Kilograms), 
+            kElevator.ELEVATOR_DRUMRADIUS.in(Meters), 
+            kElevator.ELEVATOR_MIN_HEIGHT, 
+            kElevator.ELEVATOR_MAX_HEIGHT, 
+            true, 
+            kElevator.ELEVATOR_MIN_HEIGHT
+        );
+        PID = new PIDController(kElevator.SIM_PID.kP, kElevator.SIM_PID.kI, kElevator.SIM_PID.kD);
         running = false;
 
     }
@@ -64,13 +59,15 @@ public class ElevatorIOSim implements ElevatorIO {
         double volts = 0.0;
         double current = 0.0;
         if (running) {
-            volts = MathUtil.clamp(PID.calculate(elevatorSim.getPositionMeters()) * 12, -RoboRioSim.getVInVoltage(), RoboRioSim.getVInVoltage());
+            volts = MathUtil.clamp(
+                PID.calculate(elevatorSim.getPositionMeters()) * 12, 
+                -RoboRioSim.getVInVoltage(), 
+                RoboRioSim.getVInVoltage()
+            );
             current = elevatorSim.getCurrentDrawAmps();
         }
         elevatorSim.setInputVoltage (volts);
         elevatorSim.update(0.02);
-        mainMotorMech.setLength(1.066+(elevatorSim.getPositionMeters()));
-        followerMotorMech.setLength(1.066+elevatorSim.getPositionMeters());
 
         inputs.mainMotorConnection = true;
         inputs.mainAppliedVoltage = volts;

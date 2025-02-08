@@ -182,10 +182,12 @@ public final class Constants {
     public static final double kGearing = 9.0/1.0;
     public static final double kCircumfrence = 2 * Math.PI * 0.0199;
     public static final double kRotationConverter = kCircumfrence / kGearing;
-    public static final double kP = 0.78;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-
+    public static final PIDConstants TALONFX_PID = new PIDConstants(0.78, 0, 0);
+    public static final PIDConstants SIM_PID = new PIDConstants(10, 0, 0);
+    public static final Mass ELEVATOR_MASS = Pound.of(52.95);
+    public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2);
+    public static final double ELEVATOR_MIN_HEIGHT = 0.0;
+    public static final double ELEVATOR_MAX_HEIGHT = 0.684;
   }
 
   public static final class kVision {
