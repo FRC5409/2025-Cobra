@@ -1,6 +1,6 @@
 package frc.robot.subsystems.Elevator;
 
-import java.io.ObjectInputFilter.Status;
+import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -11,10 +11,10 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants.kElevator;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
@@ -103,13 +103,13 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     @Override
-    public double getPosition() {
-        return m_mainMotor.getPosition().getValueAsDouble();
+    public Distance getPosition() {
+        return Meters.of(m_mainMotor.getPosition().getValueAsDouble());
     }
 
     @Override
-    public void setSetpoint(double setpoint) {
-        m_mainMotor.setControl(m_request.withPosition(setpoint));
+    public void setSetpoint(Distance setpoint) {
+        m_mainMotor.setControl(m_request.withPosition(setpoint.in(Meters)));
     }
 
     @Override

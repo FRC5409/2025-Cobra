@@ -54,6 +54,7 @@ import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
+import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.ArmPivot;
@@ -300,7 +301,7 @@ public class RobotContainer {
                                 .ignoringDisable(true)
                                 .andThen(
                                         new WaitThen(
-                                                0.5,
+                                                Seconds.of(0.5),
                                                 Commands.runOnce(
                                                         () -> secondaryController
                                                                 .setRumble(RumbleType.kBothRumble,
@@ -319,7 +320,7 @@ public class RobotContainer {
                                 .ignoringDisable(true)
                                 .andThen(
                                         new WaitThen(
-                                                0.5,
+                                                Seconds.of(0.5),
                                                 Commands.runOnce(
                                                         () -> primaryController
                                                                 .setRumble(RumbleType.kBothRumble,
@@ -436,7 +437,12 @@ public class RobotContainer {
         // TODO: Finish Commands
         NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
         NamedCommands.registerCommand("STATION_PICKUP", Commands.waitSeconds(0.35));
-        NamedCommands.registerCommand("SCORE_CORAL", Commands.waitSeconds(0.45));
+        NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot));
+
+        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1));
+        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2));
+        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3));
+        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4));
     }
 
     /**
@@ -506,6 +512,15 @@ public class RobotContainer {
                                                 .getTranslation(),
                                                 new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
+
+        primaryController
+            .povUp()
+                .onTrue(
+                    new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1)
+                )
+                .onFalse(
+                    new IdleCommand(sys_elevator, sys_armPivot)
+                );
 
         primaryController
             .povLeft()

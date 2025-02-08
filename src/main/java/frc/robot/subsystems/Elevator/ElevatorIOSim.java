@@ -1,8 +1,11 @@
 package frc.robot.subsystems.Elevator;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -49,14 +52,14 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
-    public void setSetpoint(double setpoint) {
-        PID.setSetpoint(setpoint);
+    public void setSetpoint(Distance setpoint) {
+        PID.setSetpoint(setpoint.in(Meters));
         running = true;
     }
 
     @Override
-    public double getPosition() {
-        return elevatorSim.getPositionMeters();
+    public Distance getPosition() {
+        return Meters.of(elevatorSim.getPositionMeters());
     }
 
     @Override

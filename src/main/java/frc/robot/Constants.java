@@ -147,14 +147,16 @@ public final class Constants {
     public static final Angle minAngles = Radians.of(0);
     public static final Angle maxAngles = Radians.of(90);
 
+    public static final Angle IDLE_SETPOINT = Degrees.of(8);
+
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
   }
 
     public static enum ScoringLevel {
         LEVEL1(Meters.of(0.05), Degrees.of(15.0)),
-        LEVEL2(Meters.of(0.18), Degrees.of(20.0)),
-        LEVEL3(Meters.of(0.38), Degrees.of(20.0)),
-        LEVEL4(Meters.of(0.68), Degrees.of(30.0));
+        LEVEL2(Meters.of(0.16), Degrees.of(18.0)),
+        LEVEL3(Meters.of(0.36), Degrees.of(18.0)),
+        LEVEL4(Meters.of(0.68), Degrees.of(22.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
@@ -185,7 +187,6 @@ public final class Constants {
     public static final double kP = 0.78;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-
   }
 
   public static final class kVision {

@@ -3,7 +3,10 @@
 
 package frc.robot.subsystems.Elevator;
 
+import static edu.wpi.first.units.Units.*;
+
 import org.littletonrobotics.junction.AutoLog;
+import edu.wpi.first.units.measure.Distance;
 
 public interface ElevatorIO {
     @AutoLog
@@ -29,8 +32,8 @@ public interface ElevatorIO {
 
     public default void zeroEncoder() {}
 
-    public default double getPosition() {return 0.0;}
+    public default Distance getPosition() {return Meters.of(0.0);}
 
-    public default void setSetpoint(double setpoint) {}
+    public default void setSetpoint(Distance setpoint) {}
     
 }
