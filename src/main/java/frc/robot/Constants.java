@@ -140,16 +140,16 @@ public final class Constants {
 
     public static final double   ARM_GEARING      = 10.0/1.0;
     public static final Distance ARM_DRUM_RADIUS  = Inches.of(0.944);
-    public static final MomentOfInertia ARM_MOI   = KilogramSquareMeters.of(0.10);
+    public static final MomentOfInertia ARM_MOI   = KilogramSquareMeters.of(0.724982551);
     public static final Distance ARM_LENGTH       = Inches.of(12.0);
-    public static final Mass     ARM_MASS         = Pounds.of(11.0);
+    public static final Mass     ARM_MASS         = Pounds.of(8.75);
 
     public static final Angle minAngles = Degrees.of(-90);
     public static final Angle maxAngles = Degrees.of(Math.PI);
 
     public static final Angle IDLE_SETPOINT = Degrees.of(8);
 
-    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.0, 0.0, 0.1);
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(2.0, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {

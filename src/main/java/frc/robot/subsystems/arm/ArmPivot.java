@@ -35,7 +35,7 @@ public class ArmPivot extends SubsystemBase {
     }
 
     public Command moveArm(Angle positionRad) {
-        return Commands.runOnce(() -> io.moveArm(positionRad), this);
+        return Commands.runOnce(() -> io.setSetpoint(positionRad), this);
     }
 
     @Override

@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -17,6 +19,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.kArmPivot;
 
 public class ArmPivotIOTalonFX implements ArmPivotIO {
@@ -25,6 +30,10 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
     private final PositionTorqueCurrentFOC positionVoltage;
     private final double motorArmRatio = 1;
     private final double sensorOffset = 0.0;
+
+    private StatusSignal<Voltage> deviceVoltage;
+    private StatusSignal<Current> deviceCurrent;
+    private StatusSignal<Temperature> deviceTemp;
 
     public ArmPivotIOTalonFX(int canID, int sensorID) {
 
@@ -57,6 +66,19 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
 
         armMotor.getConfigurator().apply(slot0Configs);
+
+        deviceVoltage = armMotor.getMotorVoltage();
+        deviceCurrent = armMotor.getSupplyCurrent();
+        deviceTemp = armMotor.getDeviceTemp();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            59,
+            deviceVoltage,
+            deviceCurrent,
+            deviceTemp
+            );
+
+        armMotor.optimizeBusUtilization();
     }
 
     @Override
@@ -76,12 +98,21 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
     @Override
     public void updateInputs(ArmPivotInputs inputs) {
-        inputs.connected = armMotor.getFaultField().getValue() == 0;
-        inputs.voltage = armMotor.getMotorVoltage().getValueAsDouble();
-        inputs.current = armMotor.getSupplyCurrent().getValueAsDouble();
+        // inputs.connected = armMotor.getFaultField().getValue() == 0;
+        // inputs.voltage = armMotor.getMotorVoltage().getValueAsDouble();
+        // inputs.current = armMotor.getSupplyCurrent().getValueAsDouble();
+        // inputs.temperature = armMotor.getDeviceTemp().getValue().in(Celsius);
         inputs.positionAngles = armMotor.getPosition().getValue().in(Degrees);
-        inputs.temperature = armMotor.getDeviceTemp().getValue().in(Celsius);
         inputs.speed = armMotor.getVelocity().getValue().in(RadiansPerSecond);
         inputs.positionRad = Units.rotationsToRadians(inputs.positionAngles);
+
+        inputs.connected = BaseStatusSignal.refreshAll(
+            deviceVoltage,
+            deviceCurrent,
+            deviceTemp
+        ).isOK();
+        inputs.voltage = deviceVoltage.getValueAsDouble();
+        inputs.current = deviceCurrent.getValueAsDouble();
+        inputs.temperature = deviceTemp.getValueAsDouble();
     }
 }
