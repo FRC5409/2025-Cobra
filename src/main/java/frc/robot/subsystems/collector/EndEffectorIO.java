@@ -6,10 +6,10 @@ public interface EndEffectorIO {
 
     @AutoLog
     public class EndEffectorInputs{
-        public boolean EndEffectorConnection = false;
-        public double EndEffectorVolts = 0.0;
-        public double EndEffectorCurrent = 0.0;
-        public double EndEffectTemp = 0.0;
+        public boolean endEffectorConnection;
+        public double endEffectorVolts;
+        public double endEffectorCurrent;
+        public double endEffectTemp;
     }
 
     public default void setVoltage(double volts) {}

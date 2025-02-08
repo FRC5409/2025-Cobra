@@ -1,10 +1,11 @@
 package frc.robot.subsystems.Elevator;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -12,8 +13,6 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 
 public class ElevatorIOSim implements ElevatorIO {
-
-    private static final ShuffleboardTab sb_Sim = Shuffleboard.getTab("Sim");
 
     private boolean running;
     private ElevatorSim elevatorSim;
@@ -27,17 +26,15 @@ public class ElevatorIOSim implements ElevatorIO {
     // private MechanismLigament2d endEffectorMech;
 
     public ElevatorIOSim() {
-        elevatorSim = new ElevatorSim(DCMotor.getFalcon500Foc(2), 9.0 /1.0, 3.446, 0.0199, 0.0, 0.684, true, 0.0);
+        elevatorSim = new ElevatorSim(DCMotor.getFalcon500Foc(2), 9.0 /1.0, 24.017716, 0.0199, 0.0, 0.684, true, 0.0);
 
-        PID = new PIDController(1.0, 0.0, 0.0);
+        PID = new PIDController(9, 0.0, 0.0);
         mech = new Mechanism2d(0.927, 10);
         mainMotor = mech.getRoot("mainMotor", 0.25, 0);
         followerMotor = mech.getRoot("followerMotor", 0.75, 0);
 
         mainMotorMech = mainMotor.append(new MechanismLigament2d("elevator", 1.066, 90));
         followerMotorMech = followerMotor.append(new MechanismLigament2d("elevator", 1.066, 90));
-
-        sb_Sim.add("Elevator Mech", mech);
 
         running = false;
 
@@ -55,14 +52,14 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
-    public void setSetpoint(double setpoint) {
-        PID.setSetpoint(setpoint);
+    public void setSetpoint(Distance setpoint) {
+        PID.setSetpoint(setpoint.in(Meters));
         running = true;
     }
 
     @Override
-    public double getPosition() {
-        return elevatorSim.getPositionMeters();
+    public Distance getPosition() {
+        return Meters.of(elevatorSim.getPositionMeters());
     }
 
     @Override
@@ -78,13 +75,13 @@ public class ElevatorIOSim implements ElevatorIO {
         mainMotorMech.setLength(1.066+(elevatorSim.getPositionMeters()));
         followerMotorMech.setLength(1.066+elevatorSim.getPositionMeters());
 
-        inputs.mainMotorConnected = true;
+        inputs.mainMotorConnection = true;
         inputs.mainAppliedVoltage = volts;
         inputs.mainAppliedCurrent = current;
         inputs.mainMotorTemperature = 0.0;
         inputs.mainMotorPosition = elevatorSim.getPositionMeters();
 
-        inputs.followerMotorConnected = true;
+        inputs.followerMotorConnection = true;
         inputs.followerAppliedVoltage = volts;
         inputs.followerAppliedCurrent = current;
         inputs.followerMotorTemperature = 0.0;

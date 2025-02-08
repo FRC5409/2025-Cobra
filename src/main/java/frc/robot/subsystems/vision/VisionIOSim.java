@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -78,7 +79,9 @@ public class VisionIOSim implements VisionIO {
     public PoseEstimate estimatePose(Drive drive) {
         if (prevEstPose.isPresent()) poseEstimator.setReferencePose(prevEstPose.get());
 
-        Optional<EstimatedRobotPose> pe = poseEstimator.update(cam.getLatestResult());
+        List<PhotonPipelineResult> results = cam.getAllUnreadResults();
+        if (results.isEmpty()) return null;
+        Optional<EstimatedRobotPose> pe = poseEstimator.update(results.get(results.size() - 1));
 
         if (!pe.isPresent()) return null;
 

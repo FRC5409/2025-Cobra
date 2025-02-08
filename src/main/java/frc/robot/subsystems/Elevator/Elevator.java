@@ -3,15 +3,15 @@
 
 package frc.robot.subsystems.Elevator;
 
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.*;
+
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,22 +24,14 @@ public class Elevator extends SubsystemBase{
     private final ElevatorIO io;
     private final ElevatorInputsAutoLogged inputs;
 
-    // Shuffleboard
-    private final ShuffleboardTab sb_tab;
-
     private static Pose3d elevatorPose;
     private static Pose3d elevatorPoseStage2;
 
     private final Alert leftElevatorAlert  = new Alert("The Left Elevator Motor is Disconnected " + kElevator.MAIN_MOTOR_ID, AlertType.kError);
     private final Alert rightElevatorAlert = new Alert("The Right Elevator Motor is Disconnected " + kElevator.FOLLOWER_MOTOR_ID, AlertType.kError);
     public Elevator(ElevatorIO io) {
-        // IO
         this.io = io;
         inputs = new ElevatorInputsAutoLogged();
-
-        // Shuffleboard
-        sb_tab = Shuffleboard.getTab("Elevator");
-        sb_tab.addDouble("Elevator Position", () -> io.getPosition());
 
         elevatorPose = new Pose3d();
         elevatorPoseStage2 = new Pose3d();
@@ -57,8 +49,8 @@ public class Elevator extends SubsystemBase{
 
     public Command elevatorGo(Distance setpoint) {
         return Commands.sequence(
-            Commands.runOnce(() -> io.setSetpoint(setpoint.in(Meters)), this),
-            Commands.waitUntil(() -> Math.abs(setpoint.in(Meters) - getPosition()) <= 0.02),
+            Commands.runOnce(() -> io.setSetpoint(setpoint), this),
+            Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025))),
             Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
         );
     }
@@ -67,7 +59,7 @@ public class Elevator extends SubsystemBase{
         return Commands.runOnce(() -> io.stopMotor(), this);
     }
     
-    public double getPosition() {
+    public Distance getPosition() {
         return io.getPosition();
     }
 
@@ -75,8 +67,9 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
         // This method will be called once per scheduler run
         io.updateInputs(inputs);
-        leftElevatorAlert.set(!inputs.mainMotorConnected);
-        rightElevatorAlert.set(!inputs.followerMotorConnected);
+        Logger.processInputs("Elevator", inputs);
+        leftElevatorAlert.set(!inputs.mainMotorConnection);
+        rightElevatorAlert.set(!inputs.followerMotorConnection);
         elevatorPose = new Pose3d(0,0,inputs.mainMotorPosition, new Rotation3d());
         elevatorPoseStage2 = new Pose3d(0,0,2*inputs.mainMotorPosition, new Rotation3d());
     }

@@ -11,51 +11,41 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ALIGN_RIGHT"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ALIGN_RIGHT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "SCORE_CORAL"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FL to LP"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "STATION_PICKUP"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LP to BL"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ALIGN_LEFT"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "SCORE_CORAL"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BL to LP"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FL to LP"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IDLE"
+                }
+              }
+            ]
           }
         },
         {
@@ -71,21 +61,91 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ALIGN_RIGHT"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ALIGN_LEFT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BL to LP"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IDLE"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "SCORE_CORAL"
+            "name": "STATION_PICKUP"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BL to LP"
+            "pathName": "LP to BL"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ALIGN_RIGHT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BL to LP"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IDLE"
+                }
+              }
+            ]
           }
         },
         {
@@ -101,15 +161,28 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ALIGN_LEFT"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ALIGN_LEFT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "SCORE_CORAL"
+            "name": "IDLE"
           }
         }
       ]

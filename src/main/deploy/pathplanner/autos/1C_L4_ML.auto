@@ -19,7 +19,13 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_CORAL"
+            "name": "L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IDLE"
           }
         }
       ]

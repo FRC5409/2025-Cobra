@@ -1,7 +1,5 @@
 package frc.robot.subsystems.arm;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -37,17 +35,8 @@ public class ArmPivot extends SubsystemBase {
     }
 
     public Command moveArm(Angle positionRad) {
-        return Commands.sequence(
-            Commands.runOnce(() -> io.setSetpoint(positionRad), this),
-            Commands.waitUntil(() -> positionRad.isNear(getPosition(), Degrees.of(1)))
-        );
+        return Commands.runOnce(() -> io.moveArm(positionRad), this);
     }
-
-    // return Commands.sequence(
-    //         Commands.runOnce(() -> io.setSetpoint(setpoint.in(Meters)), this),
-    //         Commands.waitUntil(() -> Math.abs(setpoint.in(Meters) - getPosition()) <= 0.02),
-    //         Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
-    //     );
 
     @Override
     public void periodic() {
