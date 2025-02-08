@@ -33,7 +33,7 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         endEffectorConfig.apply(currentConfig);
 
         endEffectorMotor.setNeutralMode(NeutralModeValue.Brake);
-        
+
         // Getting Status Signals
         deviceVoltage = endEffectorMotor.getMotorVoltage();
         deviceCurrent = endEffectorMotor.getSupplyCurrent();
@@ -56,12 +56,12 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
 
     @Override 
     public void updateInputs(EndEffectorInputs inputs) {
-        inputs.EndEffectorConnection = BaseStatusSignal.refreshAll(
+        inputs.endEffectorConnection = BaseStatusSignal.refreshAll(
             deviceVoltage,
             deviceCurrent,
             deviceTemp).isOK();
-        inputs.EndEffectorVolts = deviceVoltage.getValueAsDouble();
-        inputs.EndEffectorCurrent = deviceCurrent.getValueAsDouble();
-        inputs.EndEffectTemp = deviceTemp.getValueAsDouble();
+        inputs.endEffectorVolts = deviceVoltage.getValueAsDouble();
+        inputs.endEffectorCurrent = deviceCurrent.getValueAsDouble();
+        inputs.endEffectTemp = deviceTemp.getValueAsDouble();
     }
 }

@@ -25,7 +25,7 @@ public class EndEffector extends SubsystemBase {
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
-        
+
         tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
         tof.setRangingMode(RangingMode.Short, 50);
     }
@@ -54,7 +54,7 @@ public class EndEffector extends SubsystemBase {
                     this
                 ),
                 Commands.waitUntil(
-                    () -> inputs.EndEffectorCurrent > 25
+                    () -> inputs.endEffectorCurrent > 25
                 ),
                 Commands.runOnce(
                     () -> io.setVoltage(-voltage), 
@@ -89,7 +89,7 @@ public class EndEffector extends SubsystemBase {
         // System.out.println(tof.getRange());  --- Use when testing
 
         // Alert if motor is not connected
-        alert.set(!inputs.EndEffectorConnection);
+        alert.set(!inputs.endEffectorConnection);
     }
 
     @Override
