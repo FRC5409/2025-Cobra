@@ -228,8 +228,11 @@ public class DriveCommands {
             Commands.run(() -> {
                 Pose2d robotPose = drive.getPose();
                 Pose2d targetPose = target.get();
+
                 if (AutoBuilder.shouldFlip())
                     targetPose = FlippingUtil.flipFieldPose(targetPose);
+
+                Logger.recordOutput("AutoAlign/Target", targetPose);
         
                 double xSpeed = xController.calculate(robotPose.getX(), targetPose.getX());
                 double ySpeed = yController.calculate(robotPose.getY(), targetPose.getY());
@@ -252,7 +255,6 @@ public class DriveCommands {
 
             double distanceMeters = Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY());
 
-            Logger.recordOutput("AutoAlign/Target", targetPose);
             Logger.recordOutput("AutoAlign/Distance To Alignment [m]", distanceMeters);
             Logger.recordOutput("AutoAlign/Angle To Alignment [degrees]", difference.in(Degrees));
         

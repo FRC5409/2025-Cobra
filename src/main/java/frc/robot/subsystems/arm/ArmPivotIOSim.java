@@ -40,7 +40,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
             kArmPivot.minAngles.in(Radians),
             kArmPivot.maxAngles.in(Radians),
             true,
-            -Math.PI
+            Math.PI
         );
         armSim.update(0.02);
 
@@ -78,13 +78,13 @@ public class ArmPivotIOSim implements ArmPivotIO{
 
     @Override
     public void setSetpoint(Angle angle) {
-        controller.setSetpoint(-angle.in(Radians));
+        controller.setSetpoint(angle.in(Radians));
         isRunning = true;
     }
 
     @Override
     public Angle getPosition() {
-        return Radians.of(armSim.getAngleRads());
+        return Radians.of(-armSim.getAngleRads());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
                 12
             );
             
-            armSim.setInputVoltage((volatge));
+            armSim.setInputVoltage(volatge);
             armSim.update(0.02);
 
             arm.setAngle(Units.radiansToDegrees(armSim.getAngleRads()));
@@ -117,7 +117,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
         inputs.connected = true;
         inputs.positionRad = armSim.getAngleRads();
         inputs.positionAngles = Units.radiansToDegrees(inputs.positionRad);
-        inputs.targetAngle = -controller.getSetpoint();
+        inputs.targetAngle = controller.getSetpoint();
         inputs.voltage = volatge;
         inputs.current = current;
         inputs.temperature = 0.0;

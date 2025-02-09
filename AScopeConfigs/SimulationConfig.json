@@ -7,7 +7,7 @@
       "height": 1048,
       "state": {
         "sidebar": {
-          "width": 238,
+          "width": 277,
           "expanded": [
             "/PathPlanner/vel",
             "/AdvantageKit",
@@ -17,7 +17,7 @@
             "/AdvantageKit/RealOutputs/Odometry/Robot/rotation",
             "/AdvantageKit/RealOutputs/SwerveStates",
             "/AdvantageKit/RealOutputs/Simulation",
-            "/AdvantageKit/RealOutputs"
+            "/AdvantageKit/Drive/Module0"
           ]
         },
         "tabs": {
@@ -100,28 +100,29 @@
                     "logType": "Pose2d",
                     "visible": true,
                     "options": {
-                      "model": "Comp"
+                      "model": "comp"
                     }
                   },
                   {
-                    "type": "swerveStates",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
-                    "logType": "SwerveModuleState[]",
+                    "type": "component",
+                    "logKey": "NT:Elevator",
+                    "logType": "Pose3d",
                     "visible": true,
-                    "options": {
-                      "color": "#ff0000",
-                      "arrangement": "0,1,2,3"
-                    }
+                    "options": {}
                   },
                   {
-                    "type": "trajectory",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Trajectory",
-                    "logType": "Pose2d[]",
+                    "type": "component",
+                    "logKey": "NT:Elevator Stage 2",
+                    "logType": "Pose3d",
                     "visible": true,
-                    "options": {
-                      "color": "#00ff00",
-                      "size": "normal"
-                    }
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:End Effector location",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
                   },
                   {
                     "type": "ghost",
@@ -129,19 +130,30 @@
                     "logType": "Pose2d",
                     "visible": false,
                     "options": {
-                      "model": "Comp",
+                      "model": "comp",
                       "color": "#00ffff"
                     }
                   },
                   {
-                    "type": "swerveStates",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Setpoints",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#0000ff",
-                      "arrangement": "0,1,2,3"
-                    }
+                    "type": "component",
+                    "logKey": "NT:Elevator",
+                    "logType": "Pose3d",
+                    "visible": false,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:Elevator Stage 2",
+                    "logType": "Pose3d",
+                    "visible": false,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:End Effector location",
+                    "logType": "Pose3d",
+                    "visible": false,
+                    "options": {}
                   },
                   {
                     "type": "gamePiece",
@@ -162,10 +174,20 @@
                     }
                   },
                   {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
                     "type": "ghost",
                     "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/StartingPose",
                     "logType": "Pose2d",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "model": "KitBot",
                       "color": "#00ff00"
@@ -180,17 +202,17 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  10.610287028862025,
-                  8.46871348939842,
-                  -0.5905785985059497
+                  6.388416343233121,
+                  2.1929367884377884,
+                  2.363236874710074
                 ],
                 "cameraTarget": [
-                  4.035834525441374,
-                  -0.5066348663165997,
-                  -0.5322317229958525
+                  3.3896054777910436,
+                  1.7916272357424243,
+                  0.15219086924656486
                 ]
               },
-              "controlsHeight": 397
+              "controlsHeight": 210
             }
           ]
         }

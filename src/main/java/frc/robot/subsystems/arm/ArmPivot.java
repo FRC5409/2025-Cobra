@@ -1,7 +1,8 @@
 package frc.robot.subsystems.arm;
 
-import org.littletonrobotics.junction.Logger;
+import static edu.wpi.first.units.Units.*;
 
+import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -26,10 +27,6 @@ public class ArmPivot extends SubsystemBase {
         StructHelper.publishStruct("End Effector location", Pose3d.struct, () -> this.endEffectorPose);
     }
 
-    // public Command moveArm(Angle positionRad) {
-    //     return Commands.runOnce(() -> io.moveArm(positionRad), this);
-    // }
-
     public Angle getPosition() {
         return io.getPosition();
     }
@@ -42,6 +39,6 @@ public class ArmPivot extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Arm", inputs);
-        endEffectorPose = new Pose3d(new Translation3d(0.22, -0.025, 0.143 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, inputs.positionRad, 0));
+        endEffectorPose = new Pose3d(new Translation3d(0.22, -0.025, 0.143 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, getPosition().in(Radians), 0));
     }
 }
