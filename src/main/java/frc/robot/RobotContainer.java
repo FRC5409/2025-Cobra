@@ -512,14 +512,6 @@ public class RobotContainer {
                         .andThen(telopAutoCommand)
                 );
 
-        primaryController.leftBumper()
-            .and(() -> isTelopAuto)
-            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
-
-        primaryController.rightBumper()
-            .and(() -> isTelopAuto)
-            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
-
         primaryController.rightBumper()
             .and(() -> !isTelopAuto)
             .onTrue( Commands.runOnce(() -> sys_drive.coastMode()).ignoringDisable(true))
@@ -605,6 +597,12 @@ public class RobotContainer {
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
         secondaryController.y()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
+
+        secondaryController.leftBumper()
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
+
+        secondaryController.rightBumper()
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
     }
 
     public Command prepLevelCommand(ScoringLevel level) {

@@ -71,7 +71,7 @@ public class AlignHelper {
 
     public static Collection<Pose2d> getStationPoses(kDirection station) {
         List<Pose2d> poses = new ArrayList<>();
-        for (int i = -1; i < 6; i++) {
+        for (int i = -1; i < 4; i++) {
             if (station == kDirection.LEFT  || station == kDirection.BOTH)
                 poses.add(kStation.LEFT_STATION .transformBy(kStation.STATIONS_OFFSET.times( i)));
             
