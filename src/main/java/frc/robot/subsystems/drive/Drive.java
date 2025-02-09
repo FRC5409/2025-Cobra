@@ -28,12 +28,8 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
-
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -81,8 +77,6 @@ public class Drive extends SubsystemBase {
             Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
     private final RobotConfig PP_CONFIG;
-    private final SwerveSetpointGenerator setpointGenerator;
-    private SwerveSetpoint previousSetpoint;
 
     protected static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
@@ -171,16 +165,6 @@ public class Drive extends SubsystemBase {
           Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
 
-    setpointGenerator = new SwerveSetpointGenerator(
-        PP_CONFIG, 
-        RadiansPerSecond.of(10) // TODO: Find this value
-    );
-    previousSetpoint = new SwerveSetpoint(
-        getChassisSpeeds(),
-        getModuleStates(),
-        DriveFeedforwards.zeros(PP_CONFIG.numModules)
-    );
-
     // Configure SysId
     sysId = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -266,22 +250,22 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    // Generate a possible setpoint within our robots capabilities.
-    previousSetpoint = setpointGenerator.generateSetpoint(
-        previousSetpoint,
-        speeds,
-        0.02
-    );
+    // Calculate module setpoints
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
-    SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+    // Log unoptimized setpoints and setpoint speeds
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
-    for (int i = 0; i < setpointStates.length; i++) {
-        modules[i].runSetpoint(setpointStates[i]);
+    // Send setpoints to modules
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(setpointStates[i]);
     }
 
-    // Log setpoints to modules
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", ChassisSpeeds.discretize(speeds, 0.02));
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    // Log optimized setpoints (runSetpoint mutates each state)
+    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
