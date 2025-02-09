@@ -66,7 +66,7 @@
             "degrees": 90
           }
         ],
-        "zeroedPosition": [0, -0.1, 0.305]
+        "zeroedPosition": [0, -0.095, 0.305]
       }, 
       {
         "zeroedRotations": [
@@ -83,7 +83,7 @@
             "degrees": -90
           }
         ],
-        "zeroedPosition": [0,0,0]
+        "zeroedPosition": [0, 0, 0]
       }
   ]
 }

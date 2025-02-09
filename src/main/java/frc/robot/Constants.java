@@ -78,8 +78,8 @@ public final class Constants {
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
-    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(4.0);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(1.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(3.0);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,

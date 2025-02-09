@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.FlippingUtil;
 
@@ -248,10 +249,16 @@ public class DriveCommands {
                 targetPose = FlippingUtil.flipFieldPose(targetPose);
 
             Angle difference = AlignHelper.rotationDifference(targetPose.getRotation(), robotPose.getRotation());
+
+            double distanceMeters = Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY());
+
+            Logger.recordOutput("AutoAlign/Target", targetPose);
+            Logger.recordOutput("AutoAlign/Distance To Alignment [m]", distanceMeters);
+            Logger.recordOutput("AutoAlign/Angle To Alignment [degrees]", difference.in(Degrees));
         
             return
-                Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()) < kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
-                difference.lt(kAutoAlign.ROTATION_TOLLERANCE);
+                distanceMeters <= kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
+                difference.lte(kAutoAlign.ROTATION_TOLLERANCE);
         }
     ).andThen(Commands.runOnce(drive::stop, drive));
   }

@@ -114,10 +114,10 @@ public class RobotContainer {
     // Commands
     protected final Command telopAutoCommand;
   
-    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
+    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL4;
 
     // Controller
-    private final CommandXboxController primaryController = new CommandXboxController(0);
+    private final CommandXboxController primaryController   = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
 
     public static boolean isTelopAuto = false;
@@ -227,11 +227,11 @@ public class RobotContainer {
         registerCommands();
 
         // Commands
-        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(), () -> primaryController.getHID().getPOV() != -1).alongWith(
+        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> secondaryController.getHID().getPOV() != -1).alongWith(
                 Commands.run(() -> {
-                    if (Math.hypot(primaryController.getRightX(), primaryController.getRightY()) < 0.1) return;
+                    if (Math.hypot(secondaryController.getRightX(), secondaryController.getRightY()) < 0.4) return;
 
-                    Angle targetAngle = Radians.of(Math.atan2(primaryController.getRightY(), primaryController.getRightX()));
+                    Angle targetAngle = Radians.of(Math.atan2(secondaryController.getRightY(), secondaryController.getRightX()));
 
                     double degrees = targetAngle.in(Degrees);
                     if (degrees > -120 && degrees <= -60)
@@ -246,9 +246,7 @@ public class RobotContainer {
                         AutoCommands.target = kReefPosition.FAR_RIGHT;
                     else
                         AutoCommands.target = kReefPosition.CLOSE_RIGHT;
-
-                    // AutoCommands.target = 
-                })
+                }).ignoringDisable(true)
             ).onlyWhile(() -> isTelopAuto);
 
         // Set up auto routines
@@ -365,7 +363,7 @@ public class RobotContainer {
         sys_drive.setPose(startingPose);
     }
 
-    private Command getLevelSelectorCommand() {
+    private Command getLevelSelectorCommand(boolean ends) {
         ScoringLevel[] levels = ScoringLevel.values();
         BooleanSupplier[] conditionals = new BooleanSupplier[levels.length];
         Command[] commands = new Command[levels.length];
@@ -373,7 +371,7 @@ public class RobotContainer {
         for (int i = 0; i < conditionals.length; i++) {
             final int index = i;
             conditionals[i] = () -> levels[index] == selectedScoringLevel;
-            commands[i] = new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, levels[index], false);
+            commands[i] = new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, levels[index], ends);
         }
 
         return CaseCommand.buildSelector(
@@ -528,7 +526,7 @@ public class RobotContainer {
             .onFalse(Commands.runOnce(() -> sys_drive.brakeMode()).ignoringDisable(true));
 
         primaryController.a()
-            .onTrue(getLevelSelectorCommand())
+            .onTrue(getLevelSelectorCommand(false))
             .onFalse(
                 new ConditionalCommand(
                     Commands.waitSeconds(0.2),
@@ -554,12 +552,13 @@ public class RobotContainer {
             .leftBumper()
             .and(() -> !isTelopAuto)
                 .whileTrue(
-                    DriveCommands.alignToPoint(
-                        sys_drive, 
-                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
-                    ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-                    .alongWith(getLevelSelectorCommand())
-                    .andThen(
+                    Commands.deadline(
+                        DriveCommands.alignToPoint(
+                            sys_drive, 
+                            () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
+                        ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+                        getLevelSelectorCommand(false)
+                    ).andThen(
                         new ConditionalCommand(
                             Commands.waitSeconds(0.2),
                             sys_endEffector.runUntilCoralNotDetected(3), 
@@ -573,12 +572,13 @@ public class RobotContainer {
             .rightBumper()
             .and(() -> !isTelopAuto)
                 .whileTrue(
-                    DriveCommands.alignToPoint(
-                        sys_drive, 
-                        () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
-                    ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-                    .alongWith(getLevelSelectorCommand())
-                    .andThen(
+                    Commands.deadline(
+                        DriveCommands.alignToPoint(
+                            sys_drive, 
+                            () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
+                        ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+                        getLevelSelectorCommand(false)
+                    ).andThen(
                         new ConditionalCommand(
                             Commands.waitSeconds(0.2),
                             sys_endEffector.runUntilCoralNotDetected(3), 
@@ -598,13 +598,20 @@ public class RobotContainer {
             );
 
         secondaryController.a()
-            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL1));
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
         secondaryController.b()
-            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL2));
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL2));
         secondaryController.x()
-            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL3));
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
         secondaryController.y()
-            .onTrue(Commands.runOnce(() -> selectedScoringLevel = ScoringLevel.LEVEL4));
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
+    }
+
+    public Command prepLevelCommand(ScoringLevel level) {
+        return Commands.runOnce(() -> {
+            Logger.recordOutput("Scoring Position", level);
+            selectedScoringLevel = level;
+        }).ignoringDisable(true);
     }
 
     /**
@@ -618,7 +625,7 @@ public class RobotContainer {
             .andThen(
                 AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
                 .alongWith(
-                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(), () -> false).onlyIf(runTelop::get)
+                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> false).onlyIf(runTelop::get)
                 )
             );
     }

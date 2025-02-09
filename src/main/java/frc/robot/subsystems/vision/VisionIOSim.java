@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.drive.Drive;
@@ -36,7 +37,7 @@ public class VisionIOSim implements VisionIO {
 
     private static volatile VisionIOSim globalThis = null;
 
-    private static final Transform3d ROBOT_CAM_OFFSET = new Transform3d(new Translation3d(-0.118, 0.218, 0.38), new Rotation3d(0,0,-20));
+    private static final Transform3d ROBOT_CAM_OFFSET = new Transform3d(new Translation3d(-0.118, 0.218, 0.38), new Rotation3d(0, 0, Units.degreesToRadians(-20)));
 
     public VisionIOSim(SwerveDriveSimulation sim) {
         if (globalThis != null) throw new IllegalArgumentException("You cannot create more than one VisionIOSim!");

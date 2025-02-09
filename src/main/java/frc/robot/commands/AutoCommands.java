@@ -30,6 +30,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
+import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -78,7 +79,7 @@ public class AutoCommands {
         stationChooser.addOption(       "Right",     kDirection.RIGHT);
     }
 
-    public static Command pathfindTo(Drive drive, Supplier<Pose2d> targetPose, boolean acceptVelocity) {
+    public static Command pathfindTo(Drive drive, Supplier<Pose2d> targetPose, boolean acceptVelocity, boolean selector) {
         List<Pose2d> poses = new ArrayList<>();
         poses.addAll(AlignHelper.getStationPoses(kDirection.BOTH));
         poses.addAll(kReef.TARGETS.values());
@@ -143,7 +144,10 @@ public class AutoCommands {
                 commands[i] = AutoBuilder.pathfindToPoseFlipped(pose, CONSTRAINTS);
         }
 
-        return CaseCommand.buildSelector(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
+        if (selector)
+            return CaseCommand.buildSelector(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
+        else
+            return CaseCommand.buildCondtional(suppliers, commands, Commands.print("ERROR WITH AUTO-TELE"));
     }
 
     public static Command pathFindToNearestStation(Drive drive) {
@@ -154,6 +158,7 @@ public class AutoCommands {
                 kClosestType.DISTANCE, 
                 stationChooser.get()
             ),
+            false,
             false
         ).alongWith(
             new WaitThen(
@@ -180,6 +185,7 @@ public class AutoCommands {
                 reef.get(), 
                 new Pose2d()
             ),
+            true,
             true
         );
     }
@@ -205,7 +211,8 @@ public class AutoCommands {
                 Commands.waitSeconds(0.2),
                 sys_endeffector.runUntilCoralNotDetected(3),
                 () -> Constants.currentMode == Mode.SIM
-            )
+            ),
+            new IdleCommand(sys_elevator, sys_pivot)
         ).repeatedly();
     }
 }
