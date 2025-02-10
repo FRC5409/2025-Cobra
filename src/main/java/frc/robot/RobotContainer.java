@@ -109,7 +109,7 @@ public class RobotContainer {
     protected final EndEffector sys_endEffector;
     protected final ArmPivot    sys_armPivot;
 
-    private SwerveDriveSimulation simConfig;
+    public static SwerveDriveSimulation simConfig;
 
     // Commands
     protected final Command telopAutoCommand;
@@ -468,13 +468,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, true));
         NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, true));
 
-        NamedCommands.registerCommand("RELEASE", 
-            new ConditionalCommand(
-                Commands.waitSeconds(0.2),
-                sys_endEffector.runUntilCoralNotDetected(3), 
-                () -> Constants.currentMode == Mode.SIM
-            )
-        );
+        NamedCommands.registerCommand("RELEASE", sys_endEffector.runUntilCoralNotDetected(3));
     }
 
     /**
@@ -512,10 +506,10 @@ public class RobotContainer {
                         .andThen(telopAutoCommand)
                 );
 
-        primaryController.rightBumper()
-            .and(() -> !isTelopAuto)
-            .onTrue( Commands.runOnce(() -> sys_drive.coastMode()).ignoringDisable(true))
-            .onFalse(Commands.runOnce(() -> sys_drive.brakeMode()).ignoringDisable(true));
+        // primaryController.rightBumper()
+        //     .and(() -> !isTelopAuto)
+        //     .onTrue( Commands.runOnce(() -> sys_drive.coastMode()).ignoringDisable(true))
+        //     .onFalse(Commands.runOnce(() -> sys_drive.brakeMode()).ignoringDisable(true));
 
         primaryController.a()
             .onTrue(getLevelSelectorCommand(false))
@@ -548,14 +542,11 @@ public class RobotContainer {
                         DriveCommands.alignToPoint(
                             sys_drive, 
                             () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
-                        ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+                        ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+                        .alongWith(Commands.waitUntil(() -> sys_elevator.getPosition().gte(ScoringLevel.LEVEL4.elevatorSetpoint.minus(Centimeters.of(5))))),
                         getLevelSelectorCommand(false)
                     ).andThen(
-                        new ConditionalCommand(
-                            Commands.waitSeconds(0.2),
-                            sys_endEffector.runUntilCoralNotDetected(3), 
-                            () -> Constants.currentMode == Mode.SIM
-                        ),
+                        sys_endEffector.runUntilCoralNotDetected(3),
                         new IdleCommand(sys_elevator, sys_armPivot)
                     )
                 ).onFalse(new IdleCommand(sys_elevator, sys_armPivot));
@@ -571,11 +562,7 @@ public class RobotContainer {
                         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                         getLevelSelectorCommand(false)
                     ).andThen(
-                        new ConditionalCommand(
-                            Commands.waitSeconds(0.2),
-                            sys_endEffector.runUntilCoralNotDetected(3), 
-                            () -> Constants.currentMode == Mode.SIM
-                        ),
+                        sys_endEffector.runUntilCoralNotDetected(3),
                         new IdleCommand(sys_elevator, sys_armPivot)
                     )
                 ).onFalse(new IdleCommand(sys_elevator, sys_armPivot));

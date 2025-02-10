@@ -1,10 +1,8 @@
 package frc.robot.subsystems.collector;
 
 import org.littletonrobotics.junction.Logger;
-
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
-
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;

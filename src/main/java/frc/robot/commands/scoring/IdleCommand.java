@@ -13,7 +13,7 @@ public class IdleCommand extends ParallelCommandGroup {
         super(
             sys_pivot.moveArm(kArmPivot.IDLE_SETPOINT),
             new WaitThen(
-                () -> sys_pivot.getPosition().lte(Degrees.of(15)),
+                () -> sys_pivot.getPosition().gte(Degrees.of(75)),
                 sys_elevator.elevatorGo(Meters.of(0.05))
             )
         );

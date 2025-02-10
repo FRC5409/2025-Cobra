@@ -94,8 +94,8 @@ public final class Constants {
     public static final int  TIME_ADJUSTMENT_TIMEOUT = 10;
 
     public static final class kReef {
-      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.315, 0.167, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.315, -0.167, new Rotation2d());
+      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.35, 0.167, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.35, -0.167, new Rotation2d());
 
       public static final HashMap<kReefPosition, Pose2d> TARGETS = new HashMap<>();
       static {
@@ -149,14 +149,14 @@ public final class Constants {
 
     public static final Angle IDLE_SETPOINT = Degrees.of(82);
 
-    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(2.0, 0.0, 0.2);
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(9.0, 0.0, 0.6);
   }
 
     public static enum ScoringLevel {
         LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
         LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
         LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(Meters.of(0.68), Degrees.of(68.0));
+        LEVEL4(Meters.of(0.68), Degrees.of(65.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;

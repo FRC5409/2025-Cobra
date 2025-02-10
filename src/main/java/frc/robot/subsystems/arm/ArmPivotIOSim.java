@@ -84,7 +84,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
 
     @Override
     public Angle getPosition() {
-        return Radians.of(-armSim.getAngleRads());
+        return Radians.of(armSim.getAngleRads());
     }
 
     @Override

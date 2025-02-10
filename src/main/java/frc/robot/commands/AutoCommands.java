@@ -26,8 +26,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Constants;
-import frc.robot.Constants.Mode;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.scoring.IdleCommand;
@@ -207,11 +205,7 @@ public class AutoCommands {
                 Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
                 Commands.waitSeconds(0.25)
             ).onlyIf(waitBeforeScoring),
-            new ConditionalCommand(
-                Commands.waitSeconds(0.2),
-                sys_endeffector.runUntilCoralNotDetected(3),
-                () -> Constants.currentMode == Mode.SIM
-            ),
+            sys_endeffector.runUntilCoralNotDetected(3),
             new IdleCommand(sys_elevator, sys_pivot)
         ).repeatedly();
     }
