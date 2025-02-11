@@ -3,46 +3,47 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class ControlBoard {
-    private class HIDHandler extends CommandGenericHID {
-        public HIDHandler(int port) {
-            super(port);
+public class ControlBoard extends CommandGenericHID {
+
+    // TODO: VALIDATE THESE
+    public static enum kButton {
+        CLOSE_LEFT_LEFT   (0),
+        CLOSE_LEFT_RIGHT  (1),
+        CLOSE_MIDDLE_LEFT (2),
+        CLOSE_MIDDLE_RIGHT(3),
+        CLOSE_RIGHT_LEFT  (4),
+        CLOSE_RIGHT_RIGHT (5),
+        FAR_LEFT_LEFT     (6),
+        FAR_LEFT_RIGHT    (7),
+        FAR_MIDDLE_LEFT   (8),
+        FAR_MIDDLE_RIGHT  (9),
+        FAR_RIGHT_LEFT    (10),
+        FAR_RIGHT_RIGHT   (11),
+        LEVEL_1           (12),
+        LEVEL_2           (13),
+        LEVEL_3           (14),
+        LEVEL_4           (15);
+
+        public final int id;
+        private kButton(int id) {
+            this.id = id + 1;
         }
     }
 
-    private HIDHandler[] HIDs;
-
     /**
      * Creates a new Control board
-     * @param port1 The first port of the device
-     * @param port2 The second port of the device
-     * @throws IllegalArgumentException if the two ports match
+     * @param port The driverstation port of the control board
      */
-    public ControlBoard(int port1, int port2) {
-        if (port1 == port2) throw new IllegalArgumentException("Controlboard was given two of the same port!");
-
-        HIDs = new HIDHandler[] {
-            new HIDHandler(port1),
-            new HIDHandler(port2)
-        };
+    public ControlBoard(int port) {
+        super(port);
     }
 
     /**
-     * Gets the button attached to the ID
-     * @param id The Button ID of the control board [0, 31]
-     * @return The trigger related to that ID
-     * @throws IllegalArgumentException if an invalid ID was given
+     * Gets the button attached to the button
+     * @param button The button to get
+     * @return The trigger related to that button
      */
-    public Trigger button(int id) {
-        if (id < 0 || id >= 32) throw new IllegalArgumentException("No such button ID exists on the control board!");
-
-        return id < 16 ? HIDs[0].button(id) : HIDs[1].button(id % 16);
-    }
-
-    /**
-     * @return True if the device is connected
-     */
-    public boolean isConnected() {
-        return HIDs[0].isConnected() && HIDs[1].isConnected();
+    public Trigger button(kButton button) {
+        return super.button(button.id);
     }
 }

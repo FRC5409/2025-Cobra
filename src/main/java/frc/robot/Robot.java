@@ -133,6 +133,7 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putNumber("Time", DriverStation.getMatchTime());
 
     StructHelper.update();
+    robotContainer.updateScoringPosition();
   }
 
   /** This function is called once when the robot is disabled. */

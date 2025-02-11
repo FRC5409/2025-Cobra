@@ -78,8 +78,8 @@ public final class Constants {
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(1.0);
-    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(3.0);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(3.0);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
@@ -145,9 +145,10 @@ public final class Constants {
     public static final Mass     ARM_MASS         = Pounds.of(8.75);
 
     public static final Angle minAngles = Degrees.of(-90);
-    public static final Angle maxAngles = Degrees.of(90);
+    public static final Angle maxAngles = Degrees.of(120);
 
-    public static final Angle IDLE_SETPOINT = Degrees.of(82);
+    public static final Angle MOVEMENT_SETPOINT = Degrees.of(82);
+    public static final Angle PICKUP_ANGLE  = Degrees.of(90);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(9.0, 0.0, 0.6);
   }
@@ -156,7 +157,7 @@ public final class Constants {
         LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
         LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
         LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(Meters.of(0.68), Degrees.of(65.0));
+        LEVEL4(Meters.of(0.68), Degrees.of(69.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
@@ -190,6 +191,8 @@ public final class Constants {
     public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.684;
+
+    public static final Distance IDLING_HEIGHT = Meters.of(0.03);
   }
 
   public static final class kVision {

@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
@@ -86,10 +87,12 @@ import frc.robot.util.AlignHelper;
 import frc.robot.util.WaitThen;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.CaseCommand;
+import frc.robot.util.ControlBoard;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
+import frc.robot.util.ControlBoard.kButton;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -119,6 +122,7 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController primaryController   = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
+    private final ControlBoard          controlBoard        = new ControlBoard(2);
 
     public static boolean isTelopAuto = false;
 
@@ -136,6 +140,9 @@ public class RobotContainer {
             AlertType.kError);
     private final Alert secondaryDisconnectedAlert = new Alert(
             "Secondary Controller Disconnected!",
+            AlertType.kError);
+    private final Alert controlDisconnectedAlert = new Alert(
+            "Control Board Disconnected!",
             AlertType.kError);
 
     /**
@@ -227,27 +234,14 @@ public class RobotContainer {
         registerCommands();
 
         // Commands
-        telopAutoCommand = AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> secondaryController.getHID().getPOV() != -1).alongWith(
-                Commands.run(() -> {
-                    if (Math.hypot(secondaryController.getRightX(), secondaryController.getRightY()) < 0.4) return;
-
-                    Angle targetAngle = Radians.of(Math.atan2(secondaryController.getRightY(), secondaryController.getRightX()));
-
-                    double degrees = targetAngle.in(Degrees);
-                    if (degrees > -120 && degrees <= -60)
-                        AutoCommands.target = kReefPosition.CLOSE;
-                    else if (degrees > -60 && degrees <= 0)
-                        AutoCommands.target = kReefPosition.CLOSE_LEFT;
-                    else if (degrees > 0 && degrees <= 60)
-                        AutoCommands.target = kReefPosition.FAR_LEFT;
-                    else if (degrees > 60 && degrees <= 120)
-                        AutoCommands.target = kReefPosition.FAR;
-                    else if (degrees > 120 && degrees <= 180)
-                        AutoCommands.target = kReefPosition.FAR_RIGHT;
-                    else
-                        AutoCommands.target = kReefPosition.CLOSE_RIGHT;
-                }).ignoringDisable(true)
-            ).onlyWhile(() -> isTelopAuto);
+        telopAutoCommand = AutoCommands.telopAutoCommand(
+            sys_drive,
+            sys_elevator,
+            sys_armPivot,
+            sys_endEffector,
+            getLevelSelectorCommand(true),
+            () -> secondaryController.getHID().getPOV() != -1
+        ).onlyWhile(() -> isTelopAuto);
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -336,14 +330,61 @@ public class RobotContainer {
                         Commands.runOnce(() -> secondaryDisconnectedAlert.set(false))
                                 .ignoringDisable(true));
 
+        new Trigger(() -> !controlBoard.isConnected())
+                .onTrue(
+                    Commands.runOnce(() -> {
+                        primaryController.setRumble(RumbleType.kBothRumble, 0.50);
+                        controlDisconnectedAlert.set(true);
+                    })
+                            .ignoringDisable(true)
+                            .andThen(
+                                    new WaitThen(
+                                            Seconds.of(0.5),
+                                            Commands.runOnce(
+                                                    () -> primaryController
+                                                            .setRumble(RumbleType.kBothRumble,
+                                                                    0.0)))
+                                            .ignoringDisable(true)))
+            .onFalse(
+                    Commands.runOnce(() -> controlDisconnectedAlert.set(false))
+                            .ignoringDisable(true));
+
         // TODO: fix on real robot
         new Trigger(DriverStation::isDSAttached).onTrue(
+            Commands.waitSeconds(1.0).andThen(
                 Commands.runOnce(() -> {
                     primaryDisconnectedAlert.set(!primaryController.isConnected());
                     secondaryDisconnectedAlert.set(!secondaryController.isConnected());
+                    controlDisconnectedAlert.set(!controlBoard.isConnected());
 
                     resetPose();
-                }).ignoringDisable(true));
+                }).ignoringDisable(true)
+            )
+        );
+    }
+
+    public void updateScoringPosition() {
+        if (!secondaryController.isConnected()) return;
+
+        if (Math.hypot(secondaryController.getRightX(), secondaryController.getRightY()) < 0.6) return;
+
+        Angle targetAngle = Radians.of(Math.atan2(secondaryController.getRightY(), secondaryController.getRightX()));
+
+        double degrees = targetAngle.in(Degrees);
+        if (degrees > -120 && degrees <= -60)
+            AutoCommands.target = kReefPosition.CLOSE;
+        else if (degrees > -60 && degrees <= 0)
+            AutoCommands.target = kReefPosition.CLOSE_LEFT;
+        else if (degrees > 0 && degrees <= 60)
+            AutoCommands.target = kReefPosition.FAR_LEFT;
+        else if (degrees > 60 && degrees <= 120)
+            AutoCommands.target = kReefPosition.FAR;
+        else if (degrees > 120 && degrees <= 180)
+            AutoCommands.target = kReefPosition.FAR_RIGHT;
+        else
+            AutoCommands.target = kReefPosition.CLOSE_RIGHT;
+
+        Logger.recordOutput("Scoring Position", AutoCommands.target);
     }
 
     public void updateSim() {
@@ -434,7 +475,7 @@ public class RobotContainer {
                         )
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
-                )
+                ).withTimeout(1.5)
             );
 
         NamedCommands.registerCommand(
@@ -455,11 +496,10 @@ public class RobotContainer {
                         )
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
-                )
+                ).withTimeout(1.5)
             );
 
         // TODO: Finish Commands
-        NamedCommands.registerCommand("PREPARE_STATION", Commands.none());
         NamedCommands.registerCommand("STATION_PICKUP", Commands.waitSeconds(0.35));
         NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot));
 
@@ -576,6 +616,8 @@ public class RobotContainer {
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
             );
 
+        // SECONDARY CONTROLLER
+
         secondaryController.a()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
         secondaryController.b()
@@ -590,11 +632,69 @@ public class RobotContainer {
 
         secondaryController.rightBumper()
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
+
+        // Wanted to try something new. Could have just made a method
+        BiFunction<kReefPosition, Boolean, Command> selectGenerator = new BiFunction<AutoCommands.kReefPosition,Boolean,Command>() {
+            @Override
+            public Command apply(kReefPosition reefPosition, Boolean scoreRight) {
+                return Commands.runOnce(() -> {
+                    AutoCommands.target = reefPosition;
+                    AutoCommands.scoreRight.setBoolean(scoreRight);
+                }).ignoringDisable(true);
+            }
+        };
+
+        // CONTROL BOARD
+
+        // SELECTION
+        controlBoard.button(kButton.CLOSE_LEFT_LEFT)
+            .onTrue(selectGenerator.apply(kReefPosition.CLOSE_LEFT, false));
+        controlBoard.button(kButton.CLOSE_LEFT_RIGHT)
+            .onTrue(selectGenerator.apply(kReefPosition.CLOSE_LEFT, true));
+
+        controlBoard.button(kButton.CLOSE_MIDDLE_LEFT)
+            .onTrue(selectGenerator.apply(kReefPosition.CLOSE, false));
+        controlBoard.button(kButton.CLOSE_MIDDLE_RIGHT)
+            .onTrue(selectGenerator.apply(kReefPosition.CLOSE, true));
+
+        controlBoard.button(kButton.CLOSE_RIGHT_LEFT)
+            .onTrue(selectGenerator.apply(kReefPosition.CLOSE_RIGHT, false));
+        controlBoard.button(kButton.CLOSE_RIGHT_RIGHT)
+            .onTrue(selectGenerator.apply(kReefPosition.CLOSE_RIGHT, true));
+
+        controlBoard.button(kButton.FAR_LEFT_LEFT)
+            .onTrue(selectGenerator.apply(kReefPosition.FAR_LEFT, false));
+        controlBoard.button(kButton.FAR_LEFT_RIGHT)
+            .onTrue(selectGenerator.apply(kReefPosition.FAR_LEFT, true));
+
+        controlBoard.button(kButton.FAR_MIDDLE_LEFT)
+            .onTrue(selectGenerator.apply(kReefPosition.FAR, false));
+        controlBoard.button(kButton.FAR_MIDDLE_RIGHT)
+            .onTrue(selectGenerator.apply(kReefPosition.FAR, true));
+
+        controlBoard.button(kButton.FAR_RIGHT_LEFT)
+            .onTrue(selectGenerator.apply(kReefPosition.FAR_RIGHT, false));
+        controlBoard.button(kButton.FAR_RIGHT_RIGHT)
+            .onTrue(selectGenerator.apply(kReefPosition.FAR_RIGHT, true));
+
+        // LEVELS
+        controlBoard.button(kButton.LEVEL_1)
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
+
+        controlBoard.button(kButton.LEVEL_2)
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL2));
+
+        controlBoard.button(kButton.LEVEL_3)
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
+
+        controlBoard.button(kButton.LEVEL_4)
+            .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
+
     }
 
     public Command prepLevelCommand(ScoringLevel level) {
         return Commands.runOnce(() -> {
-            Logger.recordOutput("Scoring Position", level);
+            Logger.recordOutput("Scoring Level", level);
             selectedScoringLevel = level;
         }).ignoringDisable(true);
     }
@@ -608,8 +708,8 @@ public class RobotContainer {
         return AutoTimer.start()
             .alongWith(autoChooser.get())
             .andThen(
-                AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true)
-                .alongWith(
+                Commands.parallel(
+                    AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true),
                     AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> false).onlyIf(runTelop::get)
                 )
             );

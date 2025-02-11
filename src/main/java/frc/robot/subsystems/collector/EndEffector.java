@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.Mode;
 import frc.robot.Constants.kEndEffector;
 
 public class EndEffector extends SubsystemBase {
@@ -46,25 +48,28 @@ public class EndEffector extends SubsystemBase {
     }
     // Run until coral is no longer detected, if spike in current, wait then rerun
     public Command runUntilCoralNotDetected(double voltage) {
-        return Commands.repeatingSequence(
-                Commands.runOnce(
-                    () -> io.setVoltage(voltage), 
-                    this
-                ),
-                Commands.waitUntil(
-                    () -> inputs.endEffectorCurrent > 25
-                ),
-                Commands.runOnce(
-                    () -> io.setVoltage(-voltage), 
-                    this
-                ), 
-                Commands.waitSeconds(0.25)
-            ).until(
-                ()-> !coralDetected
-            )    
-            .finallyDo(
-                ()-> io.setVoltage(0)
-            );
+        if (Constants.currentMode == Mode.SIM)
+            return Commands.waitSeconds(0.2);
+        else
+            return Commands.repeatingSequence(
+                    Commands.runOnce(
+                        () -> io.setVoltage(voltage), 
+                        this
+                    ),
+                    Commands.waitUntil(
+                        () -> inputs.endEffectorCurrent > 25
+                    ),
+                    Commands.runOnce(
+                        () -> io.setVoltage(-voltage), 
+                        this
+                    ), 
+                    Commands.waitSeconds(0.25)
+                ).until(
+                    () -> !coralDetected
+                )    
+                .finallyDo(
+                    () -> io.setVoltage(0)
+                );
     }
 
     public Command setVoltage(double voltage){
