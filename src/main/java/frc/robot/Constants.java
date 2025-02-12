@@ -157,7 +157,7 @@ public final class Constants {
         LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
         LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
         LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(Meters.of(0.68), Degrees.of(69.0));
+        LEVEL4(Meters.of(0.653), Degrees.of(69.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
@@ -174,7 +174,7 @@ public final class Constants {
       public static final double VOLTAGE_INTAKE = 3;
       public static final double VOLTAGE_SCORE = -3;
       public static final int TIMOFFLIGHT_SENSORID = 0;
-      public static final int TIMEOFFLIGHT_DISTANCE_VALIDATION = 80;
+      public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(80);
 
   }
 
@@ -183,12 +183,12 @@ public final class Constants {
     public static final int FOLLOWER_MOTOR_ID = 21;
     public static final double CURRENT_LIMIT = 30.0;
     public static final double kGearing = 12.0/1.0;
-    public static final double kCircumfrence = 2 * Math.PI * 0.0199;
+    public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2.0);
+    public static final double kCircumfrence = 2 * Math.PI * ELEVATOR_DRUMRADIUS.in(Meters);
     public static final double kRotationConverter = kCircumfrence / kGearing;
-    public static final PIDConstants TALONFX_PID = new PIDConstants(0.78, 0, 0);
+    public static final PIDConstants TALONFX_PID = new PIDConstants(30, 0, 0);
     public static final PIDConstants SIM_PID = new PIDConstants(10, 0, 0);
     public static final Mass ELEVATOR_MASS = Pound.of(52.95);
-    public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.684;
 
