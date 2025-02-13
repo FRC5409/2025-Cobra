@@ -1,8 +1,6 @@
 package frc.robot.subsystems.collector;
 
 import org.littletonrobotics.junction.Logger;
-import com.playingwithfusion.TimeOfFlight;
-import com.playingwithfusion.TimeOfFlight.RangingMode;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,31 +15,25 @@ public class EndEffector extends SubsystemBase {
     private final EndEffectorIO io;
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
 
-    private final TimeOfFlight tof;
-    private boolean coralDetected = false;
-
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
-
-        tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
-        tof.setRangingMode(RangingMode.Short, 50);
     }
     // Run until coral is detected then wait 50ms then stop
     public Command runUntilCoralDetected(double voltage) {
         return Commands.parallel(
                 Commands.runOnce(
-                    () -> io.setVoltage(voltage), this),
+                    () -> io.setVoltage(voltage), this
+                ),
                 Commands.waitUntil(
-                    () -> coralDetected
+                    () -> coralDetected()
                 )
-        )
-        .andThen(
+        ).andThen(
             Commands.waitSeconds(0.5),
             Commands.runOnce(
-                ()-> io.setVoltage(0),this
+                ()-> io.setVoltage(0), this
             )
         );
 
@@ -65,7 +57,7 @@ public class EndEffector extends SubsystemBase {
                     ), 
                     Commands.waitSeconds(0.25)
                 ).until(
-                    () -> !coralDetected
+                    () -> !coralDetected()
                 )    
                 .finallyDo(
                     () -> io.setVoltage(0)
@@ -79,6 +71,11 @@ public class EndEffector extends SubsystemBase {
         );
     }
 
+    public boolean coralDetected(){
+        // return inputs.tofDistance.gte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
+        // OR
+        return io.getTofRange().gte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
+    }
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
@@ -87,9 +84,7 @@ public class EndEffector extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("EndEffector", inputs);
 
-        // Check if coral is detected
-        coralDetected = tof.getRange() <= kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION;
-        // System.out.println(tof.getRange());  --- Use when testing
+        // System.out.println(inputs.tofDistance); --- Use when testing
 
         // Alert if motor is not connected
         alert.set(!inputs.endEffectorConnection);

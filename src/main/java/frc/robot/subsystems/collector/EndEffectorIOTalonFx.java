@@ -2,6 +2,8 @@ package frc.robot.subsystems.collector;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import static edu.wpi.first.units.Units.Meters;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -9,6 +11,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import com.playingwithfusion.TimeOfFlight;
+import com.playingwithfusion.TimeOfFlight.RangingMode;
+
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.kEndEffector;
 
 public class EndEffectorIOTalonFx implements EndEffectorIO {
@@ -20,6 +27,7 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
     private StatusSignal<Voltage> deviceVoltage;
     private StatusSignal<Current> deviceCurrent;
     private StatusSignal<Temperature> deviceTemp;
+    private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
 
     public EndEffectorIOTalonFx(int ID) {
         // Creating Objects
@@ -47,11 +55,18 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         );
         // Optimize the CanBus
         endEffectorMotor.optimizeBusUtilization();
+
+        tof.setRangingMode(RangingMode.Short, 50);
     }
 
     @Override 
     public void setVoltage(double volts) {
         endEffectorMotor.setVoltage(volts);
+    }
+
+    @Override
+    public Distance getTofRange(){
+        return Meters.of(tof.getRange());
     }
 
     @Override 
@@ -63,5 +78,6 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         inputs.endEffectorVolts = deviceVoltage.getValueAsDouble();
         inputs.endEffectorCurrent = deviceCurrent.getValueAsDouble();
         inputs.endEffectTemp = deviceTemp.getValueAsDouble();
+        inputs.tofDistance = Meters.of(tof.getRange());
     }
 }
