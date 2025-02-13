@@ -6,11 +6,15 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
@@ -32,6 +36,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
     private PositionTorqueCurrentFOC m_request = new PositionTorqueCurrentFOC(0).withSlot(0);
 
+    private StatusSignal<Angle> motorPosition;
     private StatusSignal<Voltage> mainDeviceVoltage;
     private StatusSignal<Current> mainDeviceCurrent;
     private StatusSignal<Temperature> mainDeviceTemp;
@@ -54,7 +59,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
 
         m_encoderConfigs = new FeedbackConfigs();
-        m_encoderConfigs.SensorToMechanismRatio = kElevator.kRotationConverter;
+        m_encoderConfigs.SensorToMechanismRatio = 1.0 / kElevator.kRotationConverter;
 
         //PID
         m_pidConfig.kP = kElevator.TALONFX_PID.kP; 
@@ -67,6 +72,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_mainMotorConfig.apply(m_pidConfig);
         m_followerMotorConfig.apply(m_pidConfig);
 
+        m_mainMotorConfig.apply(m_encoderConfigs);
+        m_followerMotorConfig.apply(m_encoderConfigs);
+
+        m_mainMotorConfig.apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+
+        m_followerMotor.setControl(new Follower(mainMotorID, true));
+
+        motorPosition = m_mainMotor.getPosition();
         mainDeviceVoltage = m_mainMotor.getMotorVoltage();
         mainDeviceCurrent = m_mainMotor.getSupplyCurrent();
         mainDeviceTemp  = m_mainMotor.getDeviceTemp();
@@ -74,8 +87,11 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         secondaryDeviceCurrent = m_followerMotor.getSupplyCurrent();
         secondaryDeviceTemp = m_followerMotor.getDeviceTemp();
 
+        m_mainMotor.setPosition(0);
+
         BaseStatusSignal.setUpdateFrequencyForAll(
             50,
+            motorPosition,
             mainDeviceVoltage,
             mainDeviceCurrent,
             mainDeviceTemp,
@@ -115,6 +131,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     @Override
     public void updateInputs(ElevatorInputs inputs) {
         inputs.mainMotorConnection = BaseStatusSignal.refreshAll(
+            motorPosition,
             mainDeviceVoltage, 
             mainDeviceCurrent, 
             mainDeviceTemp
@@ -122,7 +139,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.mainAppliedVoltage = mainDeviceVoltage.getValueAsDouble();
         inputs.mainAppliedCurrent = mainDeviceCurrent.getValueAsDouble();
         inputs.mainMotorTemperature = mainDeviceTemp.getValueAsDouble();
-        inputs.mainMotorPosition = m_mainMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
+        inputs.mainMotorPosition = motorPosition.getValueAsDouble();
         
         inputs.followerMotorConnection = BaseStatusSignal.refreshAll(
             secondaryrDeviceVoltage, 
@@ -132,6 +149,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.followerAppliedVoltage = secondaryrDeviceVoltage.getValueAsDouble();
         inputs.followerAppliedCurrent = secondaryDeviceCurrent.getValueAsDouble();
         inputs.followerMotorTemperature = secondaryDeviceTemp.getValueAsDouble();        
-        inputs.followerMotorPosition = m_followerMotor.getPosition().getValueAsDouble()*kElevator.kRotationConverter;
+        inputs.followerMotorPosition = motorPosition.getValueAsDouble();
     }
 }
