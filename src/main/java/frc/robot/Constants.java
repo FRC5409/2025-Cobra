@@ -138,7 +138,7 @@ public final class Constants {
     public static final double kD = 0.0;
     public static final double kG = 0.0;
 
-    public static final double   ARM_GEARING      = 10.0/1.0;
+    public static final double   ARM_GEARING      = (72/22) * 4*9;
     public static final Distance ARM_DRUM_RADIUS  = Inches.of(0.944);
     public static final MomentOfInertia ARM_MOI   = KilogramSquareMeters.of(0.724982551);
     public static final Distance ARM_LENGTH       = Inches.of(12.0);
@@ -150,7 +150,7 @@ public final class Constants {
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(82);
     public static final Angle PICKUP_ANGLE  = Degrees.of(90);
 
-    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(9.0, 0.0, 0.6);
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.5, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {
