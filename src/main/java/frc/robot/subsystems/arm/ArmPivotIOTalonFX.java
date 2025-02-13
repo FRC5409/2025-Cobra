@@ -54,7 +54,8 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
             .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
             .withRemoteCANcoder(canCoderSensor)
             .withSensorToMechanismRatio(1)
-            .withRotorToSensorRatio(kArmPivot.ARM_GEARING);
+            .withRotorToSensorRatio(kArmPivot.ARM_GEARING)
+            .withRotorToSensorRatio(sensorID);
         configurator.apply(feedBackConfig);
 
         armMotor.setNeutralMode(NeutralModeValue.Brake);
