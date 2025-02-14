@@ -29,4 +29,5 @@ public interface ArmPivotIO {
     public default Angle getPosition() {return Degrees.of(0);}
 
     public default void stop() {}
+
 }

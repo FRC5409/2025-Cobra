@@ -38,6 +38,10 @@ public class ArmPivot extends SubsystemBase {
         );
     }
 
+    public Command setVoltage(double volatge){
+        return Commands.runOnce(() -> io.setVoltage(volatge), this);
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);

@@ -124,6 +124,7 @@ public class RobotContainer {
     private final CommandXboxController primaryController   = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
     private final ControlBoard          controlBoard        = new ControlBoard(2);
+    private final CommandXboxController testController      = new CommandXboxController(4);
 
     public static boolean isTelopAuto = false;
 
@@ -684,6 +685,16 @@ public class RobotContainer {
 
         controlBoard.button(kButton.LEVEL_4)
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
+
+        // Test Controller
+        testController.a()
+            .onTrue(sys_elevator.elevatorGo(Meters.of(0.4)));
+        testController.b()
+        .onTrue(sys_elevator.elevatorGo(Meters.of(0.2)));
+        testController.x()
+            .onTrue(sys_armPivot.moveArm(Degrees.of(75.0)));
+        testController.y()
+            .onTrue(sys_armPivot.moveArm(Degrees.of(45.0)));
 
     }
 
