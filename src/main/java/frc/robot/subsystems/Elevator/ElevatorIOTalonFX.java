@@ -1,6 +1,6 @@
 package frc.robot.subsystems.Elevator;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Meters;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -14,11 +14,12 @@ import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants.kElevator;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
@@ -51,33 +52,32 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_mainMotorConfig = m_mainMotor.getConfigurator();
         m_followerMotorConfig = m_followerMotor.getConfigurator();
 
-        m_currentConfig = new CurrentLimitsConfigs();
-        m_currentConfig.SupplyCurrentLimit = kElevator.CURRENT_LIMIT;
-        m_currentConfig.SupplyCurrentLimitEnable = true;
-        
         m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
         m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        m_encoderConfigs = new FeedbackConfigs();
-        m_encoderConfigs.SensorToMechanismRatio = 1.0 / kElevator.kRotationConverter;
+        m_currentConfig = new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(kElevator.CURRENT_LIMIT)
+            .withSupplyCurrentLimitEnable(true);
+        m_mainMotorConfig.apply(m_currentConfig);
+        m_followerMotorConfig.apply(m_currentConfig);
+        
+        m_encoderConfigs = new FeedbackConfigs()
+            .withSensorToMechanismRatio(1.0 / kElevator.kRotationConverter);
+        m_mainMotorConfig.apply(m_encoderConfigs);
+        m_followerMotorConfig.apply(m_encoderConfigs);
 
         //PID
         m_pidConfig.kP = kElevator.TALONFX_PID.kP; 
         m_pidConfig.kI = kElevator.TALONFX_PID.kI;
         m_pidConfig.kD = kElevator.TALONFX_PID.kD;
-
-        m_mainMotorConfig.apply(m_currentConfig);
-        m_followerMotorConfig.apply(m_currentConfig);
-
         m_mainMotorConfig.apply(m_pidConfig);
         m_followerMotorConfig.apply(m_pidConfig);
-
-        m_mainMotorConfig.apply(m_encoderConfigs);
-        m_followerMotorConfig.apply(m_encoderConfigs);
 
         m_mainMotorConfig.apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 
         m_followerMotor.setControl(new Follower(mainMotorID, true));
+
+        m_mainMotor.setPosition(0);
 
         motorPosition = m_mainMotor.getPosition();
         mainDeviceVoltage = m_mainMotor.getMotorVoltage();
@@ -86,8 +86,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         secondaryrDeviceVoltage = m_followerMotor.getMotorVoltage();
         secondaryDeviceCurrent = m_followerMotor.getSupplyCurrent();
         secondaryDeviceTemp = m_followerMotor.getDeviceTemp();
-
-        m_mainMotor.setPosition(0);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50,
