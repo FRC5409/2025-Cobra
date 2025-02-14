@@ -33,9 +33,9 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private CurrentLimitsConfigs m_currentConfig;
 
     private FeedbackConfigs m_encoderConfigs;
-    private Slot0Configs m_pidConfig = new Slot0Configs();
+    private Slot0Configs m_pidConfig;
 
-    private PositionTorqueCurrentFOC m_request = new PositionTorqueCurrentFOC(0).withSlot(0);
+    private PositionTorqueCurrentFOC m_request;
 
     private StatusSignal<Angle> motorPosition;
     private StatusSignal<Voltage> mainDeviceVoltage;
@@ -51,7 +51,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         m_mainMotorConfig = m_mainMotor.getConfigurator();
         m_followerMotorConfig = m_followerMotor.getConfigurator();
-
         m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
         m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
 
@@ -67,15 +66,18 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_followerMotorConfig.apply(m_encoderConfigs);
 
         //PID
-        m_pidConfig.kP = kElevator.TALONFX_PID.kP; 
-        m_pidConfig.kI = kElevator.TALONFX_PID.kI;
-        m_pidConfig.kD = kElevator.TALONFX_PID.kD;
+        m_pidConfig = new Slot0Configs()
+            .withKP(kElevator.TALONFX_PID.kP)
+            .withKI(kElevator.TALONFX_PID.kI)
+            .withKD(kElevator.TALONFX_PID.kD);
         m_mainMotorConfig.apply(m_pidConfig);
         m_followerMotorConfig.apply(m_pidConfig);
 
         m_mainMotorConfig.apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 
         m_followerMotor.setControl(new Follower(mainMotorID, true));
+
+        m_request = new PositionTorqueCurrentFOC(0).withSlot(0);
 
         m_mainMotor.setPosition(0);
 
