@@ -147,7 +147,7 @@ public final class Constants {
     public static final Angle minAngles = Degrees.of(-90);
     public static final Angle maxAngles = Degrees.of(120);
 
-    public static final Angle MOVEMENT_SETPOINT = Degrees.of(82);
+    public static final Angle MOVEMENT_SETPOINT = Degrees.of(84);
     public static final Angle PICKUP_ANGLE  = Degrees.of(105);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
@@ -157,7 +157,9 @@ public final class Constants {
         LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
         LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
         LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(Meters.of(0.653), Degrees.of(69.0));
+        LEVEL4(Meters.of(0.653), Degrees.of(69.0)),
+        LEVEL2_ALGAE(Meters.of(0.22), Degrees.of(76)),
+        LEVEL3_ALGAE(Meters.of(0.42), Degrees.of(76));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
@@ -186,7 +188,7 @@ public final class Constants {
     public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2.0);
     public static final double kCircumfrence = 2 * Math.PI * ELEVATOR_DRUMRADIUS.in(Meters);
     public static final double kRotationConverter = kCircumfrence / kGearing;
-    public static final PIDConstants TALONFX_PID = new PIDConstants(30, 0, 0);
+    public static final PIDConstants TALONFX_PID = new PIDConstants(0, 0, 0);
     public static final PIDConstants SIM_PID = new PIDConstants(10, 0, 0);
     public static final Mass ELEVATOR_MASS = Pound.of(52.95);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;

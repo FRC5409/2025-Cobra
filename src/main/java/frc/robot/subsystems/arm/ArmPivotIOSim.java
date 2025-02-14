@@ -33,7 +33,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
 
     public ArmPivotIOSim() {
         armSim = new SingleJointedArmSim(
-            DCMotor.getFalcon500Foc(1),
+            DCMotor.getKrakenX60(1),
             kArmPivot.ARM_GEARING,
             kArmPivot.ARM_MOI.in(KilogramSquareMeters),
             kArmPivot.ARM_LENGTH.in(Meters),

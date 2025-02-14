@@ -18,7 +18,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
     public ElevatorIOSim() {
         elevatorSim = new ElevatorSim(
-            DCMotor.getFalcon500Foc(2), 
+            DCMotor.getFalcon500(2), 
             kElevator.kGearing, 
             kElevator.ELEVATOR_MASS.in(Kilograms), 
             kElevator.ELEVATOR_DRUMRADIUS.in(Meters), 

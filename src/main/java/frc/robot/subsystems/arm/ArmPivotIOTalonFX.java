@@ -4,17 +4,19 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -26,7 +28,7 @@ import frc.robot.Constants.kArmPivot;
 public class ArmPivotIOTalonFX implements ArmPivotIO {
     private TalonFX armMotor;
     private CANcoder canCoderSensor;
-    private final PositionTorqueCurrentFOC positionVoltage;
+    private final PositionVoltage positionVoltage;
 
     private StatusSignal<Angle> positionSignal;
     private StatusSignal<AngularVelocity> velocitySignal;
@@ -40,6 +42,12 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
         armMotor = new TalonFX(canID);
         canCoderSensor = new CANcoder(sensorID);
+
+        canCoderSensor.getConfigurator().apply(
+            new CANcoderConfiguration().MagnetSensor
+            .withAbsoluteSensorDiscontinuityPoint(Degrees.of(180))
+            .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+        );
 
         TalonFXConfigurator configurator = armMotor.getConfigurator();
 
@@ -59,7 +67,7 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
         armMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        positionVoltage = new PositionTorqueCurrentFOC(0).withSlot(0);
+        positionVoltage = new PositionVoltage(0).withSlot(0);
 
         Slot0Configs slot0Configs = new Slot0Configs();
         slot0Configs.kP = kArmPivot.kP;

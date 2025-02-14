@@ -57,6 +57,7 @@ import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
 import frc.robot.commands.scoring.IdleCommand;
+import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.ArmPivot;
@@ -576,7 +577,7 @@ public class RobotContainer {
             .leftBumper()
             .and(() -> !isTelopAuto)
                 .whileTrue(
-                    Commands.deadline(
+                    Commands.parallel(
                         DriveCommands.alignToPoint(
                             sys_drive, 
                             () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
@@ -592,7 +593,7 @@ public class RobotContainer {
             .rightBumper()
             .and(() -> !isTelopAuto)
                 .whileTrue(
-                    Commands.deadline(
+                    Commands.parallel(
                         DriveCommands.alignToPoint(
                             sys_drive, 
                             () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
@@ -611,6 +612,10 @@ public class RobotContainer {
                     () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
             );
+
+        primaryController.y()
+            .onTrue(new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE))
+            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // SECONDARY CONTROLLER
 

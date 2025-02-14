@@ -10,7 +10,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -35,7 +35,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private FeedbackConfigs m_encoderConfigs;
     private Slot0Configs m_pidConfig;
 
-    private PositionTorqueCurrentFOC m_request;
+    private PositionVoltage m_request;
 
     private StatusSignal<Angle> motorPosition;
     private StatusSignal<Voltage> mainDeviceVoltage;
@@ -77,7 +77,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         m_followerMotor.setControl(new Follower(mainMotorID, true));
 
-        m_request = new PositionTorqueCurrentFOC(0).withSlot(0);
+        m_request = new PositionVoltage(0).withSlot(0);
 
         m_mainMotor.setPosition(0);
 
