@@ -12,8 +12,10 @@ public interface EndEffectorIO {
         public boolean endEffectorConnection = false;
         public double endEffectorVolts = 0.0;
         public double endEffectorCurrent = 0.0;
-        public double endEffectTemp = 0.0;
+        public double endEffectorTemp = 0.0;
         public Distance tofDistance = Meters.of(-1.0);
+        public double endEffectorVelocity = 0.0;
+        public double endEffectorPosition = 0.0;
     }
     public default void setVoltage(double volts) {}
     public default void updateInputs(EndEffectorInputs inputs) {}

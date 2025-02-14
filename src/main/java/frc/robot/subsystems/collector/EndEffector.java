@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kEndEffector;
+import frc.robot.util.DebugCommand;
 
 public class EndEffector extends SubsystemBase {
 
@@ -20,6 +21,10 @@ public class EndEffector extends SubsystemBase {
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
+
+        DebugCommand.register("EndEffector Run Forward", setVoltage(3));
+        DebugCommand.register("EndEffector Run Backwards", setVoltage(-3));
+        DebugCommand.register("EndEffector Stop", setVoltage(0));
     }
     // Run until coral is detected then wait 50ms then stop
     public Command runUntilCoralDetected(double voltage) {
@@ -95,8 +100,6 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean coralDetected(){
-        // return inputs.tofDistance.gte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
-        // OR
         return io.getTofRange().lte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
     }
     @Override

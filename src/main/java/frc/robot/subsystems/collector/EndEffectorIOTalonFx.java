@@ -8,8 +8,12 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
@@ -25,6 +29,9 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
     private StatusSignal<Voltage> deviceVoltage;
     private StatusSignal<Current> deviceCurrent;
     private StatusSignal<Temperature> deviceTemp;
+    private StatusSignal<AngularVelocity> deviceVelocity;
+    private StatusSignal<Angle> devicePosition;
+    
     private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
 
     public EndEffectorIOTalonFx(int ID) {
@@ -44,12 +51,16 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         deviceVoltage = endEffectorMotor.getMotorVoltage();
         deviceCurrent = endEffectorMotor.getSupplyCurrent();
         deviceTemp = endEffectorMotor.getDeviceTemp();
+        deviceVelocity = endEffectorMotor.getVelocity();
+        devicePosition = endEffectorMotor.getPosition();
         // Make it so these status signals aren't touched by optimization
         BaseStatusSignal.setUpdateFrequencyForAll(
             50, 
             deviceVoltage,
             deviceCurrent,
-            deviceTemp
+            deviceTemp,
+            deviceVelocity,
+            devicePosition
         );
         // Optimize the CanBus
         endEffectorMotor.optimizeBusUtilization();
@@ -75,7 +86,9 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
             deviceTemp).isOK();
         inputs.endEffectorVolts = deviceVoltage.getValueAsDouble();
         inputs.endEffectorCurrent = deviceCurrent.getValueAsDouble();
-        inputs.endEffectTemp = deviceTemp.getValueAsDouble();
+        inputs.endEffectorTemp = deviceTemp.getValueAsDouble();
         inputs.tofDistance = Meters.of(tof.getRange());
+        inputs.endEffectorVelocity = deviceVelocity.getValueAsDouble();
+        inputs.endEffectorPosition = devicePosition.getValueAsDouble();
     }
 }
