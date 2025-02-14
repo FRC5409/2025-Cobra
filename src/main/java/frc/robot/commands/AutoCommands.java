@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,7 +35,6 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
-import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 
@@ -51,7 +49,6 @@ public class AutoCommands {
     }
 
     private static final PathConstraints CONSTRAINTS = kAutoAlign.PATH_FIND_CONSTRAINTS;
-    private static final Distance DISTANCE_TO_PREPARE = Meters.of(1.5);
     private static final LinearVelocity REEF_END_VELOCITY = MetersPerSecond.of(1.5);
     
     public static GenericEntry scoreRight;
@@ -158,20 +155,6 @@ public class AutoCommands {
             ),
             false,
             false
-        ).alongWith(
-            new WaitThen(
-                () -> {
-                    Pose2d station = AlignHelper.getClosestStation(
-                        drive.getBlueSidePose(), 
-                        kClosestType.DISTANCE, 
-                        kDirection.BOTH
-                    );
-
-                    return drive.getBlueSidePose().getTranslation().getDistance(station.getTranslation()) <= DISTANCE_TO_PREPARE.in(Meters);
-                }, 
-                Commands.print("PREPARE INTAKE")
-                .until(() -> true) // TODO: When pickup is achieved
-            )
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
         .andThen(Commands.waitSeconds(0.5));
     }
@@ -197,15 +180,18 @@ public class AutoCommands {
 
     public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, Command scoringCommand, BooleanSupplier waitBeforeScoring) {
         return Commands.sequence(
-            pathFindToNearestStation(drive).unless(() -> false), // TODO: Has coral
+            // TODO: TEST AT MULTIPLE AUTO POSITIONS
+            Commands.parallel(
+                new IdleCommand(sys_elevator, sys_pivot, sys_endeffector),
+                pathFindToNearestStation(drive).unless(() -> false) // TODO: Has coral
+            ),
             pathFindToReef(drive, () -> target),
             alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT))
                 .alongWith(scoringCommand),
             Commands.sequence(
                 Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
                 Commands.waitSeconds(0.25)
-            ).onlyIf(waitBeforeScoring),
-            new IdleCommand(sys_elevator, sys_pivot, sys_endeffector)
+            ).onlyIf(waitBeforeScoring)
         ).repeatedly();
     }
 }

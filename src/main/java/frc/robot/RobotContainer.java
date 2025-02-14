@@ -500,8 +500,6 @@ public class RobotContainer {
                 ).withTimeout(1.5)
             );
 
-        // TODO: Finish Commands
-        NamedCommands.registerCommand("STATION_PICKUP", Commands.waitSeconds(0.35));
         NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned));
@@ -707,7 +705,11 @@ public class RobotContainer {
             .andThen(
                 Commands.parallel(
                     AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true),
-                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> false).onlyIf(runTelop::get)
+                    Commands.either(
+                        AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> false), 
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector),
+                        runTelop::get
+                    )
                 )
             );
     }
