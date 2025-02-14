@@ -14,7 +14,7 @@
         "degrees": 90
       }
   ],
-  "position": [0.352, 0.33, 0.01],
+  "position": [-0.01, -0.023, 0],
   "cameras": [
       {
         "name": "LIMELIGHT",
@@ -38,7 +38,7 @@
       "zeroedRotations": [
         {
           "axis": "x",
-          "degrees": 0
+          "degrees": 90
         },
         {
           "axis": "y",
@@ -46,10 +46,10 @@
         },
         {
           "axis": "z",
-          "degrees": 180
+          "degrees": 90
         }
       ],
-      "zeroedPosition": [0.0175, -0.16, 0.075]
+      "zeroedPosition": [0.038, -0.18, 1.07]
     },
     {
         "zeroedRotations": [
@@ -59,14 +59,14 @@
           },
           {
             "axis": "y",
-            "degrees": 180
+            "degrees": 0
           },
           {
             "axis": "z",
-            "degrees": 90
+            "degrees": -90
           }
         ],
-        "zeroedPosition": [0, -0.095, 0.305]
+        "zeroedPosition": [0.038, -0.178, -0.14]
       }, 
       {
         "zeroedRotations": [

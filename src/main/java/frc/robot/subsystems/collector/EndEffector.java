@@ -23,25 +23,48 @@ public class EndEffector extends SubsystemBase {
     }
     // Run until coral is detected then wait 50ms then stop
     public Command runUntilCoralDetected(double voltage) {
-        return Commands.parallel(
+        if (Constants.currentMode == Mode.SIM)
+            return Commands.sequence(
                 Commands.runOnce(
-                    () -> io.setVoltage(voltage), this
+                    () -> io.setVoltage(voltage), 
+                    this
                 ),
-                Commands.waitUntil(
-                    () -> coralDetected()
+                Commands.waitSeconds(0.8),
+                Commands.runOnce(
+                    () -> io.setVoltage(0), 
+                    this
                 )
-        ).andThen(
-            Commands.waitSeconds(0.5),
-            Commands.runOnce(
-                ()-> io.setVoltage(0), this
-            )
-        );
+            );
+        else
+            return Commands.parallel(
+                    Commands.runOnce(
+                        () -> io.setVoltage(voltage), this
+                    ),
+                    Commands.waitUntil(
+                        () -> coralDetected()
+                    )
+            ).andThen(
+                Commands.waitSeconds(0.5),
+                Commands.runOnce(
+                    ()-> io.setVoltage(0), this
+                )
+            ).unless(this::coralDetected);
 
     }
     // Run until coral is no longer detected, if spike in current, wait then rerun
     public Command runUntilCoralNotDetected(double voltage) {
         if (Constants.currentMode == Mode.SIM)
-            return Commands.waitSeconds(0.2);
+            return Commands.sequence(
+                Commands.runOnce(
+                    () -> io.setVoltage(voltage), 
+                    this
+                ),
+                Commands.waitSeconds(0.2),
+                Commands.runOnce(
+                    () -> io.setVoltage(0), 
+                    this
+                )
+            );
         else
             return Commands.repeatingSequence(
                     Commands.runOnce(
@@ -74,7 +97,7 @@ public class EndEffector extends SubsystemBase {
     public boolean coralDetected(){
         // return inputs.tofDistance.gte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
         // OR
-        return io.getTofRange().gte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
+        return io.getTofRange().lte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
     }
     @Override
     public void periodic() {

@@ -73,7 +73,7 @@ public class ArmPivotIOSim implements ArmPivotIO{
 
         sb_sim.add("Arm Mech", mech);
 
-        isRunning = false;
+        setSetpoint(Degrees.of(90));
     }
 
     @Override

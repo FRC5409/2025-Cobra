@@ -21,18 +21,6 @@
           "data": {
             "name": "L4"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RELEASE"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RELEASE"
-          }
         }
       ]
     }

@@ -30,12 +30,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "RELEASE"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -86,12 +80,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "RELEASE"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -142,12 +130,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "RELEASE"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -195,12 +177,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RELEASE"
           }
         },
         {

@@ -205,8 +205,7 @@ public class AutoCommands {
                 Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
                 Commands.waitSeconds(0.25)
             ).onlyIf(waitBeforeScoring),
-            sys_endeffector.runUntilCoralNotDetected(3),
-            new IdleCommand(sys_elevator, sys_pivot)
+            new IdleCommand(sys_elevator, sys_pivot, sys_endeffector)
         ).repeatedly();
     }
 }

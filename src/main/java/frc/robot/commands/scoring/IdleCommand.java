@@ -8,10 +8,11 @@ import frc.robot.Constants.kArmPivot;
 import frc.robot.Constants.kElevator;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.collector.EndEffector;
 import frc.robot.util.WaitThen;
 
 public class IdleCommand extends SequentialCommandGroup {
-    public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot) {
+    public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector) {
         super(
             Commands.parallel(
                 sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
@@ -20,7 +21,11 @@ public class IdleCommand extends SequentialCommandGroup {
                     sys_elevator.elevatorGo(kElevator.IDLING_HEIGHT)
                 )
             ),
-            sys_pivot.moveArm(kArmPivot.PICKUP_ANGLE)
+            Commands.deadline(
+                sys_endeffector.runUntilCoralDetected(2),
+                sys_pivot.moveArm(kArmPivot.PICKUP_ANGLE)
+            ),
+            sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT)
         );
     }
 }

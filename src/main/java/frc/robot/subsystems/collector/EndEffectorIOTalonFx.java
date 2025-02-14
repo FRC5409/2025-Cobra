@@ -1,9 +1,9 @@
 package frc.robot.subsystems.collector;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import static edu.wpi.first.units.Units.Meters;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -13,9 +13,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
-
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.kEndEffector;
 
 public class EndEffectorIOTalonFx implements EndEffectorIO {

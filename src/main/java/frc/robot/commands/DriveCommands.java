@@ -58,8 +58,13 @@ public class DriveCommands {
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
   public static double speedModifier = 1;
 
+  private static boolean aligned = false;
+
   private DriveCommands() {}
 
+  public static boolean isAligned() {
+    return aligned;
+  }
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
@@ -218,6 +223,8 @@ public class DriveCommands {
 
         return Commands.parallel(
             Commands.runOnce(() -> {
+                aligned = false;
+
                 Pose2d robotPose = drive.getPose();
                 ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
         
@@ -262,7 +269,12 @@ public class DriveCommands {
                 distanceMeters <= kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
                 difference.lte(kAutoAlign.ROTATION_TOLLERANCE);
         }
-    ).andThen(Commands.runOnce(drive::stop, drive));
+    ).andThen(
+        Commands.runOnce(() -> {
+            drive.stop();
+            aligned = true;
+        }, drive)
+    );
   }
 
   /**

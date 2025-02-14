@@ -42,7 +42,7 @@ public class ArmPivot extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Arm", inputs);
-        endEffectorPose = new Pose3d(new Translation3d(0.22, -0.025, 0.143 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, -getPosition().in(Radians), 0));
+        endEffectorPose = new Pose3d(new Translation3d(0.231, -0.023, 0.155 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, -getPosition().in(Radians), 0));
     }
 
     public static Pose3d getPose() {

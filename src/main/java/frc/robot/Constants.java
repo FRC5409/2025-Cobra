@@ -148,9 +148,9 @@ public final class Constants {
     public static final Angle maxAngles = Degrees.of(120);
 
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(82);
-    public static final Angle PICKUP_ANGLE  = Degrees.of(90);
+    public static final Angle PICKUP_ANGLE  = Degrees.of(105);
 
-    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(1.5, 0.0, 0.2);
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {
@@ -192,7 +192,7 @@ public final class Constants {
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.684;
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.03);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.02);
   }
 
   public static final class kVision {
