@@ -51,6 +51,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.ScoringLevel;
+import frc.robot.Constants.kArmPivot;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
@@ -168,7 +169,7 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.BackRight),
                         sys_vision);
               
-                sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(0,0));
+                sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(kArmPivot.FALCON_ID, kArmPivot.CANCODER_ID));
                 sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
                 sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
             }

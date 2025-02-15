@@ -133,10 +133,12 @@ public final class Constants {
   }
 
   public static final class kArmPivot {
+    public static final int FALCON_ID = 22;
+    public static final int CANCODER_ID = 24;
     public static final double kP = 0.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-    public static final double kG = 0.0;
+    public static final double kG = 0.025 * 12.0;
 
     public static final double   ARM_GEARING      = (72/22) * 4*9;
     public static final Distance ARM_DRUM_RADIUS  = Inches.of(0.944);
@@ -171,11 +173,11 @@ public final class Constants {
     }
 
   public static final class kEndEffector {
-      public static final int ENDEFFECTOR_MOTOR_ID = 0;
+      public static final int ENDEFFECTOR_MOTOR_ID = 23;
       public static final int CURRENT_LIMIT = 30;
       public static final double VOLTAGE_INTAKE = 3;
       public static final double VOLTAGE_SCORE = -3;
-      public static final int TIMOFFLIGHT_SENSORID = 0;
+      public static final int TIMOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(80);
 
   }

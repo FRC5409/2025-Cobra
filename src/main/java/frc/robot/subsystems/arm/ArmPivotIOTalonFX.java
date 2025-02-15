@@ -8,7 +8,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -35,7 +34,6 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
     private StatusSignal<Voltage> deviceVoltage;
     private StatusSignal<Current> deviceCurrent;
     private StatusSignal<Temperature> deviceTemp;
-    private StatusSignal<Angle> deviceAngle;
     private StatusSignal<AngularVelocity> deviceVelocity;
 
     public ArmPivotIOTalonFX(int canID, int sensorID) {
@@ -46,7 +44,8 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         canCoderSensor.getConfigurator().apply(
             new CANcoderConfiguration().MagnetSensor
             .withAbsoluteSensorDiscontinuityPoint(Degrees.of(180))
-            .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+            .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+            .withMagnetOffset(-0.343262)
         );
 
         TalonFXConfigurator configurator = armMotor.getConfigurator();
@@ -60,9 +59,9 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         FeedbackConfigs feedBackConfig = new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
             .withRemoteCANcoder(canCoderSensor)
-            .withSensorToMechanismRatio(1)
-            .withRotorToSensorRatio(kArmPivot.ARM_GEARING)
-            .withRotorToSensorRatio(sensorID);
+            .withSensorToMechanismRatio(1.0)
+            .withRotorToSensorRatio(kArmPivot.ARM_GEARING);
+            
         configurator.apply(feedBackConfig);
 
         armMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -78,20 +77,11 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
         armMotor.getConfigurator().apply(slot0Configs);
 
-        TalonFXConfiguration fusedCanCoder = new TalonFXConfiguration();
-        fusedCanCoder.Feedback.FeedbackRemoteSensorID = armMotor.getDeviceID();
-        fusedCanCoder.Feedback.SensorToMechanismRatio = 1.0;
-        fusedCanCoder.Feedback.RotorToSensorRatio = kArmPivot.ARM_GEARING;
-        fusedCanCoder.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
-
-        armMotor.getConfigurator().apply(fusedCanCoder);
-
         positionSignal = armMotor.getPosition();
         velocitySignal = armMotor.getVelocity();
         deviceVoltage = armMotor.getMotorVoltage();
         deviceCurrent = armMotor.getSupplyCurrent();
         deviceTemp = armMotor.getDeviceTemp();
-        deviceAngle = armMotor.getDifferentialAveragePosition();
         deviceVelocity = armMotor.getVelocity();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
@@ -100,7 +90,8 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
             velocitySignal,
             deviceVoltage,
             deviceCurrent,
-            deviceTemp
+            deviceTemp,
+            deviceVelocity
         );
 
         armMotor.optimizeBusUtilization();
@@ -123,29 +114,19 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
     @Override
     public void updateInputs(ArmPivotInputs inputs) {
-        // inputs.connected = armMotor.getFaultField().getValue() == 0;
-        // inputs.voltage = armMotor.getMotorVoltage().getValueAsDouble();
-        // inputs.current = armMotor.getSupplyCurrent().getValueAsDouble();
-        // inputs.temperature = armMotor.getDeviceTemp().getValue().in(Celsius);
-        // inputs.positionAngles = armMotor.getPosition().getValue().in(Degrees);
-        // inputs.speed = armMotor.getVelocity().getValue().in(RadiansPerSecond);
-        inputs.positionRad = Units.rotationsToRadians(inputs.positionAngles);
-
         inputs.connected = BaseStatusSignal.refreshAll(
             deviceVoltage,
             deviceCurrent,
             deviceTemp,
-            deviceAngle,
             deviceVelocity
         ).isOK();
 
         inputs.positionAngles = positionSignal.getValue().in(Degrees);
         inputs.speed = velocitySignal.getValue().in(RadiansPerSecond);
-        inputs.positionRad = Units.rotationsToRadians(inputs.positionAngles);
+        inputs.positionRad = Units.degreesToRadians(inputs.positionAngles);
         inputs.voltage = deviceVoltage.getValueAsDouble();
         inputs.current = deviceCurrent.getValueAsDouble();
         inputs.temperature = deviceTemp.getValueAsDouble();
-        inputs.positionAngles = deviceAngle.getValueAsDouble();
         inputs.speed = deviceVelocity.getValueAsDouble();
     }
 }
