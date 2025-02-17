@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.kArmPivot;
 import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -22,7 +23,7 @@ public class IdleCommand extends SequentialCommandGroup {
                 )
             ),
             Commands.deadline(
-                sys_endeffector.runUntilCoralDetected(2),
+                sys_endeffector.runUntilCoralDetected(kEndEffector.IDLE_VOLTAGE),
                 sys_pivot.moveArm(kArmPivot.PICKUP_ANGLE)
             ),
             sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT)

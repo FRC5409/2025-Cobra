@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -30,7 +31,7 @@ public class ScoreCommand extends SequentialCommandGroup {
                 )
             ),
             Commands.waitUntil(scoring),
-            sys_score.runUntilCoralNotDetected(4.0)
+            sys_score.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE)
         );
     }
 }

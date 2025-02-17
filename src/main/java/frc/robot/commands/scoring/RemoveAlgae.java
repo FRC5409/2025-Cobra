@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -16,7 +17,7 @@ public class RemoveAlgae extends SequentialCommandGroup {
             Commands.parallel(
                 sys_elevator.elevatorGo(level.elevatorSetpoint),
                 sys_arm.moveArm(level.pivotAngle),
-                sys_endEffector.setVoltage(-3)
+                sys_endEffector.setVoltage(-kEndEffector.ALGAE_VOLTAGE)
             )
         );
     }

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -57,9 +58,9 @@ public final class Constants {
   }
 
   public static final class kDrive {
-    public static final Mass ROBOT_FULL_MASS = Kilograms.of(25.034);
+    public static final Mass ROBOT_FULL_MASS = Kilograms.of(58.920);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(2.881);
-    public static final double WHEEL_COF = 1.2;
+    public static final double WHEEL_COF = 1.916;
   }
 
   public static final class kAuto {
@@ -94,18 +95,28 @@ public final class Constants {
     public static final int  TIME_ADJUSTMENT_TIMEOUT = 10;
 
     public static final class kReef {
-      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.35, 0.167, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.35, -0.167, new Rotation2d());
+      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.367, 0.18, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.18, new Rotation2d());
+
+      private static final Pose2d generatePose(Rotation2d rotation) {
+        final double mx = 4.493;
+        final double my = FlippingUtil.fieldSizeY / 2.0;
+        final double r = 1.64;
+
+        return new Pose2d(r * -rotation.getCos() + mx, r * -rotation.getSin() + my, rotation);
+      } 
 
       public static final HashMap<kReefPosition, Pose2d> TARGETS = new HashMap<>();
       static {
-        TARGETS.put(kReefPosition.CLOSE_LEFT,   new Pose2d(3.668, 5.428, Rotation2d.fromDegrees(-60.000)));
-        TARGETS.put(kReefPosition.FAR_LEFT,     new Pose2d(5.335, 5.392, Rotation2d.fromDegrees(-120.000)));
-        TARGETS.put(kReefPosition.FAR,          new Pose2d(6.150, 4.026, Rotation2d.fromDegrees(180.000)));
-        TARGETS.put(kReefPosition.CLOSE,        new Pose2d(2.850, 4.026, Rotation2d.fromDegrees(0.000)));
-
+        TARGETS.put(kReefPosition.CLOSE_LEFT,   generatePose(Rotation2d.fromDegrees(-60.000)));
+        TARGETS.put(kReefPosition.FAR_LEFT,     generatePose(Rotation2d.fromDegrees(-120.000)));
+        TARGETS.put(kReefPosition.FAR,          generatePose(Rotation2d.fromDegrees(180.000)));
+        TARGETS.put(kReefPosition.CLOSE,        generatePose(Rotation2d.fromDegrees(0.000)));
+        
         TARGETS.put(kReefPosition.CLOSE_RIGHT,  FieldMirror.mirrorPose(TARGETS.get(kReefPosition.CLOSE_LEFT)));
         TARGETS.put(kReefPosition.FAR_RIGHT,    FieldMirror.mirrorPose(TARGETS.get(kReefPosition.FAR_LEFT)));
+
+        System.out.println(TARGETS.get(kReefPosition.CLOSE));
       }
 
       public static final HashMap<String, Pose2d> BRANCHES = new HashMap<>();
@@ -175,10 +186,12 @@ public final class Constants {
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 23;
       public static final int CURRENT_LIMIT = 30;
-      public static final double VOLTAGE_INTAKE = 3;
-      public static final double VOLTAGE_SCORE = -3;
       public static final int TIMOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(80);
+
+      public static final double IDLE_VOLTAGE  = 2.0;
+      public static final double SCORE_VOLTAGE = 4.0;
+      public static final double ALGAE_VOLTAGE = 3.0;
 
   }
 
