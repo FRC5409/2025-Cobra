@@ -20,4 +20,5 @@ public interface EndEffectorIO {
     public default void setVoltage(double volts) {}
     public default void updateInputs(EndEffectorInputs inputs) {}
     public default Distance getTofRange(){ return Meter.of(0);}
+    public default double getMotorCurrent() { return 0.0; }
 } 

@@ -17,7 +17,7 @@ public class RemoveAlgae extends SequentialCommandGroup {
             Commands.parallel(
                 sys_elevator.elevatorGo(level.elevatorSetpoint),
                 sys_arm.moveArm(level.pivotAngle),
-                sys_endEffector.setVoltage(-kEndEffector.ALGAE_VOLTAGE)
+                sys_endEffector.setVoltage(kEndEffector.ALGAE_VOLTAGE)
             )
         );
     }

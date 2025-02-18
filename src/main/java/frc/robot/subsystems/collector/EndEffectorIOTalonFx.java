@@ -76,6 +76,11 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         return Meters.of(tof.getRange());
     }
 
+    @Override
+    public double getMotorCurrent() {
+        return deviceCurrent.getValueAsDouble();
+    }
+
     @Override 
     public void updateInputs(EndEffectorInputs inputs) {
         inputs.endEffectorConnection = BaseStatusSignal.refreshAll(

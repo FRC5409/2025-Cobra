@@ -15,19 +15,23 @@ import com.pathplanner.lib.path.PathPoint;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.scoring.IdleCommand;
+import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -174,11 +178,29 @@ public class AutoCommands {
     public static Command alignToBranch(Drive drive, Supplier<kDirection> direction) {
         return DriveCommands.alignToPoint(
             drive, 
-            () -> AlignHelper.getClosestReef(drive.getBlueSidePose(), kClosestType.DISTANCE, direction.get())
+            () -> AlignHelper.getClosestBranch(drive.getBlueSidePose(), kClosestType.DISTANCE, direction.get())
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
-    public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, Command scoringCommand, BooleanSupplier waitBeforeScoring) {
+    public static Command alignToAlgae(Drive drive) {
+        return DriveCommands.alignToPoint(
+            drive, 
+            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.367, 0.0, new Rotation2d()))
+        ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
+    }
+
+    public static Command backOffFromAlgae(Drive drive, Rotation2d rotationOffset) {
+        return DriveCommands.alignToPoint(
+            drive, 
+            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0, 0, rotationOffset))
+        ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
+    }
+
+    public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, Command scoringCommand, BooleanSupplier isAlgae, BooleanSupplier waitBeforeScoring) {
+        Command waitForAlgae = RobotBase.isReal() ? 
+            Commands.waitUntil(() -> sys_endeffector.getCurrent() >= 20.0) :
+            Commands.waitSeconds(0.5);
+
         return Commands.sequence(
             // TODO: TEST AT MULTIPLE AUTO POSITIONS
             Commands.parallel(
@@ -188,10 +210,19 @@ public class AutoCommands {
             pathFindToReef(drive, () -> target),
             alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT))
                 .alongWith(scoringCommand),
-            Commands.sequence(
-                Commands.run(() -> {}).onlyWhile(waitBeforeScoring),
-                Commands.waitSeconds(0.25)
-            ).onlyIf(waitBeforeScoring)
+            backOffFromAlgae(drive, new Rotation2d())
+                .andThen(alignToAlgae(drive))
+                .alongWith(
+                    new ConditionalCommand(
+                        new RemoveAlgae(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL2_ALGAE), 
+                        new RemoveAlgae(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL3_ALGAE), 
+                        () -> AlignHelper.getAlgaeHeight(drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+                    )
+                )
+                .andThen(
+                    waitForAlgae,
+                    backOffFromAlgae(drive, Rotation2d.fromDegrees(180.0))
+                ).onlyIf(isAlgae)
         ).repeatedly();
     }
 }

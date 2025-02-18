@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
+import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.Constants.kAutoAlign.kStation;
@@ -38,15 +39,23 @@ public class AlignHelper {
         timer = kAutoAlign.TIME_ADJUSTMENT_TIMEOUT;
     }
 
+    public static ScoringLevel getAlgaeHeight(Pose2d robotPose) {
+        return kReef.ALGAE_HEIGHTS.getOrDefault(getClosestReef(robotPose), ScoringLevel.LEVEL2_ALGAE);
+    }
+
     public static Pose2d getClosestReef(Pose2d robotPose) {
-        return getClosestReef(robotPose, kClosestType.DISTANCE);
+        return calculator(robotPose, kClosestType.DISTANCE, kReef.TARGETS.values());
     }
 
-    public static Pose2d getClosestReef(Pose2d robotPose, kClosestType type) {
-        return getClosestReef(robotPose, type, kDirection.BOTH);
+    public static Pose2d getClosestBranch(Pose2d robotPose) {
+        return getClosestBranch(robotPose, kClosestType.DISTANCE);
     }
 
-    public static Pose2d getClosestReef(Pose2d robotPose, kClosestType type, kDirection direction) {
+    public static Pose2d getClosestBranch(Pose2d robotPose, kClosestType type) {
+        return getClosestBranch(robotPose, type, kDirection.BOTH);
+    }
+
+    public static Pose2d getClosestBranch(Pose2d robotPose, kClosestType type, kDirection direction) {
         return calculator(robotPose, type, getBranchPoses(direction));
     }
 

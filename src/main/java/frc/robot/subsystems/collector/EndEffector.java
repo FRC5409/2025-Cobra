@@ -77,7 +77,7 @@ public class EndEffector extends SubsystemBase {
                         this
                     ),
                     Commands.waitUntil(
-                        () -> inputs.endEffectorCurrent > 25
+                        () -> getCurrent() > 25
                     ),
                     Commands.runOnce(
                         () -> io.setVoltage(-voltage), 
@@ -102,6 +102,11 @@ public class EndEffector extends SubsystemBase {
     public boolean coralDetected(){
         return io.getTofRange().lte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
     }
+
+    public double getCurrent() {
+        return io.getMotorCurrent();
+    }
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run

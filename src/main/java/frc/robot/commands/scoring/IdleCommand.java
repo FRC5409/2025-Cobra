@@ -14,6 +14,10 @@ import frc.robot.util.WaitThen;
 
 public class IdleCommand extends SequentialCommandGroup {
     public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector) {
+        this(sys_elevator, sys_pivot, sys_endeffector, kEndEffector.IDLE_VOLTAGE);
+    }
+
+    public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, double endEffectorVoltage) {
         super(
             Commands.parallel(
                 sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
@@ -23,7 +27,7 @@ public class IdleCommand extends SequentialCommandGroup {
                 )
             ),
             Commands.deadline(
-                sys_endeffector.runUntilCoralDetected(kEndEffector.IDLE_VOLTAGE),
+                sys_endeffector.runUntilCoralDetected(endEffectorVoltage),
                 sys_pivot.moveArm(kArmPivot.PICKUP_ANGLE)
             ),
             sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT)

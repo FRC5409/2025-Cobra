@@ -130,6 +130,8 @@ public class RobotContainer {
 
     public static boolean isTelopAuto = false;
 
+    private boolean removeAlgae = false;
+
     @SuppressWarnings("unused")
     private static final boolean runOpponent = false
         && Constants.currentMode == Mode.SIM;
@@ -244,6 +246,7 @@ public class RobotContainer {
             sys_armPivot,
             sys_endEffector,
             getLevelSelectorCommand(true),
+            () -> removeAlgae,
             () -> secondaryController.getHID().getPOV() != -1
         ).onlyWhile(() -> isTelopAuto);
 
@@ -465,14 +468,14 @@ public class RobotContainer {
                 "ALIGN_LEFT",
                 new ConditionalCommand(
                     DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(
+                        () -> AlignHelper.getClosestBranch(
                             sys_drive.getBlueSidePose(),
                             kClosestType.DISTANCE,
                             kDirection.LEFT
                         )
                     ),
                     DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(
+                        () -> AlignHelper.getClosestBranch(
                             sys_drive.getBlueSidePose(),
                             kClosestType.DISTANCE,
                             kDirection.RIGHT
@@ -486,14 +489,14 @@ public class RobotContainer {
                 "ALIGN_RIGHT",
                 new ConditionalCommand(
                     DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(
+                        () -> AlignHelper.getClosestBranch(
                             sys_drive.getBlueSidePose(),
                             kClosestType.DISTANCE,
                             kDirection.RIGHT
                         )
                     ),
                     DriveCommands.alignToPoint(sys_drive,
-                        () -> AlignHelper.getClosestReef(
+                        () -> AlignHelper.getClosestBranch(
                             sys_drive.getBlueSidePose(),
                             kClosestType.DISTANCE,
                             kDirection.LEFT
@@ -541,6 +544,7 @@ public class RobotContainer {
 
         primaryController
             .back()
+            .or(() -> secondaryController.getHID().getBackButton())
                 .whileFalse(
                     Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
                         .andThen(telopAutoCommand)
@@ -563,6 +567,18 @@ public class RobotContainer {
                 )
             );
 
+        primaryController.x()
+            .onTrue(new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel == ScoringLevel.LEVEL3 ? ScoringLevel.LEVEL3_ALGAE : ScoringLevel.LEVEL2_ALGAE))
+            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector, kEndEffector.ALGAE_VOLTAGE));
+
+        primaryController.b()
+            .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
+            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
+        // TODO: Look into barge/create barge command
+        // primaryController.y()
+        //     .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.BARGE, () -> true));
+
         // Reset gyro to 0° when Start button is pressed
         primaryController
                 .start()
@@ -581,7 +597,7 @@ public class RobotContainer {
                     Commands.parallel(
                         DriveCommands.alignToPoint(
                             sys_drive, 
-                            () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
+                            () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
                         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
                         .alongWith(Commands.waitUntil(() -> sys_elevator.getPosition().gte(ScoringLevel.LEVEL4.elevatorSetpoint.minus(Centimeters.of(5))))),
                         getLevelSelectorCommand(false)
@@ -597,7 +613,7 @@ public class RobotContainer {
                     Commands.parallel(
                         DriveCommands.alignToPoint(
                             sys_drive, 
-                            () -> AlignHelper.getClosestReef(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
+                            () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
                         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                         getLevelSelectorCommand(false)
                     ).andThen(
@@ -613,10 +629,6 @@ public class RobotContainer {
                     () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
             );
-
-        primaryController.y()
-            .onTrue(new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE))
-            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // SECONDARY CONTROLLER
 
@@ -634,6 +646,10 @@ public class RobotContainer {
 
         secondaryController.rightBumper()
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
+
+        secondaryController.start()
+            .onTrue(Commands.runOnce(() -> removeAlgae = true).ignoringDisable(true))
+            .onFalse(Commands.runOnce(() -> removeAlgae = false).ignoringDisable(true));
 
         // Wanted to try something new. Could have just made a method
         BiFunction<kReefPosition, Boolean, Command> selectGenerator = new BiFunction<AutoCommands.kReefPosition,Boolean,Command>() {
@@ -723,7 +739,7 @@ public class RobotContainer {
                 Commands.parallel(
                     AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true),
                     Commands.either(
-                        AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> false), 
+                        AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
                         new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector),
                         runTelop::get
                     )

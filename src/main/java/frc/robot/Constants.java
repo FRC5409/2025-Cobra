@@ -99,7 +99,7 @@ public final class Constants {
       public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.18, new Rotation2d());
 
       private static final Pose2d generatePose(Rotation2d rotation) {
-        final double mx = 4.493;
+        final double mx = 4.48945;
         final double my = FlippingUtil.fieldSizeY / 2.0;
         final double r = 1.64;
 
@@ -115,8 +115,16 @@ public final class Constants {
         
         TARGETS.put(kReefPosition.CLOSE_RIGHT,  FieldMirror.mirrorPose(TARGETS.get(kReefPosition.CLOSE_LEFT)));
         TARGETS.put(kReefPosition.FAR_RIGHT,    FieldMirror.mirrorPose(TARGETS.get(kReefPosition.FAR_LEFT)));
+      }
 
-        System.out.println(TARGETS.get(kReefPosition.CLOSE));
+      public static final HashMap<Pose2d, ScoringLevel> ALGAE_HEIGHTS = new HashMap<>();
+      static {
+        ALGAE_HEIGHTS.put(TARGETS.get(kReefPosition.CLOSE_LEFT ), ScoringLevel.LEVEL2_ALGAE);
+        ALGAE_HEIGHTS.put(TARGETS.get(kReefPosition.CLOSE      ), ScoringLevel.LEVEL3_ALGAE);
+        ALGAE_HEIGHTS.put(TARGETS.get(kReefPosition.CLOSE_RIGHT), ScoringLevel.LEVEL2_ALGAE);
+        ALGAE_HEIGHTS.put(TARGETS.get(kReefPosition.FAR_RIGHT  ), ScoringLevel.LEVEL3_ALGAE);
+        ALGAE_HEIGHTS.put(TARGETS.get(kReefPosition.FAR        ), ScoringLevel.LEVEL2_ALGAE);
+        ALGAE_HEIGHTS.put(TARGETS.get(kReefPosition.FAR_LEFT   ), ScoringLevel.LEVEL3_ALGAE);
       }
 
       public static final HashMap<String, Pose2d> BRANCHES = new HashMap<>();
@@ -167,12 +175,14 @@ public final class Constants {
   }
 
     public static enum ScoringLevel {
-        LEVEL1(Meters.of(0.05), Degrees.of(75.0)),
-        LEVEL2(Meters.of(0.16), Degrees.of(72.0)),
-        LEVEL3(Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(Meters.of(0.653), Degrees.of(69.0)),
-        LEVEL2_ALGAE(Meters.of(0.22), Degrees.of(76)),
-        LEVEL3_ALGAE(Meters.of(0.42), Degrees.of(76));
+        LEVEL1(      Meters.of(0.05), Degrees.of(75.0)),
+        LEVEL2(      Meters.of(0.16), Degrees.of(72.0)),
+        LEVEL3(      Meters.of(0.36), Degrees.of(72.0)),
+        LEVEL4(      Meters.of(0.65), Degrees.of(69.0)),
+        LEVEL2_ALGAE(Meters.of(0.22), Degrees.of(76.0)),
+        LEVEL3_ALGAE(Meters.of(0.42), Degrees.of(76.0)),
+        BARGE(       Meters.of(0.65), Degrees.of(100.)),
+        PROCESSOR(   Meters.of(0.05), Degrees.of(80.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
@@ -189,9 +199,9 @@ public final class Constants {
       public static final int TIMOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(80);
 
-      public static final double IDLE_VOLTAGE  = 2.0;
-      public static final double SCORE_VOLTAGE = 4.0;
-      public static final double ALGAE_VOLTAGE = 3.0;
+      public static final double IDLE_VOLTAGE  =  2.0;
+      public static final double SCORE_VOLTAGE =  4.0;
+      public static final double ALGAE_VOLTAGE = -3.0;
 
   }
 
