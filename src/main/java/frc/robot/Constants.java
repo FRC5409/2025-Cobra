@@ -22,7 +22,10 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -236,5 +239,9 @@ public final class Constants {
      * Frames allowed without latency update before flagged as disconnected
      */
     public static final int DISCONNECTION_TIMEOUT = 5;
+
+    public static final Transform3d OFFSET_FROM_ROBOT_ORIGIN = new Transform3d(
+                                                                        new Translation3d(0.118, 0.218, 0.38),
+                                                                        new Rotation3d(   0,  0,   -20));
   }
 }
