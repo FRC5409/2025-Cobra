@@ -154,7 +154,10 @@ public final class Constants {
   public static final class kArmPivot {
     public static final int FALCON_ID = 22;
     public static final int CANCODER_ID = 24;
-    public static final double kP = 0.0;
+
+    public static final double MAGNET_SENSOR_OFFSET = -0.344727;
+
+    public static final double kP = 150.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kG = 0.025 * 12.0;
@@ -169,18 +172,20 @@ public final class Constants {
     public static final Angle maxAngles = Degrees.of(120);
 
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(84);
-    public static final Angle PICKUP_ANGLE  = Degrees.of(105);
+    public static final Angle PICKUP_ANGLE  = Degrees.of(104);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
   }
 
+    // MAX ELEVATOR HEIGHT = 0.652587890625;
+
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.05), Degrees.of(75.0)),
-        LEVEL2(      Meters.of(0.16), Degrees.of(72.0)),
-        LEVEL3(      Meters.of(0.36), Degrees.of(72.0)),
-        LEVEL4(      Meters.of(0.65), Degrees.of(69.0)),
-        LEVEL2_ALGAE(Meters.of(0.22), Degrees.of(76.0)),
-        LEVEL3_ALGAE(Meters.of(0.42), Degrees.of(76.0)),
+        LEVEL1(      Meters.of(0.03), Degrees.of(100.0)),
+        LEVEL2(      Meters.of(0.12), Degrees.of(77.0)),
+        LEVEL3(      Meters.of(0.32), Degrees.of(77.0)),
+        LEVEL4(      Meters.of(0.65), Degrees.of(89.0)),
+        LEVEL2_ALGAE(Meters.of(0.17), Degrees.of(76.0)),
+        LEVEL3_ALGAE(Meters.of(0.37), Degrees.of(76.0)),
         BARGE(       Meters.of(0.65), Degrees.of(100.)),
         PROCESSOR(   Meters.of(0.05), Degrees.of(80.0));
 
@@ -197,10 +202,10 @@ public final class Constants {
       public static final int ENDEFFECTOR_MOTOR_ID = 23;
       public static final int CURRENT_LIMIT = 30;
       public static final int TIMOFFLIGHT_SENSORID = 28;
-      public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(80);
+      public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
-      public static final double IDLE_VOLTAGE  =  2.0;
-      public static final double SCORE_VOLTAGE =  4.0;
+      public static final double IDLE_VOLTAGE  =  3.0;
+      public static final double SCORE_VOLTAGE =  6.0;
       public static final double ALGAE_VOLTAGE = -3.0;
 
   }
@@ -213,13 +218,13 @@ public final class Constants {
     public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2.0);
     public static final double kCircumfrence = 2 * Math.PI * ELEVATOR_DRUMRADIUS.in(Meters);
     public static final double kRotationConverter = kCircumfrence / kGearing;
-    public static final PIDConstants TALONFX_PID = new PIDConstants(0, 0, 0);
+    public static final PIDConstants TALONFX_PID = new PIDConstants(100, 0, 0);
     public static final PIDConstants SIM_PID = new PIDConstants(10, 0, 0);
     public static final Mass ELEVATOR_MASS = Pound.of(52.95);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.684;
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.02);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.01);
   }
 
   public static final class kVision {

@@ -50,11 +50,17 @@ public class Elevator extends SubsystemBase{
     }
 
     public Command elevatorGo(Distance setpoint) {
-        return Commands.sequence(
-            Commands.runOnce(() -> io.setSetpoint(setpoint), this),
-            Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025))),
-            Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
-        );
+        if (setpoint.lte(kElevator.IDLING_HEIGHT.plus(Centimeters.of(1))))
+            return Commands.sequence(
+                Commands.runOnce(() -> io.setSetpoint(setpoint), this),
+                Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025))),
+                Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
+            );
+        else
+            return Commands.sequence(
+                Commands.runOnce(() -> io.setSetpoint(setpoint), this),
+                Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025)))
+            );
     }
 
     public Command stopAll() {

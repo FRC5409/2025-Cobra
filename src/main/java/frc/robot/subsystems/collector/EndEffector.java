@@ -10,6 +10,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kEndEffector;
 import frc.robot.util.DebugCommand;
+import frc.robot.util.WaitThen;
 
 public class EndEffector extends SubsystemBase {
 
@@ -49,7 +50,7 @@ public class EndEffector extends SubsystemBase {
                         () -> coralDetected()
                     )
             ).andThen(
-                Commands.waitSeconds(0.5),
+                Commands.waitSeconds(0.0),
                 Commands.runOnce(
                     ()-> io.setVoltage(0), this
                 )
@@ -71,23 +72,15 @@ public class EndEffector extends SubsystemBase {
                 )
             );
         else
-            return Commands.repeatingSequence(
-                    Commands.runOnce(
-                        () -> io.setVoltage(voltage), 
-                        this
-                    ),
-                    Commands.waitUntil(
-                        () -> getCurrent() > 25
-                    ),
-                    Commands.runOnce(
-                        () -> io.setVoltage(-voltage), 
-                        this
-                    ), 
-                    Commands.waitSeconds(0.25)
-                ).until(
-                    () -> !coralDetected()
-                )    
-                .finallyDo(
+            return Commands.runOnce(
+                    () -> io.setVoltage(voltage), 
+                    this
+                ).alongWith(
+                    new WaitThen(
+                        () -> !coralDetected(),
+                        Commands.waitSeconds(0.25)
+                    )
+                ).finallyDo(
                     () -> io.setVoltage(0)
                 );
     }

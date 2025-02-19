@@ -43,7 +43,7 @@ public class VisionIOLimelight implements VisionIO {
 
     @Override
     public void setCameraOffset() {
-        LimelightHelpers.setCameraPose_RobotSpace(kVision.CAM_NAME, 0.171919, 0, 0.629752, 0, 0, 0);
+        LimelightHelpers.setCameraPose_RobotSpace(kVision.CAM_NAME, 0.118, 0.218, 0.38, 0, 0, -20);
     }
 
     @Override

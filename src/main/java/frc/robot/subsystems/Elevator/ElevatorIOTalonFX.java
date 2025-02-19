@@ -70,6 +70,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             .withKP(kElevator.TALONFX_PID.kP)
             .withKI(kElevator.TALONFX_PID.kI)
             .withKD(kElevator.TALONFX_PID.kD);
+
         m_mainMotorConfig.apply(m_pidConfig);
         m_followerMotorConfig.apply(m_pidConfig);
 

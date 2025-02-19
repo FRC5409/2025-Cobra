@@ -5,8 +5,10 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -43,7 +45,11 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         currentConfig.SupplyCurrentLimitEnable = true;
         endEffectorConfig.apply(currentConfig);
 
-        endEffectorMotor.setNeutralMode(NeutralModeValue.Brake);
+        MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
+
+        endEffectorConfig.apply(motorOutputConfigs);
 
         // Getting Status Signals
         deviceVoltage = endEffectorMotor.getMotorVoltage();
@@ -73,7 +79,7 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
 
     @Override
     public Distance getTofRange(){
-        return Meters.of(tof.getRange());
+        return Millimeters.of(tof.getRange());
     }
 
     @Override
@@ -86,11 +92,13 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         inputs.endEffectorConnection = BaseStatusSignal.refreshAll(
             deviceVoltage,
             deviceCurrent,
-            deviceTemp).isOK();
+            deviceTemp
+        ).isOK();
+        
         inputs.endEffectorVolts = deviceVoltage.getValueAsDouble();
         inputs.endEffectorCurrent = deviceCurrent.getValueAsDouble();
         inputs.endEffectorTemp = deviceTemp.getValueAsDouble();
-        inputs.tofDistance = Meters.of(tof.getRange());
+        inputs.tofDistance = getTofRange().in(Millimeters);
         inputs.endEffectorVelocity = deviceVelocity.getValueAsDouble();
         inputs.endEffectorPosition = devicePosition.getValueAsDouble();
     }

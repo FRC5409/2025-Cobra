@@ -186,7 +186,7 @@ public class RobotContainer {
                         COTS.ofMark4i(
                             DCMotor.getKrakenX60Foc(1),
                             DCMotor.getKrakenX60Foc(1),
-                            1.20,
+                            kDrive.WHEEL_COF,
                             2
                         )
                     );
@@ -560,19 +560,24 @@ public class RobotContainer {
             .onFalse(
                 new ConditionalCommand(
                     Commands.waitSeconds(0.2),
-                    sys_endEffector.runUntilCoralNotDetected(3), 
+                    sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE), 
                     () -> Constants.currentMode == Mode.SIM
-                ).andThen(
-                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
                 )
+                // .andThen(
+                //     new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                // )
             );
 
         primaryController.x()
             .onTrue(new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel == ScoringLevel.LEVEL3 ? ScoringLevel.LEVEL3_ALGAE : ScoringLevel.LEVEL2_ALGAE))
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector, kEndEffector.ALGAE_VOLTAGE));
 
+        // primaryController.b()
+        //     .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
+        //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
         primaryController.b()
-            .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
+            .onTrue(sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE))
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // TODO: Look into barge/create barge command
@@ -709,14 +714,16 @@ public class RobotContainer {
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
 
         // Test Controller
+
         testController.a()
-            .onTrue(sys_elevator.elevatorGo(Meters.of(0.4)));
-        testController.b()
-        .onTrue(sys_elevator.elevatorGo(Meters.of(0.2)));
+            .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
         testController.x()
-            .onTrue(sys_armPivot.moveArm(Degrees.of(75.0)));
-        testController.y()
-            .onTrue(sys_armPivot.moveArm(Degrees.of(45.0)));
+            .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, () -> false));
+
+        testController.b()
+            .onTrue(sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE));
+
 
     }
 

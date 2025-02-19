@@ -7,6 +7,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -14,6 +15,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.util.Units;
@@ -45,7 +47,7 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
             new CANcoderConfiguration().MagnetSensor
             .withAbsoluteSensorDiscontinuityPoint(Degrees.of(180))
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
-            .withMagnetOffset(-0.343262)
+            .withMagnetOffset(kArmPivot.MAGNET_SENSOR_OFFSET)
         );
 
         TalonFXConfigurator configurator = armMotor.getConfigurator();
@@ -56,6 +58,12 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
         configurator.apply(limitConfigs);
 
+        MotorOutputConfigs outputConfigs = new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
+
+        configurator.apply(outputConfigs);
+
         FeedbackConfigs feedBackConfig = new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
             .withRemoteCANcoder(canCoderSensor)
@@ -63,8 +71,6 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
             .withRotorToSensorRatio(kArmPivot.ARM_GEARING);
             
         configurator.apply(feedBackConfig);
-
-        armMotor.setNeutralMode(NeutralModeValue.Brake);
 
         positionVoltage = new PositionVoltage(0).withSlot(0);
 

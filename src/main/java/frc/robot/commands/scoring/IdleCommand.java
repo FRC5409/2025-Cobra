@@ -22,7 +22,7 @@ public class IdleCommand extends SequentialCommandGroup {
             Commands.parallel(
                 sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
                 new WaitThen(
-                    () -> sys_pivot.getPosition().gte(Degrees.of(75)),
+                    () -> sys_pivot.getPosition().gte(Degrees.of(80)),
                     sys_elevator.elevatorGo(kElevator.IDLING_HEIGHT)
                 )
             ),
