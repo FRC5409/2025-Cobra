@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -242,6 +243,6 @@ public final class Constants {
 
     public static final Transform3d OFFSET_FROM_ROBOT_ORIGIN = new Transform3d(
                                                                         new Translation3d(0.118, 0.218, 0.38),
-                                                                        new Rotation3d(   0,  0,   -20));
+                                                                        new Rotation3d(   0,  0,   Units.degreesToRadians(-20)));
   }
 }

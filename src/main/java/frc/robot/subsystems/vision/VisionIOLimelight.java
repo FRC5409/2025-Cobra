@@ -1,6 +1,9 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
 import frc.robot.Constants;
 import frc.robot.Constants.kVision;
@@ -24,10 +27,17 @@ public class VisionIOLimelight implements VisionIO {
         Double[] system = LimelightHelpers.getLimelightNTTableEntry(kVision.CAM_NAME, "hw")
                                                     .getDoubleArray(new Double[] {0.0, 0.0, 0.0, 0.0});
 
-        inputs.fps      = system[0];
-        inputs.cpuTemp  = system[1];
-        inputs.ramUsage = system[2];
-        inputs.sysTemp  = system[3];
+        try {
+            inputs.fps      = system[0];
+            inputs.cpuTemp  = system[1];
+            inputs.ramUsage = system[2];
+            inputs.sysTemp  = system[3];
+        } catch (Exception e) {
+            inputs.fps = 0.0;
+            inputs.cpuTemp = 0.0;
+            inputs.ramUsage = 0.0;
+            inputs.sysTemp = 0.0;
+        }
 
         // check if disconnected by comparing prx latency
         if (lastPrxLatency != inputs.prxLatency) {
@@ -47,16 +57,16 @@ public class VisionIOLimelight implements VisionIO {
                                                   kVision.OFFSET_FROM_ROBOT_ORIGIN.getTranslation().getX(), 
                                                   kVision.OFFSET_FROM_ROBOT_ORIGIN.getTranslation().getY(), 
                                                   kVision.OFFSET_FROM_ROBOT_ORIGIN.getTranslation().getZ(), 
-                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation()   .getX(), 
-                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation()   .getY(), 
-                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation()   .getZ());
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation().getMeasureX().in(Degrees), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation().getMeasureY().in(Degrees), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation().getMeasureZ().in(Degrees));
     }
 
     @Override
     public LimelightHelpers.PoseEstimate estimatePose(Drive drive) {
         Rotation2d rot = drive.getRotation();
         LimelightHelpers.SetRobotOrientation(Constants.kVision.CAM_NAME, rot.getDegrees(),
-                drive.getChassisSpeeds().omegaRadiansPerSecond, 0, 0, 0, 0);
+                Units.radiansToDegrees(drive.getChassisSpeeds().omegaRadiansPerSecond), 0, 0, 0, 0);
         return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.kVision.CAM_NAME);
     }
 
