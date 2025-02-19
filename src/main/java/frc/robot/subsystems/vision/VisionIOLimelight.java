@@ -43,7 +43,13 @@ public class VisionIOLimelight implements VisionIO {
 
     @Override
     public void setCameraOffset() {
-        LimelightHelpers.setCameraPose_RobotSpace(kVision.CAM_NAME, 0.171919, 0, 0.629752, 0, 0, 0);
+        LimelightHelpers.setCameraPose_RobotSpace(kVision.CAM_NAME,
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getTranslation().getX(), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getTranslation().getY(), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getTranslation().getZ(), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation()   .getX(), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation()   .getY(), 
+                                                  kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation()   .getZ());
     }
 
     @Override
@@ -58,8 +64,7 @@ public class VisionIOLimelight implements VisionIO {
      * Forward limelight ports (5800-5809) so it can be used over USB
      */
     public static void forwardLimelightPorts() {
-        for (int i = 5800; i <= 5809; i++) {
+        for (int i = 5800; i <= 5809; i++) 
             PortForwarder.add(i, kVision.CAM_NAME+".local", i);
-        }
     }
 }
