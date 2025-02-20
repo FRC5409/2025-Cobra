@@ -1,8 +1,6 @@
 package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.Alert;
 
 // 5409: The Chargers
@@ -51,7 +49,7 @@ public class Vision extends SubsystemBase {
         if (estimate.tagCount < kVision.FIDUCIAL_TRUST_THRESHOLD)
             return;
 
-        drive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, VecBuilder.fill(.5, .5, 9999999));
+        drive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds);
     }
 
     @Override

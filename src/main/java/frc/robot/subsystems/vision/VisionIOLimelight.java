@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
-import frc.robot.Constants;
 import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.drive.Drive;
@@ -65,9 +64,10 @@ public class VisionIOLimelight implements VisionIO {
     @Override
     public LimelightHelpers.PoseEstimate estimatePose(Drive drive) {
         Rotation2d rot = drive.getRotation();
-        LimelightHelpers.SetRobotOrientation(Constants.kVision.CAM_NAME, rot.getDegrees(),
+        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rot.getDegrees(),
                 Units.radiansToDegrees(drive.getChassisSpeeds().omegaRadiansPerSecond), 0, 0, 0, 0);
-        return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.kVision.CAM_NAME);
+        // return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kVision.CAM_NAME);
+        return LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME);
     }
 
     /**

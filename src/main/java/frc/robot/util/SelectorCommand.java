@@ -7,7 +7,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
- * @author Alexander Szura
+ * A Selector Command will run either command A or command B, if the supplier changes then it will cancel the other command and run the selected one.
+ * This command ends when the currently selected command ends
+ * @author Alexander Szura Team 5409
  */
 public class SelectorCommand extends Command {
 
@@ -18,10 +20,16 @@ public class SelectorCommand extends Command {
     private Command currentCommand;
     private boolean lastEntry;
 
+    /**
+     * Creates a new selector command. This command will run onTrue when the condition is true, when the condition changes the command will change. Ends when the currently running command ends
+     * @param onTrue The command to run when true
+     * @param onFalse The command to run when false
+     * @param condition The condition
+     */
     public SelectorCommand(Command onTrue, Command onFalse, BooleanSupplier condition) {
         this.onTrue = requireNonNullParam(onTrue, "onTrue", "SelectorCommand");
-        this.onFalse = requireNonNullParam(onFalse, "onTrue", "SelectorCommand");
-        this.condition = requireNonNullParam(condition, "onTrue", "SelectorCommand");
+        this.onFalse = requireNonNullParam(onFalse, "onFalse", "SelectorCommand");
+        this.condition = requireNonNullParam(condition, "condition", "SelectorCommand");
 
         CommandScheduler.getInstance().registerComposedCommands(onTrue, onFalse);
         

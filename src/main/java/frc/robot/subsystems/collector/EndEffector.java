@@ -19,7 +19,6 @@ public class EndEffector extends SubsystemBase {
 
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
-
     public EndEffector(EndEffectorIO io) {
         this.io = io;
 
@@ -27,6 +26,7 @@ public class EndEffector extends SubsystemBase {
         DebugCommand.register("EndEffector Run Backwards", setVoltage(-3));
         DebugCommand.register("EndEffector Stop", setVoltage(0));
     }
+
     // Run until coral is detected then wait 50ms then stop
     public Command runUntilCoralDetected(double voltage) {
         if (Constants.currentMode == Mode.SIM)
@@ -46,15 +46,16 @@ public class EndEffector extends SubsystemBase {
                     Commands.runOnce(
                         () -> io.setVoltage(voltage), this
                     ),
-                    Commands.waitUntil(
-                        () -> coralDetected()
+                    Commands.sequence(
+                        Commands.waitSeconds(0.2),
+                        Commands.waitUntil(this::coralDetected)
                     )
             ).andThen(
                 Commands.waitSeconds(0.0),
                 Commands.runOnce(
                     ()-> io.setVoltage(0), this
                 )
-            ).unless(this::coralDetected);
+            );
 
     }
     // Run until coral is no longer detected, if spike in current, wait then rerun

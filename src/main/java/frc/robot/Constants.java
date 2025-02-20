@@ -78,9 +78,9 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(12.0, 0.0, 0.5);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(11.0, 0.0, 0.5);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(3.5);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.50);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(3.0);
@@ -181,15 +181,14 @@ public final class Constants {
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
   }
 
-    // MAX ELEVATOR HEIGHT = 0.652587890625;
-
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.03), Degrees.of(100.0)),
+        LEVEL1(      Meters.of(0.03), Degrees.of(100)),
         LEVEL2(      Meters.of(0.12), Degrees.of(77.0)),
         LEVEL3(      Meters.of(0.32), Degrees.of(77.0)),
         LEVEL4(      Meters.of(0.65), Degrees.of(89.0)),
-        LEVEL2_ALGAE(Meters.of(0.17), Degrees.of(76.0)),
-        LEVEL3_ALGAE(Meters.of(0.37), Degrees.of(76.0)),
+        LEVEL2_ALGAE(Meters.of(0.20), Degrees.of(76.0)),
+        LEVEL3_ALGAE(Meters.of(0.40), Degrees.of(76.0)),
+        /** Not Implemented */
         BARGE(       Meters.of(0.65), Degrees.of(100.)),
         PROCESSOR(   Meters.of(0.05), Degrees.of(80.0));
 
@@ -226,9 +225,9 @@ public final class Constants {
     public static final PIDConstants SIM_PID = new PIDConstants(10, 0, 0);
     public static final Mass ELEVATOR_MASS = Pound.of(52.95);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
-    public static final double ELEVATOR_MAX_HEIGHT = 0.684;
+    public static final double ELEVATOR_MAX_HEIGHT = 0.652587890625;
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.01);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.04);
   }
 
   public static final class kVision {
@@ -242,7 +241,7 @@ public final class Constants {
     public static final int DISCONNECTION_TIMEOUT = 5;
 
     public static final Transform3d OFFSET_FROM_ROBOT_ORIGIN = new Transform3d(
-                                                                        new Translation3d(0.118, 0.218, 0.38),
+                                                                        new Translation3d(0.118, -0.218, 0.38),
                                                                         new Rotation3d(   0,  0,   Units.degreesToRadians(-20)));
   }
 }
