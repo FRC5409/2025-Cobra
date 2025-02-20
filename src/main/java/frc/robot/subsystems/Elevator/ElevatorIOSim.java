@@ -2,6 +2,7 @@ package frc.robot.subsystems.Elevator;
 
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -71,15 +72,14 @@ public class ElevatorIOSim implements ElevatorIO {
 
         inputs.mainMotorConnection = true;
         inputs.mainAppliedVoltage = volts;
-        inputs.mainAppliedCurrent = current;
+        inputs.mainAppliedCurrent = Math.abs(current);
         inputs.mainMotorTemperature = 0.0;
         inputs.mainMotorPosition = elevatorSim.getPositionMeters();
 
         inputs.followerMotorConnection = true;
         inputs.followerAppliedVoltage = volts;
-        inputs.followerAppliedCurrent = current;
+        inputs.followerAppliedCurrent = Math.abs(current);
         inputs.followerMotorTemperature = 0.0;
         inputs.followerMotorPosition = elevatorSim.getPositionMeters();
-
     }
 }

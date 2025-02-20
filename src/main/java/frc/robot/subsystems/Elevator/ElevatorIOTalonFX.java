@@ -14,7 +14,6 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
@@ -138,7 +137,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             mainDeviceTemp
         ).isOK();
         inputs.mainAppliedVoltage = mainDeviceVoltage.getValueAsDouble();
-        inputs.mainAppliedCurrent = mainDeviceCurrent.getValueAsDouble();
+        inputs.mainAppliedCurrent = Math.abs(mainDeviceCurrent.getValueAsDouble());
         inputs.mainMotorTemperature = mainDeviceTemp.getValueAsDouble();
         inputs.mainMotorPosition = motorPosition.getValueAsDouble();
         
@@ -148,7 +147,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             secondaryDeviceTemp
         ).isOK();
         inputs.followerAppliedVoltage = secondaryrDeviceVoltage.getValueAsDouble();
-        inputs.followerAppliedCurrent = secondaryDeviceCurrent.getValueAsDouble();
+        inputs.followerAppliedCurrent = Math.abs(secondaryDeviceCurrent.getValueAsDouble());
         inputs.followerMotorTemperature = secondaryDeviceTemp.getValueAsDouble();        
         inputs.followerMotorPosition = motorPosition.getValueAsDouble();
     }

@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.kElevator;
-import frc.robot.util.StructHelper;
 
 public class Elevator extends SubsystemBase{
 
@@ -24,7 +23,7 @@ public class Elevator extends SubsystemBase{
     private final ElevatorIO io;
     private final ElevatorInputsAutoLogged inputs;
 
-    //Initiazlie Pose3d object
+    // Initiazlie Pose3d object
     private static Pose3d elevatorPose;
     private static Pose3d elevatorPoseStage2;
 
@@ -37,8 +36,8 @@ public class Elevator extends SubsystemBase{
 
         elevatorPose = new Pose3d();
         elevatorPoseStage2 = new Pose3d();
-        StructHelper.publishStruct("Elevator", Pose3d.struct, ()->Elevator.elevatorPose);  
-        StructHelper.publishStruct("Elevator Stage 2", Pose3d.struct, ()->Elevator.elevatorPoseStage2);      
+        // StructHelper.publishStruct("Elevator", Pose3d.struct, ()->Elevator.elevatorPose);  
+        // StructHelper.publishStruct("Elevator Stage 2", Pose3d.struct, ()->Elevator.elevatorPoseStage2);      
     }
 
     public Command startManualMove(double voltage) {
@@ -80,6 +79,8 @@ public class Elevator extends SubsystemBase{
         rightElevatorAlert.set(!inputs.followerMotorConnection);
         elevatorPose = new Pose3d(0,0,inputs.mainMotorPosition, new Rotation3d());
         elevatorPoseStage2 = new Pose3d(0,0,2*inputs.mainMotorPosition, new Rotation3d());
+        Logger.recordOutput("Elevator/Pose", elevatorPose);
+        Logger.recordOutput("Elevator/Pose Stage 2", elevatorPoseStage2);
     }
 
     public static Pose3d getElevatorStage2Pose3dPose() {
