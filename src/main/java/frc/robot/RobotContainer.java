@@ -34,6 +34,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
@@ -186,7 +187,7 @@ public class RobotContainer {
                         COTS.ofMark4i(
                             DCMotor.getKrakenX60Foc(1),
                             DCMotor.getKrakenX60Foc(1),
-                            1.20,
+                            kDrive.WHEEL_COF,
                             2
                         )
                     );
@@ -458,10 +459,14 @@ public class RobotContainer {
 
     private void registerCommands() {
         // DEBUG COMMANDS
-        DebugCommand.register("Score L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned));
-        DebugCommand.register("Score L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned));
-        DebugCommand.register("Score L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned));
-        DebugCommand.register("Score L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned));
+        DebugCommand.register("Score L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, () -> true));
+        DebugCommand.register("Score L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, () -> true));
+        DebugCommand.register("Score L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, () -> true));
+        DebugCommand.register("Score L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, () -> true));
+
+        DebugCommand.register("Score PRocessor", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true));
+
+        DebugCommand.register("Idle", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // NAMED COMMANDS
         NamedCommands.registerCommand(
@@ -560,24 +565,38 @@ public class RobotContainer {
             .onFalse(
                 new ConditionalCommand(
                     Commands.waitSeconds(0.2),
-                    sys_endEffector.runUntilCoralNotDetected(3), 
+                    sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE), 
                     () -> Constants.currentMode == Mode.SIM
-                ).andThen(
-                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
                 )
+                // .andThen(
+                //     new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                // )
             );
 
         primaryController.x()
-            .onTrue(new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel == ScoringLevel.LEVEL3 ? ScoringLevel.LEVEL3_ALGAE : ScoringLevel.LEVEL2_ALGAE))
+            .onTrue(
+                new ConditionalCommand(
+                    Commands.parallel(
+                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.25)),
+                        Commands.waitSeconds(0.25),
+                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+                    ).andThen(
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel)
+                    )
+                    .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0)),
+                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel == ScoringLevel.LEVEL3 ? ScoringLevel.LEVEL3_ALGAE : ScoringLevel.LEVEL2_ALGAE), 
+                    sys_endEffector::coralDetected
+                )
+            )
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector, kEndEffector.ALGAE_VOLTAGE));
 
-        primaryController.b()
-            .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
-            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        // primaryController.b()
+        //     .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
+        //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
-        // TODO: Look into barge/create barge command
-        // primaryController.y()
-        //     .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.BARGE, () -> true));
+        primaryController.b()
+            .onTrue(sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE))
+            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // Reset gyro to 0° when Start button is pressed
         primaryController
@@ -590,21 +609,30 @@ public class RobotContainer {
                                                 new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
 
-        primaryController
-            .leftBumper()
-            .and(() -> !isTelopAuto)
-                .whileTrue(
-                    Commands.parallel(
-                        DriveCommands.alignToPoint(
-                            sys_drive, 
-                            () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
-                        ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-                        .alongWith(Commands.waitUntil(() -> sys_elevator.getPosition().gte(ScoringLevel.LEVEL4.elevatorSetpoint.minus(Centimeters.of(5))))),
-                        getLevelSelectorCommand(false)
-                    ).andThen(
-                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-                    )
-                ).onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        // TUNING
+        primaryController.leftBumper()
+            .whileTrue(
+                DriveCommands.alignToPoint(
+                    sys_drive,
+                    () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose()).transformBy(new Transform2d(-Feet.of(3).in(Meters), 0.0, new Rotation2d()))
+                )
+            );
+
+        // primaryController
+        //     .leftBumper()
+        //     .and(() -> !isTelopAuto)
+        //         .whileTrue(
+        //             Commands.parallel(
+        //                 DriveCommands.alignToPoint(
+        //                     sys_drive, 
+        //                     () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
+        //                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+        //                 .alongWith(Commands.waitUntil(() -> sys_elevator.getPosition().gte(ScoringLevel.LEVEL4.elevatorSetpoint.minus(Centimeters.of(5))))),
+        //                 getLevelSelectorCommand(false)
+        //             ).andThen(
+        //                 new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+        //             )
+        //         ).onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         primaryController
             .rightBumper()
@@ -709,14 +737,16 @@ public class RobotContainer {
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
 
         // Test Controller
+
         testController.a()
-            .onTrue(sys_elevator.elevatorGo(Meters.of(0.4)));
-        testController.b()
-        .onTrue(sys_elevator.elevatorGo(Meters.of(0.2)));
+            .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
         testController.x()
-            .onTrue(sys_armPivot.moveArm(Degrees.of(75.0)));
-        testController.y()
-            .onTrue(sys_armPivot.moveArm(Degrees.of(45.0)));
+            .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, () -> false));
+
+        testController.b()
+            .onTrue(sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE));
+
 
     }
 
