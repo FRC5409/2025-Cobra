@@ -18,6 +18,7 @@ public interface ArmPivotIO {
         public double temperature = 0.0;
         public double targetAngle = 0.0;
         public double positionRad = 0.0;
+        public String mech;
     }
 
     public default void setVoltage(double volts) {}

@@ -1,25 +1,25 @@
 package frc.robot.subsystems.arm;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.kArmPivot;
 
 public class ArmPivotIOSim implements ArmPivotIO{
 
-    private static final ShuffleboardTab sb_sim = Shuffleboard.getTab("SIM");
+    // private static final ShuffleboardTab sb_sim = Shuffleboard.getTab("SIM");
 
     private boolean isRunning;
 
@@ -69,9 +69,9 @@ public class ArmPivotIOSim implements ArmPivotIO{
             )
         );
 
-        SmartDashboard.putData("Mech2d", mech);
+        // SmartDashboard.putData("Mech2d", mech);
 
-        sb_sim.add("Arm Mech", mech);
+        // sb_sim.add("Arm Mech", mech);
 
         setSetpoint(Degrees.of(90));
     }
@@ -119,7 +119,8 @@ public class ArmPivotIOSim implements ArmPivotIO{
         inputs.positionAngles = Units.radiansToDegrees(inputs.positionRad);
         inputs.targetAngle = controller.getSetpoint();
         inputs.voltage = volatge;
-        inputs.current = current;
+        inputs.current = Math.abs(current);
         inputs.temperature = 0.0;
+        inputs.mech = mech.toString();
     }
 }

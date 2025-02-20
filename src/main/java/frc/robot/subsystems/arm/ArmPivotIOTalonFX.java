@@ -125,7 +125,7 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         inputs.speed = velocitySignal.getValue().in(RadiansPerSecond);
         inputs.positionRad = Units.degreesToRadians(inputs.positionAngles);
         inputs.voltage = deviceVoltage.getValueAsDouble();
-        inputs.current = deviceCurrent.getValueAsDouble();
+        inputs.current = Math.abs(deviceCurrent.getValueAsDouble());
         inputs.temperature = deviceTemp.getValueAsDouble();
         inputs.speed = deviceVelocity.getValueAsDouble();
     }
