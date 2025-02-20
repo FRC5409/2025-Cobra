@@ -96,7 +96,7 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         ).isOK();
         
         inputs.endEffectorVolts = deviceVoltage.getValueAsDouble();
-        inputs.endEffectorCurrent = deviceCurrent.getValueAsDouble();
+        inputs.endEffectorCurrent = Math.abs(deviceCurrent.getValueAsDouble());
         inputs.endEffectorTemp = deviceTemp.getValueAsDouble();
         inputs.tofDistance = getTofRange().in(Millimeters);
         inputs.endEffectorVelocity = deviceVelocity.getValueAsDouble();
