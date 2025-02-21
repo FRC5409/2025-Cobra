@@ -36,8 +36,6 @@ public class Elevator extends SubsystemBase{
 
         elevatorPose = new Pose3d();
         elevatorPoseStage2 = new Pose3d();
-        // StructHelper.publishStruct("Elevator", Pose3d.struct, ()->Elevator.elevatorPose);  
-        // StructHelper.publishStruct("Elevator Stage 2", Pose3d.struct, ()->Elevator.elevatorPoseStage2);      
     }
 
     public Command startManualMove(double voltage) {
