@@ -1,9 +1,6 @@
 package frc.robot.subsystems.arm;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -121,6 +118,5 @@ public class ArmPivotIOSim implements ArmPivotIO{
         inputs.voltage = volatge;
         inputs.current = Math.abs(current);
         inputs.temperature = 0.0;
-        inputs.mech = mech.toString();
     }
 }

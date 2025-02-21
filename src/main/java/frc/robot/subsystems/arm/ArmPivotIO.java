@@ -1,9 +1,8 @@
 package frc.robot.subsystems.arm;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.*;
 
 import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.units.measure.Angle;
 
 public interface ArmPivotIO {
@@ -18,7 +17,6 @@ public interface ArmPivotIO {
         public double temperature = 0.0;
         public double targetAngle = 0.0;
         public double positionRad = 0.0;
-        public String mech;
     }
 
     public default void setVoltage(double volts) {}

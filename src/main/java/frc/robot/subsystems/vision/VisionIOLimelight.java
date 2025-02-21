@@ -66,7 +66,6 @@ public class VisionIOLimelight implements VisionIO {
         Rotation2d rot = drive.getRotation();
         LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rot.getDegrees(),
                 Units.radiansToDegrees(drive.getChassisSpeeds().omegaRadiansPerSecond), 0, 0, 0, 0);
-        // return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kVision.CAM_NAME);
         return LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME);
     }
 

@@ -49,17 +49,10 @@ public class Elevator extends SubsystemBase{
     }
 
     public Command elevatorGo(Distance setpoint) {
-        if (setpoint.lte(kElevator.IDLING_HEIGHT.plus(Centimeters.of(1))))
-            return Commands.sequence(
-                Commands.runOnce(() -> io.setSetpoint(setpoint), this),
-                Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025))),
-                Commands.runOnce(() -> io.setMotorVoltage(0.0), this)
-            );
-        else
-            return Commands.sequence(
-                Commands.runOnce(() -> io.setSetpoint(setpoint), this),
-                Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025)))
-            );
+        return Commands.sequence(
+            Commands.runOnce(() -> io.setSetpoint(setpoint), this),
+            Commands.waitUntil(() -> setpoint.isNear(getPosition(), Meters.of(0.025)))
+        );
     }
 
     public Command stopAll() {
@@ -79,8 +72,8 @@ public class Elevator extends SubsystemBase{
         rightElevatorAlert.set(!inputs.followerMotorConnection);
         elevatorPose = new Pose3d(0,0,inputs.mainMotorPosition, new Rotation3d());
         elevatorPoseStage2 = new Pose3d(0,0,2*inputs.mainMotorPosition, new Rotation3d());
-        Logger.recordOutput("Elevator/Pose", elevatorPose);
-        Logger.recordOutput("Elevator/Pose Stage 2", elevatorPoseStage2);
+        Logger.recordOutput("Components/Elevator", elevatorPose);
+        Logger.recordOutput("Components/Elevator Stage 2", elevatorPoseStage2);
     }
 
     public static Pose3d getElevatorStage2Pose3dPose() {

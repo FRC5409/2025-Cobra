@@ -78,12 +78,12 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(11.0, 0.0, 0.5);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(4.75, 0.0, 0.1);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.50);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.0);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(3.0);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
     public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
@@ -100,7 +100,7 @@ public final class Constants {
 
     public static final class kReef {
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.367, 0.18, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.18, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.14, new Rotation2d());
 
       private static final Pose2d generatePose(Rotation2d rotation) {
         final double mx = 4.48945;
@@ -175,16 +175,16 @@ public final class Constants {
     public static final Angle minAngles = Degrees.of(-90);
     public static final Angle maxAngles = Degrees.of(120);
 
-    public static final Angle MOVEMENT_SETPOINT = Degrees.of(84);
-    public static final Angle PICKUP_ANGLE  = Degrees.of(104);
+    public static final Angle MOVEMENT_SETPOINT = Degrees.of(88);
+    public static final Angle PICKUP_ANGLE  = Degrees.of(106);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.03), Degrees.of(100)),
-        LEVEL2(      Meters.of(0.12), Degrees.of(77.0)),
-        LEVEL3(      Meters.of(0.32), Degrees.of(77.0)),
+        LEVEL2(      Meters.of(0.12), Degrees.of(81.5)),
+        LEVEL3(      Meters.of(0.34), Degrees.of(81.5)),
         LEVEL4(      Meters.of(0.65), Degrees.of(89.0)),
         LEVEL2_ALGAE(Meters.of(0.20), Degrees.of(76.0)),
         LEVEL3_ALGAE(Meters.of(0.40), Degrees.of(76.0)),
@@ -227,7 +227,7 @@ public final class Constants {
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.652587890625;
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.04);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.02);
   }
 
   public static final class kVision {

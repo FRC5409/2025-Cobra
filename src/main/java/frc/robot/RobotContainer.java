@@ -34,7 +34,6 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
@@ -121,7 +120,7 @@ public class RobotContainer {
     // Commands
     protected final Command telopAutoCommand;
   
-    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL4;
+    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL3;
 
     // Controller
     private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -420,7 +419,7 @@ public class RobotContainer {
         for (int i = 0; i < conditionals.length; i++) {
             final int index = i;
             conditionals[i] = () -> levels[index] == selectedScoringLevel;
-            commands[i] = new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, levels[index], DriveCommands::isAligned);
+            commands[i] = new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, levels[index], ends ? DriveCommands::isAligned : () -> false);
         }
 
         return CaseCommand.buildSelector(
@@ -609,30 +608,22 @@ public class RobotContainer {
                                                 new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
 
-        // TUNING
-        primaryController.leftBumper()
-            .whileTrue(
-                DriveCommands.alignToPoint(
-                    sys_drive,
-                    () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose()).transformBy(new Transform2d(-Feet.of(3).in(Meters), 0.0, new Rotation2d()))
-                )
-            );
-
-        // primaryController
-        //     .leftBumper()
-        //     .and(() -> !isTelopAuto)
-        //         .whileTrue(
-        //             Commands.parallel(
-        //                 DriveCommands.alignToPoint(
-        //                     sys_drive, 
-        //                     () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
-        //                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-        //                 .alongWith(Commands.waitUntil(() -> sys_elevator.getPosition().gte(ScoringLevel.LEVEL4.elevatorSetpoint.minus(Centimeters.of(5))))),
-        //                 getLevelSelectorCommand(false)
-        //             ).andThen(
-        //                 new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-        //             )
-        //         ).onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        primaryController
+            .leftBumper()
+            .and(() -> !isTelopAuto)
+                .whileTrue(
+                    Commands.parallel(
+                        DriveCommands.alignToPoint(
+                            sys_drive, 
+                            () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
+                        ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+                        getLevelSelectorCommand(true)
+                    ).andThen(
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                    )
+                ).onFalse(
+                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                );
 
         primaryController
             .rightBumper()
@@ -643,7 +634,7 @@ public class RobotContainer {
                             sys_drive, 
                             () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
                         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
-                        getLevelSelectorCommand(false)
+                        getLevelSelectorCommand(true)
                     ).andThen(
                         new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
                     )

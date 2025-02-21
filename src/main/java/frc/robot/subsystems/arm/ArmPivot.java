@@ -11,20 +11,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Elevator.Elevator;
-import frc.robot.util.StructHelper;
 
 public class ArmPivot extends SubsystemBase {
     private ArmPivotIO io;
     private static ArmPivotInputsAutoLogged inputs;
   
-    private static Pose3d endEffectorPose;
-
     public ArmPivot(ArmPivotIO io) {
         this.io = io;
         inputs = new ArmPivotInputsAutoLogged();
-
-        endEffectorPose = new Pose3d();
-        StructHelper.publishStruct("End Effector location", Pose3d.struct, () -> ArmPivot.endEffectorPose);
     }
 
     public Angle getPosition() {
@@ -46,10 +40,6 @@ public class ArmPivot extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Arm", inputs);
-        endEffectorPose = new Pose3d(new Translation3d(0.231, -0.023, 0.155 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, -getPosition().in(Radians), 0));
-    }
-
-    public static Pose3d getPose() {
-        return endEffectorPose;
+        Logger.recordOutput("Components/End Effector", new Pose3d(new Translation3d(0.231, -0.023, 0.155 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, -getPosition().in(Radians), 0)));
     }
 }
