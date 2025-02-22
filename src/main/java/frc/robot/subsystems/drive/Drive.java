@@ -13,14 +13,22 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -30,6 +38,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
+
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -55,10 +64,13 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
+import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.RobotSystemTest;
+import frc.robot.util.RobotSystemTest.TestResult;
 
 public class Drive extends SubsystemBase {
     // TunerConstants doesn't include these constants, so they are declared locally
@@ -263,6 +275,42 @@ public class Drive extends SubsystemBase {
 
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+
+
+    // Register tests (RST)
+    RobotSystemTest.register("Test all modules for each axis", () -> Drive.ModuleAxisTest.run(this));
+  }
+
+  private final class ModuleAxisTest {
+    private static double dx = 0, dy = 0;
+    private record Target(int x, int y, Rotation2d rot) { TestResult result = null; public Target(int x, int y, int deg) { this(x, y, Rotation2d.fromDegrees(deg)); } }
+    private static synchronized void setTarget(double x, double y) { dx = x; dy = y; }
+
+    public static final TestResult run(Drive drive) {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
+        Target[] targets = {
+            new Target(1, 0, 0),
+            new Target(-1, 0, 0),
+            new Target(0, 1, 0),
+            new Target(0, -1, 0),
+        }
+
+        for (Target target: targets) {
+            // set swerve state (position)
+            scheduler.schedule(() -> setTarget(target.x(), target.y()), i, TimeUnit.SECONDS);
+
+            // check if rotation is correct (after 0.5s)
+            scheduler.schedule(() -> {
+                for (int j = 0; j < drive.modules.length; j++) 
+                    if (drive.modules[j].getPosition().angle == target.rot()) continue; // TODO: implement checks
+            }, (i*1000)+500, TimeUnit.MILLISECONDS);
+        }
+    
+        DriveCommands.joystickDrive(drive, () -> dx, () -> dy, () -> 0);
+        
+        return TestResult.fail("TODO");
+      }
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
