@@ -512,6 +512,8 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
+        NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.2));
+
         NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned));
         NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned));
         NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned));
