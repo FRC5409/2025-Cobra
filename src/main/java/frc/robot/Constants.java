@@ -186,8 +186,8 @@ public final class Constants {
         LEVEL2(      Meters.of(0.14), Degrees.of(81.5)),
         LEVEL3(      Meters.of(0.34), Degrees.of(81.5)),
         LEVEL4(      Meters.of(0.65), Degrees.of(97.0)),
-        LEVEL2_ALGAE(Meters.of(0.20), Degrees.of(76.0)),
-        LEVEL3_ALGAE(Meters.of(0.40), Degrees.of(76.0)),
+        LEVEL2_ALGAE(Meters.of(0.23), Degrees.of(73.0)),
+        LEVEL3_ALGAE(Meters.of(0.43), Degrees.of(73.0)),
         /** Not Implemented */
         BARGE(       Meters.of(0.65), Degrees.of(100.)),
         PROCESSOR(   Meters.of(0.05), Degrees.of(80.0));
@@ -208,8 +208,8 @@ public final class Constants {
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
       public static final double IDLE_VOLTAGE  =  3.0;
-      public static final double SCORE_VOLTAGE =  6.0;
-      public static final double ALGAE_VOLTAGE = -3.0;
+      public static final double SCORE_VOLTAGE =  9.0;
+      public static final double ALGAE_VOLTAGE = -4.0;
 
   }
 
@@ -226,6 +226,8 @@ public final class Constants {
     public static final Mass ELEVATOR_MASS = Pound.of(52.95);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.652587890625;
+
+    public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.30);
 
     public static final Distance IDLING_HEIGHT = Meters.of(0.02);
   }

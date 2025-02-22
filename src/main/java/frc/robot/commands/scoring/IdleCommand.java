@@ -8,6 +8,7 @@ import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
+import frc.robot.subsystems.drive.Drive;
 
 public class IdleCommand extends SequentialCommandGroup {
     public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector) {
@@ -17,6 +18,7 @@ public class IdleCommand extends SequentialCommandGroup {
     public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, double endEffectorVoltage) {
         super(
             sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
+            Commands.waitUntil(Drive::isSafe),
             sys_elevator.elevatorGo(kElevator.IDLING_HEIGHT),
             Commands.deadline(
                 sys_endeffector.runUntilCoralDetected(endEffectorVoltage),

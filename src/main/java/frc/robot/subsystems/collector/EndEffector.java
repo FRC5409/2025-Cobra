@@ -79,7 +79,7 @@ public class EndEffector extends SubsystemBase {
                 ).alongWith(
                     new WaitThen(
                         () -> !coralDetected(),
-                        Commands.waitSeconds(0.25)
+                        Commands.waitSeconds(0.00)
                     )
                 ).finallyDo(
                     () -> io.setVoltage(0)

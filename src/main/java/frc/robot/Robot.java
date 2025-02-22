@@ -173,6 +173,8 @@ public class Robot extends LoggedRobot {
 
     if (Constants.currentMode == Mode.SIM)
         SimulatedArena.getInstance().resetFieldForAuto();
+
+    // robotContainer.sys_drive.brakeMode();
   }
 
   /** This function is called periodically during autonomous. */
@@ -197,6 +199,8 @@ public class Robot extends LoggedRobot {
         robotContainer.telopAutoCommand.schedule();
 
     autoStartingConfigAlert.set(false);
+
+    robotContainer.sys_drive.brakeMode();
   }
 
   /** This function is called periodically during operator control. */

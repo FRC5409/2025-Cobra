@@ -81,6 +81,8 @@ public class Drive extends SubsystemBase {
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
 
+    private static Pose2d globalPose;
+
     // Alerts
     private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
         AlertType.kError);
@@ -198,6 +200,8 @@ public class Drive extends SubsystemBase {
       }
     }
 
+    globalPose = getBlueSidePose();
+
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
       Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
@@ -272,6 +276,12 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  public void pointWheelsToward(Rotation2d angle) {
+    for (int i = 0; i < 4; i++) {
+        modules[i].runSetpoint(new SwerveModuleState(0, angle));
+    }
+  }
+
   /** Stops the drive. */
   public void stop() {
     runVelocity(new ChassisSpeeds());
@@ -304,6 +314,10 @@ public class Drive extends SubsystemBase {
       module.driveNeutralMode(NeutralModeValue.Brake);
       module.turnNeutralMode(NeutralModeValue.Brake);
     }
+  }
+
+  public static boolean isSafe() {
+    return globalPose.getTranslation().getDistance(new Translation2d(4.48945, FlippingUtil.fieldSizeY / 2.0)) >= 1.45;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */

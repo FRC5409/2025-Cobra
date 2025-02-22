@@ -93,6 +93,7 @@ import frc.robot.util.CaseCommand;
 import frc.robot.util.ControlBoard;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
+import frc.robot.util.SelectorCommand;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 import frc.robot.util.ControlBoard.kButton;
@@ -458,14 +459,20 @@ public class RobotContainer {
 
     private void registerCommands() {
         // DEBUG COMMANDS
-        DebugCommand.register("Score L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, () -> true));
-        DebugCommand.register("Score L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, () -> true));
-        DebugCommand.register("Score L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, () -> true));
-        DebugCommand.register("Score L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, () -> true));
-
-        DebugCommand.register("Score PRocessor", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true));
-
+        DebugCommand.register("Score Processor", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true));
         DebugCommand.register("Idle", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
+        DebugCommand.register("Setup Auto [R]", 
+            Commands.runOnce(sys_drive::coastMode, sys_drive).andThen(
+                Commands.run(() -> sys_drive.pointWheelsToward(Rotation2d.fromDegrees(60)), sys_drive).withTimeout(3.0)
+            )
+        );
+
+        DebugCommand.register("Setup Auto [L]", 
+            Commands.runOnce(sys_drive::coastMode, sys_drive).andThen(
+                Commands.run(() -> sys_drive.pointWheelsToward(Rotation2d.fromDegrees(-60)), sys_drive).withTimeout(3.0)
+            )
+        );
 
         // NAMED COMMANDS
         NamedCommands.registerCommand(
@@ -512,12 +519,38 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
-        NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.2));
+        NamedCommands.registerCommand("PREP ELEVATOR", 
+            Commands.sequence(
+                sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
+                sys_elevator.elevatorGo(kElevator.ELEVATOR_PREP_HEIGHT)
+            )
+        );
 
-        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned));
-        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned));
-        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned));
-        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned));
+        NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.5));
+
+        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
+        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
+        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
+        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
+
+        NamedCommands.registerCommand("REMOVE_ALGAE", 
+            Commands.sequence(
+                AutoCommands.alignToAlgae(sys_drive),
+                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0),
+                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
+            ).alongWith(
+                new WaitThen(
+                    Seconds.of(0.10),
+                    new SelectorCommand(
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                        () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+                    )
+                )
+            ).andThen(Commands.runOnce(sys_drive::stop, sys_drive))
+        );
+
+        NamedCommands.registerCommand("BACKOFF", AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()));
     }
 
     /**
@@ -569,27 +602,30 @@ public class RobotContainer {
                     sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE), 
                     () -> Constants.currentMode == Mode.SIM
                 )
-                .andThen(
-                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-                )
+                // .andThen(
+                //     new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                // )
             );
 
         primaryController.x()
-            .onTrue(
-                new ConditionalCommand(
-                    Commands.parallel(
-                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.25)),
-                        Commands.waitSeconds(0.25),
-                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-                    ).andThen(
-                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel)
+            .whileTrue(
+                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).andThen(
+                    Commands.sequence(
+                        AutoCommands.alignToAlgae(sys_drive),
+                        Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0),
+                        AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
+                    ).alongWith(
+                        new WaitThen(
+                            Seconds.of(0.10),
+                            new SelectorCommand(
+                                new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                                new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                                () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+                            )
+                        )
                     )
-                    .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0)),
-                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, selectedScoringLevel == ScoringLevel.LEVEL3 ? ScoringLevel.LEVEL3_ALGAE : ScoringLevel.LEVEL2_ALGAE), 
-                    sys_endEffector::coralDetected
                 )
-            )
-            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector, kEndEffector.ALGAE_VOLTAGE));
+            ).onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // primaryController.b()
         //     .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
@@ -763,7 +799,7 @@ public class RobotContainer {
                     AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true),
                     Commands.either(
                         AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
-                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector).unless(() -> autoChooser.getSendableChooser().getSelected() == "None"),
+                        Commands.none(),
                         runTelop::get
                     )
                 )
