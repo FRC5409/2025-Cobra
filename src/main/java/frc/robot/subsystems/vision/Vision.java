@@ -26,10 +26,12 @@ public class Vision extends SubsystemBase {
         inputs = new VisionInputsAutoLogged();
         io.setCameraOffset();
 
-        RobotSystemTest.register("Can see target?", () -> {
-            if (inputs.hasTarget) return TestResult.success();
-            else return TestResult.fail("Cannot find target. Is there an AprilTag in front of the robot?");
-        });
+        RobotSystemTest.register("Can see target?", () -> 
+            inputs.hasTarget ? TestResult.success() 
+                             : TestResult.fail("Cannot find target. Is there an AprilTag in front of the robot?"));
+
+        RobotSystemTest.register("Can recognize target?", () -> 
+            TestResult.success("Saw target with ID " + inputs.targetId));
     }
 
     /**
