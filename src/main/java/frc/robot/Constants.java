@@ -183,9 +183,9 @@ public final class Constants {
 
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.03), Degrees.of(100)),
-        LEVEL2(      Meters.of(0.12), Degrees.of(81.5)),
+        LEVEL2(      Meters.of(0.14), Degrees.of(81.5)),
         LEVEL3(      Meters.of(0.34), Degrees.of(81.5)),
-        LEVEL4(      Meters.of(0.65), Degrees.of(89.0)),
+        LEVEL4(      Meters.of(0.65), Degrees.of(97.0)),
         LEVEL2_ALGAE(Meters.of(0.20), Degrees.of(76.0)),
         LEVEL3_ALGAE(Meters.of(0.40), Degrees.of(76.0)),
         /** Not Implemented */

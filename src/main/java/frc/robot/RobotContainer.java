@@ -567,9 +567,9 @@ public class RobotContainer {
                     sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE), 
                     () -> Constants.currentMode == Mode.SIM
                 )
-                // .andThen(
-                //     new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-                // )
+                .andThen(
+                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                )
             );
 
         primaryController.x()
@@ -761,7 +761,7 @@ public class RobotContainer {
                     AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true),
                     Commands.either(
                         AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
-                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector),
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector).unless(() -> autoChooser.getSendableChooser().getSelected() == "None"),
                         runTelop::get
                     )
                 )

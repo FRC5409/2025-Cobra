@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.StructHelper;
@@ -112,6 +114,15 @@ public class Robot extends LoggedRobot {
     robotContainer = new RobotContainer();
 
     VisionIOLimelight.forwardLimelightPorts();
+
+    new Trigger(DriverStation::isDisabled)
+        .onTrue(
+            Commands.parallel(
+                robotContainer.sys_armPivot.setVoltage(0.0).ignoringDisable(true),
+                robotContainer.sys_elevator.startManualMove(0.0).ignoringDisable(true),
+                robotContainer.sys_endEffector.setVoltage(0.0).ignoringDisable(true)
+            ).ignoringDisable(true)
+        );
   }
 
   /** This function is called periodically during all modes. */
