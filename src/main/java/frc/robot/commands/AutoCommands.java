@@ -39,6 +39,8 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
+import frc.robot.util.SelectorCommand;
+import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 
@@ -185,7 +187,7 @@ public class AutoCommands {
     public static Command alignToAlgae(Drive drive) {
         return DriveCommands.alignToPoint(
             drive, 
-            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.367, 0.0, new Rotation2d()))
+            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.375, 0.0, new Rotation2d()))
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
@@ -194,6 +196,64 @@ public class AutoCommands {
             drive, 
             () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0, 0, rotationOffset))
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
+    }
+
+    public static Command automaticAlgae(Drive sys_drive, EndEffector sys_endEffector, Elevator sys_elevator, ArmPivot sys_armPivot) {
+        Command idealAlgae = 
+            Commands.sequence(
+                AutoCommands.alignToAlgae(sys_drive),
+                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
+                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
+            ).alongWith(
+                new WaitThen(
+                    Seconds.of(0.10),
+                    new SelectorCommand(
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                        () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+                    )
+                )
+            );
+
+        Command L4Algae = 
+            Commands.sequence(
+                AutoCommands.alignToAlgae(sys_drive),
+                new SelectorCommand(
+                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                    () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+                ),
+                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
+                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
+            );
+        
+        Command tooCloseAlgae = 
+            AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).andThen(
+                Commands.sequence(
+                    AutoCommands.alignToAlgae(sys_drive),
+                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
+                    AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
+                ).alongWith(
+                    new WaitThen(
+                        Seconds.of(0.10),
+                        new SelectorCommand(
+                            new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                            new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                            () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+                        )
+                    )
+                )
+            );
+
+        return Commands.either(
+            idealAlgae, 
+            Commands.either(
+                tooCloseAlgae, 
+                L4Algae, 
+                () -> sys_elevator.getPosition().lte(ScoringLevel.LEVEL3.elevatorSetpoint.plus(Centimeters.of(5.0)))
+            ), 
+            Drive::isSafe
+        );
     }
 
     public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, Command scoringCommand, BooleanSupplier isAlgae, BooleanSupplier waitBeforeScoring) {

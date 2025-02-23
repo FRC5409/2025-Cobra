@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "IC to FL"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "IC to FL"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PREP ELEVATOR"
+                }
+              }
+            ]
           }
         },
         {
@@ -23,7 +36,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "L3"
+                  "name": "L4"
                 }
               }
             ]
@@ -59,9 +72,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -80,7 +106,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "L3"
+                  "name": "L4"
                 }
               }
             ]
@@ -116,9 +142,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -137,10 +176,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "L3"
+                  "name": "L4"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "BACKOFF"
           }
         }
       ]

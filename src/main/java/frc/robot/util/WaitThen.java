@@ -1,7 +1,8 @@
 package frc.robot.util;
 
-import java.util.function.BooleanSupplier;
+import static edu.wpi.first.units.Units.*;
 
+import java.util.function.BooleanSupplier;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -13,6 +14,15 @@ public class WaitThen extends SequentialCommandGroup {
     /**
      * Waits then runs a command
      * @param waitTime the time to wait in seconds
+     * @param command the command to run after sometime
+     */
+    public WaitThen(double waitTime, Command command) {
+        this(Seconds.of(waitTime), command);
+    }
+
+    /**
+     * Waits then runs a command
+     * @param waitTime the time to wait
      * @param command the command to run after sometime
      */
     public WaitThen(Time waitTime, Command command) {

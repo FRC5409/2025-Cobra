@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "IC to FL"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "IC to FL"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PREP ELEVATOR"
+                }
+              }
+            ]
           }
         },
         {
@@ -59,9 +72,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -116,9 +142,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -141,6 +180,82 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "BL to LP"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "END WHEN COLLECTED"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LP to FL"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP ELEVATOR"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ALIGN_LEFT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "BACKOFF"
           }
         }
       ]

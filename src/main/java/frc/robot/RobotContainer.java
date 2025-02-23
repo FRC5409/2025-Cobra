@@ -58,7 +58,6 @@ import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
 import frc.robot.commands.scoring.IdleCommand;
-import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.ArmPivot;
@@ -93,7 +92,6 @@ import frc.robot.util.CaseCommand;
 import frc.robot.util.ControlBoard;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
-import frc.robot.util.SelectorCommand;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 import frc.robot.util.ControlBoard.kButton;
@@ -534,20 +532,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
-            Commands.sequence(
-                AutoCommands.alignToAlgae(sys_drive),
-                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0),
-                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
-            ).alongWith(
-                new WaitThen(
-                    Seconds.of(0.10),
-                    new SelectorCommand(
-                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
-                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
-                        () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                    )
-                )
-            ).andThen(Commands.runOnce(sys_drive::stop, sys_drive))
+            AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
+            .andThen(Commands.runOnce(sys_drive::stop, sys_drive))
         );
 
         NamedCommands.registerCommand("BACKOFF", AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()));
@@ -581,18 +567,13 @@ public class RobotContainer {
                                                 new Rotation2d())),
                                 sys_drive).ignoringDisable(true));
 
-        primaryController
-            .back()
-            .or(() -> secondaryController.getHID().getBackButton())
-                .whileFalse(
-                    Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
-                        .andThen(telopAutoCommand)
-                );
-
-        // primaryController.rightBumper()
-        //     .and(() -> !isTelopAuto)
-        //     .onTrue( Commands.runOnce(() -> sys_drive.coastMode()).ignoringDisable(true))
-        //     .onFalse(Commands.runOnce(() -> sys_drive.brakeMode()).ignoringDisable(true));
+        // primaryController
+        //     .back()
+        //     .or(() -> secondaryController.getHID().getBackButton())
+        //         .whileFalse(
+        //             Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
+        //                 .andThen(telopAutoCommand)
+        //         );
 
         primaryController.a()
             .onTrue(getLevelSelectorCommand(false))
@@ -602,49 +583,19 @@ public class RobotContainer {
                     sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE), 
                     () -> Constants.currentMode == Mode.SIM
                 )
-                // .andThen(
-                //     new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-                // )
+                .andThen(
+                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                )
             );
 
         primaryController.x()
-            .whileTrue(
-                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).andThen(
-                    Commands.sequence(
-                        AutoCommands.alignToAlgae(sys_drive),
-                        Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0),
-                        AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
-                    ).alongWith(
-                        new WaitThen(
-                            Seconds.of(0.10),
-                            new SelectorCommand(
-                                new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
-                                new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
-                                () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                            )
-                        )
-                    )
-                )
-            ).onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
-
-        // primaryController.b()
-        //     .onTrue(new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.PROCESSOR, () -> true))
-        //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+            .whileTrue(AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot))
+            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         primaryController.b()
             .onTrue(sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE))
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
-        // Reset gyro to 0° when Start button is pressed
-        primaryController
-                .start()
-                .onTrue(
-                        Commands.runOnce(
-                                () -> sys_drive.setPose(
-                                        new Pose2d(sys_drive.getPose()
-                                                .getTranslation(),
-                                                new Rotation2d())),
-                                sys_drive).ignoringDisable(true));
 
         primaryController
             .leftBumper()
