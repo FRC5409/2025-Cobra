@@ -50,8 +50,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         m_mainMotorConfig = m_mainMotor.getConfigurator();
         m_followerMotorConfig = m_followerMotor.getConfigurator();
-        m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
-        m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
 
         m_currentConfig = new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(kElevator.CURRENT_LIMIT)
@@ -74,6 +72,9 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_followerMotorConfig.apply(m_pidConfig);
 
         m_mainMotorConfig.apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+
+        m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
+        m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
 
         m_followerMotor.setControl(new Follower(mainMotorID, true));
 
