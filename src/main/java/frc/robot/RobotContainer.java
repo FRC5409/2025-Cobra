@@ -593,8 +593,7 @@ public class RobotContainer {
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         primaryController.b()
-            .onTrue(sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE))
-            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+            .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
 
         primaryController

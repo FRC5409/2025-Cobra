@@ -46,16 +46,13 @@ public class EndEffector extends SubsystemBase {
                     Commands.runOnce(
                         () -> io.setVoltage(voltage), this
                     ),
-                    Commands.sequence(
-                        Commands.waitSeconds(0.2),
-                        Commands.waitUntil(this::coralDetected)
-                    )
+                    Commands.waitUntil(this::coralDetected)
             ).andThen(
                 Commands.waitSeconds(0.0),
                 Commands.runOnce(
                     ()-> io.setVoltage(0), this
                 )
-            );
+            ).unless(this::coralDetected);
 
     }
     // Run until coral is no longer detected, if spike in current, wait then rerun
@@ -73,17 +70,18 @@ public class EndEffector extends SubsystemBase {
                 )
             );
         else
-            return Commands.runOnce(
-                    () -> io.setVoltage(voltage), 
-                    this
-                ).alongWith(
-                    new WaitThen(
-                        () -> !coralDetected(),
-                        Commands.waitSeconds(0.00)
-                    )
-                ).finallyDo(
-                    () -> io.setVoltage(0)
-                );
+            return Commands.repeatingSequence(
+                setVoltage(voltage),
+                new WaitThen(
+                    0.1,
+                    Commands.waitUntil(() -> io.getMotorCurrent() >= kEndEffector.CURRENT_LIMIT - 3)
+                ),
+                setVoltage(-kEndEffector.IDLE_VOLTAGE),
+                Commands.waitSeconds(0.2),
+                setVoltage(0.0),
+                Commands.waitSeconds(0.25)
+            ).onlyWhile(this::coralDetected)
+            .finallyDo(() -> io.setVoltage(0.0));
     }
 
     public Command setVoltage(double voltage){

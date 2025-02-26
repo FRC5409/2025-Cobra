@@ -62,7 +62,7 @@ public final class Constants {
   }
 
   public static final class kDrive {
-    public static final Mass ROBOT_FULL_MASS = Kilograms.of(58.920);
+    public static final Mass ROBOT_FULL_MASS = Kilograms.of(60.27789);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(2.881);
     public static final double WHEEL_COF = 1.916;
   }
@@ -78,13 +78,13 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(4.75, 0.0, 0.1);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(4.6, 0.0, 0.1);
 
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.0);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.0);
-    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.0);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(1.5);
+    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.5);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
@@ -100,7 +100,7 @@ public final class Constants {
 
     public static final class kReef {
       public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.367, 0.18, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.14, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.155, new Rotation2d());
 
       private static final Pose2d generatePose(Rotation2d rotation) {
         final double mx = 4.48945;
@@ -176,21 +176,22 @@ public final class Constants {
     public static final Angle maxAngles = Degrees.of(120);
 
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(88);
-    public static final Angle PICKUP_ANGLE  = Degrees.of(106);
+    public static final Angle PICKUP_ANGLE  = Degrees.of(105);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.03), Degrees.of(100)),
-        LEVEL2(      Meters.of(0.14), Degrees.of(81.5)),
-        LEVEL3(      Meters.of(0.34), Degrees.of(81.5)),
-        LEVEL4(      Meters.of(0.65), Degrees.of(97.0)),
-        LEVEL2_ALGAE(Meters.of(0.23), Degrees.of(73.0)),
-        LEVEL3_ALGAE(Meters.of(0.43), Degrees.of(73.0)),
+        LEVEL1(      Meters.of(0.030), Degrees.of(100.)),
+        LEVEL2(      Meters.of(0.140), Degrees.of(83.0)),
+        LEVEL3(      Meters.of(0.340), Degrees.of(83.0)),
+        LEVEL4(      Meters.of(0.665), Degrees.of(90.0)),
+        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5)),
+        LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(73.5)),
         /** Not Implemented */
-        BARGE(       Meters.of(0.65), Degrees.of(100.)),
-        PROCESSOR(   Meters.of(0.05), Degrees.of(80.0));
+        BARGE(       Meters.of(0.650), Degrees.of(100.)),
+        /** Not Implemented */
+        PROCESSOR(   Meters.of(0.050), Degrees.of(80.0));
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
@@ -203,12 +204,12 @@ public final class Constants {
 
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 23;
-      public static final int CURRENT_LIMIT = 30;
+      public static final int CURRENT_LIMIT = 40;
       public static final int TIMOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
-      public static final double IDLE_VOLTAGE  =  3.0;
-      public static final double SCORE_VOLTAGE =  9.0;
+      public static final double IDLE_VOLTAGE  =  3.5;
+      public static final double SCORE_VOLTAGE =  10.0;
       public static final double ALGAE_VOLTAGE = -4.0;
 
   }
@@ -229,7 +230,7 @@ public final class Constants {
 
     public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.30);
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.02);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.024);
   }
 
   public static final class kVision {
