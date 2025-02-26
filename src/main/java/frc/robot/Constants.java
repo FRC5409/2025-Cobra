@@ -244,7 +244,7 @@ public final class Constants {
     public static final int DISCONNECTION_TIMEOUT = 5;
 
     public static final Transform3d OFFSET_FROM_ROBOT_ORIGIN = new Transform3d(
-                                                                        new Translation3d(0.118, -0.218, 0.38),
+                                                                        new Translation3d(0.1322, -0.2170, 0.3804),
                                                                         new Rotation3d(   0,  0,   Units.degreesToRadians(-20)));
   }
 }
