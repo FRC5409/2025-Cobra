@@ -6,11 +6,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.DebugCommand;
 
 public class VisionIOLimelight implements VisionIO {
     private double lastPrxLatency = 0;
@@ -19,14 +21,21 @@ public class VisionIOLimelight implements VisionIO {
     public VisionIOLimelight() {
         new Trigger(DriverStation::isDisabled)
             .onTrue(
-                Commands.runOnce(() -> LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", 200))
-                .ignoringDisable(true)
+                setThrottle(kVision.THROTTLE_DISABLED)
             ).onFalse(
-                Commands.runOnce(() -> LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", 0))
-                .ignoringDisable(true)
+                setThrottle(0)
             );
 
-        LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", 200);
+        LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", kVision.THROTTLE_DISABLED);
+        
+        DebugCommand.register("No Throttle LL", setThrottle(0));
+        DebugCommand.register("Throttle LL", setThrottle(kVision.THROTTLE_DISABLED));
+    }
+
+    private Command setThrottle(int throttle) {
+        return Commands.runOnce(
+            () -> LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", throttle)
+        ).ignoringDisable(true);
     }
 
     @Override

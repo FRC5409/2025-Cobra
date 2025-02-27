@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 
 // 5409: The Chargers
 // http://github.com/FRC5409
@@ -13,6 +14,7 @@ import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.drive.Drive;
 
 public class Vision extends SubsystemBase {
+
     private final VisionIO io;
     private final VisionInputsAutoLogged inputs;
 
@@ -20,6 +22,7 @@ public class Vision extends SubsystemBase {
 //    private final Field2d sEstimatedPose;
 
     private final Alert disconnectedAlert = new Alert("Limelight appears to be disconnected. (TIMEOUT)", Alert.AlertType.kError);
+    private final Alert tempAlert = new Alert("LL Temp", AlertType.kWarning);
 
     public Vision(VisionIO io) {
         this.io = io;
@@ -59,6 +62,7 @@ public class Vision extends SubsystemBase {
         Logger.processInputs("Vision", inputs);
 
         disconnectedAlert.set(!inputs.isConnected && Constants.currentMode != Constants.Mode.SIM);
+        tempAlert.set(inputs.sysTemp >= 70.0);
     }
 
     @Override

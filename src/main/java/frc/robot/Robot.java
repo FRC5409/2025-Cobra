@@ -29,6 +29,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.StructHelper;
 import frc.robot.Constants.Mode;
+import frc.robot.Constants.kEndEffector;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -46,6 +47,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+
+  private double matchTime = -1;
 
   private final Alert autoStartingConfigAlert = new Alert("Auto Pose Mismatch!", AlertType.kWarning);
 
@@ -123,6 +126,10 @@ public class Robot extends LoggedRobot {
                 robotContainer.sys_endEffector.setVoltage(0.0).ignoringDisable(true)
             ).ignoringDisable(true)
         );
+
+    new Trigger(() -> matchTime <= 0.25)
+        .and(DriverStation::isTeleopEnabled)
+        .onTrue(robotContainer.sys_endEffector.setVoltage(kEndEffector.SCORE_VOLTAGE));
   }
 
   /** This function is called periodically during all modes. */
@@ -141,7 +148,8 @@ public class Robot extends LoggedRobot {
     // Return to normal thread priority
     Threads.setCurrentThreadPriority(false, 10);
 
-    SmartDashboard.putNumber("Time", DriverStation.getMatchTime());
+    matchTime = DriverStation.getMatchTime();
+    SmartDashboard.putNumber("Time", matchTime);
 
     StructHelper.update();
     robotContainer.updateScoringPosition();

@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import static edu.wpi.first.units.Units.*;
 
 import org.littletonrobotics.junction.AutoLog;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.units.measure.Angle;
 
 public interface ArmPivotIO {
@@ -17,6 +18,9 @@ public interface ArmPivotIO {
         public double temperature = 0.0;
         public double targetAngle = 0.0;
         public double positionRad = 0.0;
+
+        public boolean cancoderConnected = false;
+        public MagnetHealthValue magnetHealth = MagnetHealthValue.Magnet_Invalid;
     }
 
     public default void setVoltage(double volts) {}

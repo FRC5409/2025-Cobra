@@ -16,6 +16,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.util.Units;
@@ -37,6 +38,7 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
     private StatusSignal<Current> deviceCurrent;
     private StatusSignal<Temperature> deviceTemp;
     private StatusSignal<AngularVelocity> deviceVelocity;
+    private StatusSignal<MagnetHealthValue> magneticHealth;
 
     public ArmPivotIOTalonFX(int canID, int sensorID) {
 
@@ -89,6 +91,7 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         deviceCurrent = armMotor.getSupplyCurrent();
         deviceTemp = armMotor.getDeviceTemp();
         deviceVelocity = armMotor.getVelocity();
+        magneticHealth = canCoderSensor.getMagnetHealth();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50,
@@ -97,10 +100,13 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
             deviceVoltage,
             deviceCurrent,
             deviceTemp,
-            deviceVelocity
+            deviceVelocity,
+            magneticHealth
         );
 
         armMotor.optimizeBusUtilization();
+        // TODO: Look into this
+        // canCoderSensor.optimizeBusUtilization();
     }
 
     @Override
@@ -134,5 +140,11 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         inputs.current = Math.abs(deviceCurrent.getValueAsDouble());
         inputs.temperature = deviceTemp.getValueAsDouble();
         inputs.speed = deviceVelocity.getValueAsDouble();
+
+        inputs.cancoderConnected = BaseStatusSignal.refreshAll(
+            magneticHealth
+        ).isOK();
+
+        inputs.magnetHealth = magneticHealth.getValue();
     }
 }
