@@ -5,6 +5,9 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.kVision;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.drive.Drive;
@@ -12,6 +15,19 @@ import frc.robot.subsystems.drive.Drive;
 public class VisionIOLimelight implements VisionIO {
     private double lastPrxLatency = 0;
     private double disconnectedFrames = 0;
+
+    public VisionIOLimelight() {
+        new Trigger(DriverStation::isDisabled)
+            .onTrue(
+                Commands.runOnce(() -> LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", 200))
+                .ignoringDisable(true)
+            ).onFalse(
+                Commands.runOnce(() -> LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", 0))
+                .ignoringDisable(true)
+            );
+
+        LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", 200);
+    }
 
     @Override
     public void updateInputs(VisionInputs inputs) {
@@ -27,10 +43,10 @@ public class VisionIOLimelight implements VisionIO {
                                                     .getDoubleArray(new Double[] {0.0, 0.0, 0.0, 0.0});
 
         try {
-            inputs.fps      = system[0];
-            inputs.cpuTemp  = system[1];
-            inputs.ramUsage = system[2];
-            inputs.sysTemp  = system[3];
+            inputs.fps      = system[3];
+            inputs.cpuTemp  = system[2];
+            inputs.ramUsage = system[1];
+            inputs.sysTemp  = system[0];
         } catch (Exception e) {
             inputs.fps = 0.0;
             inputs.cpuTemp = 0.0;

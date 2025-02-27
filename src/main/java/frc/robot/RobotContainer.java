@@ -526,10 +526,10 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.5));
 
-        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
-        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
-        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
-        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected));
+        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
+        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
+        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
+        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
@@ -636,6 +636,14 @@ public class RobotContainer {
                     () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
             );
+
+        primaryController.povUp()
+            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE))
+            .onFalse(sys_endEffector.setVoltage(0.0));
+
+        primaryController.povDown()
+            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE))
+            .onFalse(sys_endEffector.setVoltage(0.0));
 
         // SECONDARY CONTROLLER
 

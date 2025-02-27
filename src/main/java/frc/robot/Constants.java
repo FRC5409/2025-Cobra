@@ -80,7 +80,7 @@ public final class Constants {
   public static final class kAutoAlign {
     public static final PIDConstants ALIGN_PID = new PIDConstants(4.6, 0.0, 0.1);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.0);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(1.75);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(1.5);
@@ -99,8 +99,8 @@ public final class Constants {
     public static final int  TIME_ADJUSTMENT_TIMEOUT = 10;
 
     public static final class kReef {
-      public static final Transform2d LEFT_OFFSET_TO_BRANCH = new Transform2d(0.367, 0.18, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.367, -0.155, new Rotation2d());
+      public static final Transform2d LEFT_OFFSET_TO_BRANCH  = new Transform2d(0.35, 0.18, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.35, -0.18, new Rotation2d());
 
       private static final Pose2d generatePose(Rotation2d rotation) {
         final double mx = 4.48945;
@@ -183,9 +183,9 @@ public final class Constants {
 
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.030), Degrees.of(100.)),
-        LEVEL2(      Meters.of(0.140), Degrees.of(83.0)),
-        LEVEL3(      Meters.of(0.340), Degrees.of(83.0)),
-        LEVEL4(      Meters.of(0.665), Degrees.of(90.0)),
+        LEVEL2(      Meters.of(0.160), Degrees.of(83.0)),
+        LEVEL3(      Meters.of(0.360), Degrees.of(83.0)),
+        LEVEL4(      Meters.of(0.665), Degrees.of(92.0)),
         LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5)),
         LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(73.5)),
         /** Not Implemented */
@@ -209,9 +209,8 @@ public final class Constants {
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
       public static final double IDLE_VOLTAGE  =  3.5;
-      public static final double SCORE_VOLTAGE =  10.0;
+      public static final double SCORE_VOLTAGE =  8.0;
       public static final double ALGAE_VOLTAGE = -4.0;
-
   }
 
   public static final class kElevator {
