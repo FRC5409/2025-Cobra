@@ -78,12 +78,12 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(4.6, 0.0, 0.1);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(4.7, 0.0, 0.12);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(1.75);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(1.90);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(1.5);
+    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.5);
     public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.5);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
@@ -209,7 +209,7 @@ public final class Constants {
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
       public static final double IDLE_VOLTAGE  =  3.5;
-      public static final double SCORE_VOLTAGE =  8.0;
+      public static final double SCORE_VOLTAGE =  7.9;
       public static final double ALGAE_VOLTAGE = -4.0;
   }
 

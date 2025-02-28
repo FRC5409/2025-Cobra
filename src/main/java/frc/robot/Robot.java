@@ -128,6 +128,7 @@ public class Robot extends LoggedRobot {
         );
 
     new Trigger(() -> matchTime <= 0.25)
+        .and(() -> matchTime != -1.0)
         .and(DriverStation::isTeleopEnabled)
         .onTrue(robotContainer.sys_endEffector.setVoltage(kEndEffector.SCORE_VOLTAGE));
   }

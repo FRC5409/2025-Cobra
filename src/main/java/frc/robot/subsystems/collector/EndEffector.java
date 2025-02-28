@@ -14,7 +14,7 @@ import frc.robot.util.WaitThen;
 
 public class EndEffector extends SubsystemBase {
 
-    private final EndEffectorIO io;
+    public final EndEffectorIO io;
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
 
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);

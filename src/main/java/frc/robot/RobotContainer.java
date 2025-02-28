@@ -86,7 +86,6 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
-import frc.robot.util.WaitThen;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
@@ -297,41 +296,23 @@ public class RobotContainer {
         // Controller Alerts
         new Trigger(() -> !primaryController.isConnected())
                 .onTrue(
-                        Commands.runOnce(() -> {
-                            secondaryController.setRumble(RumbleType.kBothRumble, 0.50);
-                            primaryDisconnectedAlert.set(true);
-                        })
-                                .ignoringDisable(true)
-                                .andThen(
-                                        new WaitThen(
-                                                Seconds.of(0.5),
-                                                Commands.runOnce(
-                                                        () -> secondaryController
-                                                                .setRumble(RumbleType.kBothRumble,
-                                                                        0.0)))
-                                                .ignoringDisable(true)))
+                    Commands.runOnce(() -> primaryDisconnectedAlert.set(true))
+                        .ignoringDisable(true)
+                )
                 .onFalse(
-                        Commands.runOnce(() -> primaryDisconnectedAlert.set(false))
-                                .ignoringDisable(true));
+                    Commands.runOnce(() -> primaryDisconnectedAlert.set(false))
+                        .ignoringDisable(true)
+                );
 
-        new Trigger(() -> !secondaryController.isConnected())
+            new Trigger(() -> !secondaryController.isConnected())
                 .onTrue(
-                        Commands.runOnce(() -> {
-                            primaryController.setRumble(RumbleType.kBothRumble, 0.50);
-                            secondaryDisconnectedAlert.set(true);
-                        })
-                                .ignoringDisable(true)
-                                .andThen(
-                                        new WaitThen(
-                                                Seconds.of(0.5),
-                                                Commands.runOnce(
-                                                        () -> primaryController
-                                                                .setRumble(RumbleType.kBothRumble,
-                                                                        0.0)))
-                                                .ignoringDisable(true)))
+                    Commands.runOnce(() -> secondaryDisconnectedAlert.set(true))
+                        .ignoringDisable(true)
+                )
                 .onFalse(
-                        Commands.runOnce(() -> secondaryDisconnectedAlert.set(false))
-                                .ignoringDisable(true));
+                    Commands.runOnce(() -> secondaryDisconnectedAlert.set(false))
+                        .ignoringDisable(true)
+                );
 
         // new Trigger(() -> !controlBoard.isConnected())
         //         .onTrue(
@@ -496,7 +477,13 @@ public class RobotContainer {
                         )
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
-                ).withTimeout(1.5)
+                ).raceWith(
+                    new ConditionalCommand(
+                        Commands.waitSeconds(1.5), 
+                        Commands.waitSeconds(0.5), 
+                        sys_endEffector::coralDetected
+                    )
+                )
             );
 
         NamedCommands.registerCommand(
@@ -517,10 +504,19 @@ public class RobotContainer {
                         )
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
-                ).withTimeout(1.5)
+                ).raceWith(
+                    new ConditionalCommand(
+                        Commands.waitSeconds(1.5), 
+                        Commands.waitSeconds(0.5), 
+                        sys_endEffector::coralDetected
+                    )
+                )
             );
 
-        NamedCommands.registerCommand("IDLE", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        NamedCommands.registerCommand("IDLE",
+            new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                .finallyDo(() -> sys_endEffector.io.setVoltage(0.0))
+        );
 
         NamedCommands.registerCommand("PREP ELEVATOR", 
             Commands.sequence(
@@ -561,16 +557,22 @@ public class RobotContainer {
             )
         );
 
-        // Reset gyro to 0° when Start button is pressed
-        primaryController
-                .start()
-                .onTrue(
-                        Commands.runOnce(
-                                () -> sys_drive.setPose(
-                                        new Pose2d(sys_drive.getPose()
-                                                .getTranslation(),
-                                                new Rotation2d())),
-                                sys_drive).ignoringDisable(true));
+        primaryController.start()
+            .onTrue(
+                sys_elevator.elevatorGo(ScoringLevel.LEVEL4.elevatorSetpoint)
+                    .onlyIf(() -> sys_armPivot.getPosition().lte(kArmPivot.MOVEMENT_SETPOINT.plus(Degrees.of(1.0))))
+            ).onFalse(sys_elevator.startManualMove(0.0));
+
+        // // Reset gyro to 0° when Start button is pressed
+        // primaryController
+        //         .start()
+        //         .onTrue(
+        //                 Commands.runOnce(
+        //                         () -> sys_drive.setPose(
+        //                                 new Pose2d(sys_drive.getPose()
+        //                                         .getTranslation(),
+        //                                         new Rotation2d())),
+        //                         sys_drive).ignoringDisable(true));
 
         // primaryController
         //     .back()
@@ -594,7 +596,17 @@ public class RobotContainer {
             );
 
         primaryController.x()
-            .whileTrue(AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot))
+            .whileTrue(
+                new ConditionalCommand(
+                    Commands.sequence(
+                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.4))
+                            .alongWith(Commands.waitSeconds(1.0)),
+                        AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
+                    ),
+                    AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot),
+                    sys_endEffector::coralDetected
+                ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+            )
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         primaryController.b()
