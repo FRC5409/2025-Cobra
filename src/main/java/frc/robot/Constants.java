@@ -185,7 +185,7 @@ public final class Constants {
         LEVEL1(      Meters.of(0.030), Degrees.of(100.)),
         LEVEL2(      Meters.of(0.160), Degrees.of(83.0)),
         LEVEL3(      Meters.of(0.360), Degrees.of(83.0)),
-        LEVEL4(      Meters.of(0.665), Degrees.of(92.0)),
+        LEVEL4(      Meters.of(0.665), Degrees.of(87.0)),
         LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5)),
         LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(73.5)),
         /** Not Implemented */
