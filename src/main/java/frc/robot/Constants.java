@@ -184,9 +184,9 @@ public final class Constants {
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.030), Degrees.of(100.), kEndEffector.SCORE_VOLTAGE),
         LEVEL2(      Meters.of(0.160), Degrees.of(83.0), 5.0),
-        LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 5.0), vl                   vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv,                                                                                                                                                                                                                                                                                                                          mmmmmmmmmmmmmmmmmmmmmmmmmxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxm n nnnnnnnnnnnnnnnnnnnnnnnn   
-        LEVEL4(      Meters.of(0.665), Degrees.of(87.0), kEndEffector.SCORE_VOLTAGE),m,,,,,,,,,,,,,,,,mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
-         LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5), 0.0),
+        LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 5.0),
+        LEVEL4(      Meters.of(0.665), Degrees.of(87.0), kEndEffector.SCORE_VOLTAGE),
+        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5), 0.0),
         LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(73.5), 0.0),
         /** Not Implemented */
         BARGE(       Meters.of(0.650), Degrees.of(100.), 0.0),
