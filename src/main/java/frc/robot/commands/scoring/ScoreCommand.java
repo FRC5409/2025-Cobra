@@ -18,7 +18,7 @@ public class ScoreCommand extends SequentialCommandGroup {
             sys_elevator.elevatorGo(level.elevatorSetpoint),
             sys_pivot.moveArm(level.pivotAngle),
             Commands.waitUntil(scoring),
-            Commands.waitSeconds(0.25).onlyIf(DriverStation::isTeleopEnabled),
+            Commands.waitSeconds(0.1).onlyIf(DriverStation::isTeleopEnabled),
             sys_score.runUntilCoralNotDetected(level.voltage)
         );
     }
