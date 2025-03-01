@@ -128,7 +128,7 @@ public class RobotContainer {
     private boolean removeAlgae = false;
 
     @SuppressWarnings("unused")
-    private static final boolean runOpponent = false
+    private static final boolean runOpponent = true
         && Constants.currentMode == Mode.SIM;
 
     // Dashboard inputs
