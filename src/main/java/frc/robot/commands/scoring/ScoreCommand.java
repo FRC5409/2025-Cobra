@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
-import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.arm.ArmPivot;
 import frc.robot.subsystems.collector.EndEffector;
@@ -20,7 +19,7 @@ public class ScoreCommand extends SequentialCommandGroup {
             sys_pivot.moveArm(level.pivotAngle),
             Commands.waitUntil(scoring),
             Commands.waitSeconds(0.25).onlyIf(DriverStation::isTeleopEnabled),
-            sys_score.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE)
+            sys_score.runUntilCoralNotDetected(level.voltage)
         );
     }
 }

@@ -182,23 +182,25 @@ public final class Constants {
   }
 
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.030), Degrees.of(100.)),
-        LEVEL2(      Meters.of(0.160), Degrees.of(83.0)),
-        LEVEL3(      Meters.of(0.360), Degrees.of(83.0)),
-        LEVEL4(      Meters.of(0.665), Degrees.of(87.0)),
-        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5)),
-        LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(73.5)),
+        LEVEL1(      Meters.of(0.030), Degrees.of(100.), kEndEffector.SCORE_VOLTAGE),
+        LEVEL2(      Meters.of(0.160), Degrees.of(83.0), kEndEffector.SCORE_VOLTAGE - 2.0),
+        LEVEL3(      Meters.of(0.360), Degrees.of(83.0), kEndEffector.SCORE_VOLTAGE - 2.0),
+        LEVEL4(      Meters.of(0.665), Degrees.of(87.0), kEndEffector.SCORE_VOLTAGE),
+        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(73.5), 0.0),
+        LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(73.5), 0.0),
         /** Not Implemented */
-        BARGE(       Meters.of(0.650), Degrees.of(100.)),
+        BARGE(       Meters.of(0.650), Degrees.of(100.), 0.0),
         /** Not Implemented */
-        PROCESSOR(   Meters.of(0.050), Degrees.of(80.0));
+        PROCESSOR(   Meters.of(0.050), Degrees.of(80.0), 0.0);
 
         public final Distance elevatorSetpoint;
         public final Angle pivotAngle;
+        public final double voltage;
 
-        private ScoringLevel(Distance elevatorSetpoint, Angle pivotAngle) {
+        private ScoringLevel(Distance elevatorSetpoint, Angle pivotAngle, double voltage) {
             this.elevatorSetpoint = elevatorSetpoint;
             this.pivotAngle = pivotAngle;
+            this.voltage = voltage;
         }
     }
 
