@@ -209,7 +209,7 @@ public final class Constants {
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
       public static final double IDLE_VOLTAGE  =  3.5;
-      public static final double SCORE_VOLTAGE =  7.9;
+      public static final double SCORE_VOLTAGE =  7.6;
       public static final double ALGAE_VOLTAGE = -4.0;
   }
 
