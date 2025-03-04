@@ -128,7 +128,7 @@ public class RobotContainer {
     private boolean removeAlgae = false;
 
     @SuppressWarnings("unused")
-    private static final boolean runOpponent = true
+    private static final boolean runOpponent = false
         && Constants.currentMode == Mode.SIM;
 
     // Dashboard inputs
@@ -524,7 +524,7 @@ public class RobotContainer {
                 sys_elevator.elevatorGo(kElevator.ELEVATOR_PREP_HEIGHT)
             )
         );
-
+      
         NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.5));
 
         NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));

@@ -186,7 +186,7 @@ public class AutoCommands {
 
     public static Command alignToAlgae(Drive drive) {
         return DriveCommands.alignToPoint(
-            drive, 
+            drive,
             () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.385, 0.0, new Rotation2d()))
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
