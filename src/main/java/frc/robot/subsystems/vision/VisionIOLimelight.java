@@ -3,18 +3,31 @@ package frc.robot.subsystems.vision;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.kVision;
-import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.DebugCommand;
+import frc.robot.util.LimelightHelpers;
 
 public class VisionIOLimelight implements VisionIO {
+
+    public enum kIMU_MODE {
+        EXTERNAL(0),
+        FUSED(1),
+        INTERNAL(2);
+
+        public final int ID;
+
+        private kIMU_MODE(int num) {
+            ID = num;
+        }
+    }
+
     private double lastPrxLatency = 0;
     private double disconnectedFrames = 0;
 
@@ -25,16 +38,25 @@ public class VisionIOLimelight implements VisionIO {
             ).onFalse(
                 setThrottle(0)
             );
-
-        LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", kVision.THROTTLE_DISABLED);
         
         DebugCommand.register("No Throttle LL", setThrottle(0));
         DebugCommand.register("Throttle LL", setThrottle(kVision.THROTTLE_DISABLED));
+        DebugCommand.register("Fused LL", setIMUMode(kIMU_MODE.FUSED));
+        DebugCommand.register("Internal LL", setIMUMode(kIMU_MODE.INTERNAL));
+
+        LimelightHelpers.SetThrottle(kVision.CAM_NAME, kVision.THROTTLE_DISABLED);
+        LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.FUSED.ID);
     }
 
     private Command setThrottle(int throttle) {
         return Commands.runOnce(
-            () -> LimelightHelpers.setLimelightNTDouble(kVision.CAM_NAME, "throttle_set", throttle)
+            () -> LimelightHelpers.SetThrottle(kVision.CAM_NAME, throttle)
+        ).ignoringDisable(true);
+    }
+
+    private Command setIMUMode(kIMU_MODE mode) {
+        return Commands.runOnce(
+            () -> LimelightHelpers.SetIMUMode(kVision.CAM_NAME, mode.ID)
         ).ignoringDisable(true);
     }
 
@@ -68,8 +90,7 @@ public class VisionIOLimelight implements VisionIO {
             disconnectedFrames = 0;
             inputs.isConnected = true;
         } else {
-            disconnectedFrames++;
-            inputs.isConnected = disconnectedFrames <= kVision.DISCONNECTION_TIMEOUT;
+            inputs.isConnected = ++disconnectedFrames <= kVision.DISCONNECTION_TIMEOUT;
         }
 
         lastPrxLatency = inputs.prxLatency;
@@ -88,10 +109,20 @@ public class VisionIOLimelight implements VisionIO {
 
     @Override
     public LimelightHelpers.PoseEstimate estimatePose(Drive drive) {
-        Rotation2d rot = drive.getRotation();
-        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rot.getDegrees(),
-                Units.radiansToDegrees(drive.getChassisSpeeds().omegaRadiansPerSecond), 0, 0, 0, 0);
-        return LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME);
+        ChassisSpeeds speeds = drive.getChassisSpeeds();
+
+        Rotation2d robotYaw;
+        if (LimelightHelpers.getTA(kVision.CAM_NAME) >= 0.7 && Math.abs(speeds.vxMetersPerSecond) < 0.1 && Math.abs(speeds.vyMetersPerSecond) < 0.1 && Math.abs(speeds.omegaRadiansPerSecond) < 0.1) {
+            LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.FUSED.ID);
+            robotYaw = LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME).pose.getRotation();
+        } else {
+            LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.INTERNAL.ID);
+            robotYaw = drive.getRotation();
+        }
+
+        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, robotYaw.getDegrees(), 0, 0, 0, 0, 0);
+
+        return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kVision.CAM_NAME);
     }
 
     /**
@@ -99,6 +130,6 @@ public class VisionIOLimelight implements VisionIO {
      */
     public static void forwardLimelightPorts() {
         for (int i = 5800; i <= 5809; i++) 
-            PortForwarder.add(i, kVision.CAM_NAME+".local", i);
+            PortForwarder.add(i, kVision.CAM_NAME + ".local", i);
     }
 }

@@ -23,9 +23,9 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.LimelightHelpers.PoseEstimate;
-import frc.robot.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.LimelightHelpers.PoseEstimate;
+import frc.robot.util.LimelightHelpers.RawFiducial;
 
 public class VisionIOSim implements VisionIO {
     private final SwerveDriveSimulation sim_drive;

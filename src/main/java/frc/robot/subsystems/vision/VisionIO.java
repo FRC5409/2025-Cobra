@@ -2,8 +2,8 @@ package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.LimelightHelpers.PoseEstimate;
 
 public interface VisionIO {
     @AutoLog
