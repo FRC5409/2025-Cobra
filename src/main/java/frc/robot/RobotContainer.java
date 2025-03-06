@@ -259,27 +259,29 @@ public class RobotContainer {
             }
         }
 
-        // Set up SysId routines
-        autoChooser.addOption(
-                "Drive Wheel Radius Characterization",
-                DriveCommands.wheelRadiusCharacterization(sys_drive));
-        autoChooser.addOption(
-                "Drive Simple FF Characterization",
-                DriveCommands.feedforwardCharacterization(sys_drive));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)",
-                sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)",
-                sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Forward)",
-                sys_drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Reverse)",
-                sys_drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        if (Constants.TUNNING) {
+            // Set up SysId routines
+            autoChooser.addOption(
+                    "Drive Wheel Radius Characterization",
+                    DriveCommands.wheelRadiusCharacterization(sys_drive));
+            autoChooser.addOption(
+                    "Drive Simple FF Characterization",
+                    DriveCommands.feedforwardCharacterization(sys_drive));
+            autoChooser.addOption(
+                    "Drive SysId (Quasistatic Forward)",
+                    sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+            autoChooser.addOption(
+                    "Drive SysId (Quasistatic Reverse)",
+                    sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+            autoChooser.addOption(
+                    "Drive SysId (Dynamic Forward)",
+                    sys_drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+            autoChooser.addOption(
+                    "Drive SysId (Dynamic Reverse)",
+                    sys_drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        }
 
-                runTelop = DebugCommand.putNumber("Run Telop Auto", false);
+        runTelop = DebugCommand.putNumber("Run Telop Auto", false);
 
         if (kAuto.RESET_ODOM_ON_CHANGE)
             autoChooser
@@ -443,7 +445,6 @@ public class RobotContainer {
         DebugCommand.register("Algae L2", new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE));
         DebugCommand.register("Algae L3", new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE));
 
-
         DebugCommand.register("Idle", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         DebugCommand.register("Setup Auto [R]", 
@@ -477,7 +478,9 @@ public class RobotContainer {
                         )
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
-                ).raceWith(
+                )
+                // .beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+                .raceWith(
                     new ConditionalCommand(
                         Commands.waitSeconds(1.5), 
                         Commands.waitSeconds(0.5), 
@@ -504,7 +507,9 @@ public class RobotContainer {
                         )
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
-                ).raceWith(
+                )
+                // .beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+                .raceWith(
                     new ConditionalCommand(
                         Commands.waitSeconds(1.5), 
                         Commands.waitSeconds(0.5), 
@@ -525,12 +530,12 @@ public class RobotContainer {
             )
         );
       
-        NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.5));
+        NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.75));
 
-        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
-        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
-        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
-        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(1.5));
+        NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
+        NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
+        NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
+        NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
@@ -538,6 +543,8 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("BACKOFF", AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()));
+
+        NamedCommands.registerCommand("AUTO_END", AutoTimer.end(kAuto.PRINT_AUTO_TIME));
     }
 
     /**
@@ -587,7 +594,7 @@ public class RobotContainer {
             .onFalse(
                 new ConditionalCommand(
                     Commands.waitSeconds(0.2),
-                    sys_endEffector.runUntilCoralNotDetected(kEndEffector.SCORE_VOLTAGE), 
+                    sys_endEffector.runUntilCoralNotDetected(ScoringLevel.LEVEL4.voltage),
                     () -> Constants.currentMode == Mode.SIM
                 )
                 .andThen(
@@ -757,13 +764,10 @@ public class RobotContainer {
         return AutoTimer.start()
             .alongWith(autoChooser.get())
             .andThen(
-                Commands.parallel(
-                    AutoTimer.end(kAuto.PRINT_AUTO_TIME).ignoringDisable(true),
-                    Commands.either(
-                        AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
-                        Commands.none(),
-                        runTelop::get
-                    )
+                Commands.either(
+                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
+                    Commands.none(),
+                    runTelop::get
                 )
             );
     }

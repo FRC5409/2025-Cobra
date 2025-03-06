@@ -40,7 +40,6 @@ import frc.robot.util.AlignHelper;
 import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.SelectorCommand;
-import frc.robot.util.WaitThen;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
 
@@ -205,13 +204,10 @@ public class AutoCommands {
                 Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
                 AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
             ).alongWith(
-                new WaitThen(
-                    Seconds.of(0.10),
-                    new SelectorCommand(
-                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
-                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
-                        () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                    )
+                new SelectorCommand(
+                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                    () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
                 )
             );
 
@@ -234,13 +230,10 @@ public class AutoCommands {
                     Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
                     AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
                 ).alongWith(
-                    new WaitThen(
-                        Seconds.of(0.10),
-                        new SelectorCommand(
-                            new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
-                            new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
-                            () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                        )
+                    new SelectorCommand(
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+                        new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+                        () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
                     )
                 )
             );
@@ -265,7 +258,7 @@ public class AutoCommands {
             // TODO: TEST AT MULTIPLE AUTO POSITIONS
             Commands.parallel(
                 new IdleCommand(sys_elevator, sys_pivot, sys_endeffector),
-                pathFindToNearestStation(drive).unless(() -> false) // TODO: Has coral
+                pathFindToNearestStation(drive).unless(sys_endeffector::coralDetected)
             ),
             pathFindToReef(drive, () -> target),
             alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT))

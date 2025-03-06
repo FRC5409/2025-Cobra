@@ -2,6 +2,8 @@ package frc.robot.subsystems.vision;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.PortForwarder;
@@ -34,9 +36,15 @@ public class VisionIOLimelight implements VisionIO {
     public VisionIOLimelight() {
         new Trigger(DriverStation::isDisabled)
             .onTrue(
-                setThrottle(kVision.THROTTLE_DISABLED)
+                Commands.parallel(
+                    setIMUMode(kIMU_MODE.FUSED),
+                    setThrottle(kVision.THROTTLE_DISABLED)
+                )
             ).onFalse(
-                setThrottle(0)
+                Commands.parallel(
+                    setIMUMode(kIMU_MODE.INTERNAL),
+                    setThrottle(0)
+                )
             );
         
         DebugCommand.register("No Throttle LL", setThrottle(0));
@@ -107,22 +115,35 @@ public class VisionIOLimelight implements VisionIO {
                                                   kVision.OFFSET_FROM_ROBOT_ORIGIN.getRotation().getMeasureZ().in(Degrees));
     }
 
+    private void logMode(String mode) {
+        Logger.recordOutput("Vision/Gyro-Mode", mode);
+    }
+
     @Override
     public LimelightHelpers.PoseEstimate estimatePose(Drive drive) {
         ChassisSpeeds speeds = drive.getChassisSpeeds();
 
-        Rotation2d robotYaw;
-        if (LimelightHelpers.getTA(kVision.CAM_NAME) >= 0.7 && Math.abs(speeds.vxMetersPerSecond) < 0.1 && Math.abs(speeds.vyMetersPerSecond) < 0.1 && Math.abs(speeds.omegaRadiansPerSecond) < 0.1) {
-            LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.FUSED.ID);
-            robotYaw = LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME).pose.getRotation();
-        } else {
-            LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.INTERNAL.ID);
-            robotYaw = drive.getRotation();
+        Rotation2d robotYaw = drive.getRotation();
+        if (DriverStation.isEnabled()) {
+            if (LimelightHelpers.getTA(kVision.CAM_NAME) >= 0.7 && Math.abs(speeds.vxMetersPerSecond) < 0.1 && Math.abs(speeds.vyMetersPerSecond) < 0.1 && Math.abs(speeds.omegaRadiansPerSecond) < 0.1) {
+                LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.FUSED.ID);
+                robotYaw = LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME).pose.getRotation();
+                logMode("FUSED");
+            } else {
+                // LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.INTERNAL.ID);
+                // logMode("INTERNAL");
+            }
         }
 
         LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, robotYaw.getDegrees(), 0, 0, 0, 0, 0);
 
         return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kVision.CAM_NAME);
+    }
+
+    @Override
+    public void setRotation(Rotation2d rotation) {
+        LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.FUSED.ID);
+        LimelightHelpers.SetRobotOrientation(kVision.CAM_NAME, rotation.getDegrees(), 0, 0, 0, 0, 0);
     }
 
     /**

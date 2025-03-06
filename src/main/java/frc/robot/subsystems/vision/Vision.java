@@ -1,6 +1,8 @@
 package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
@@ -53,6 +55,10 @@ public class Vision extends SubsystemBase {
             return;
 
         drive.addVisionMeasurement(estimate.pose, estimate.timestampSeconds);
+    }
+
+    public void setRotation(Rotation2d rotation) {
+        io.setRotation(rotation);
     }
 
     @Override

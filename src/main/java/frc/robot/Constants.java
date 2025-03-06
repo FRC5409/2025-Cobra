@@ -61,6 +61,8 @@ public final class Constants {
     REPLAY
   }
 
+  public static final boolean TUNNING = false;
+
   public static final class kDrive {
     public static final Mass ROBOT_FULL_MASS = Kilograms.of(60.27789);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(2.881);
@@ -73,8 +75,8 @@ public final class Constants {
     /** When this is true the robot will set it's position where the path starts when the auto is selected. */
     public static final boolean RESET_ODOM_ON_CHANGE = true;
 
-    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0 , 0.0, 0.0);
-    public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0 , 0.0, 0.0);
+    public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
+    public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0, 0.0, 0.0);
   }
 
   public static final class kAutoAlign {
@@ -176,16 +178,16 @@ public final class Constants {
     public static final Angle maxAngles = Degrees.of(120);
 
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(88);
-    public static final Angle PICKUP_ANGLE  = Degrees.of(105);
+    public static final Angle PICKUP_ANGLE  = Degrees.of(104.5);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
   }
 
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.030), Degrees.of(100.), kEndEffector.SCORE_VOLTAGE),
+        LEVEL1(      Meters.of(0.030), Degrees.of(100.), 2.0),
         LEVEL2(      Meters.of(0.160), Degrees.of(83.0), 5.0),
         LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 5.0),
-        LEVEL4(      Meters.of(0.665), Degrees.of(87.0), kEndEffector.SCORE_VOLTAGE),
+        LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.6),
         LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(70.5), 0.0),
         LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(70.5), 0.0),
         /** Not Implemented */
@@ -211,7 +213,6 @@ public final class Constants {
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
 
       public static final double IDLE_VOLTAGE  =  3.5;
-      public static final double SCORE_VOLTAGE =  7.6;
       public static final double ALGAE_VOLTAGE = -4.0;
   }
 
@@ -231,7 +232,7 @@ public final class Constants {
 
     public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.30);
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.024);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.029);
   }
 
   public static final class kVision {

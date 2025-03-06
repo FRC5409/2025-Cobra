@@ -255,13 +255,25 @@
         {
           "type": "named",
           "data": {
+            "name": "AUTO_END"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "BACKOFF"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IDLE"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

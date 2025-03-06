@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.LimelightHelpers.PoseEstimate;
 
@@ -57,4 +58,6 @@ public interface VisionIO {
 
     /** Code to run periodically in simulation mode */
     default void simulationPeriodic() {}
+
+    default void setRotation(Rotation2d rotation) {}
 }

@@ -30,7 +30,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.StructHelper;
 import frc.robot.Constants.Mode;
-import frc.robot.Constants.kEndEffector;
+import frc.robot.Constants.ScoringLevel;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -133,7 +133,7 @@ public class Robot extends LoggedRobot {
     new Trigger(() -> matchTime <= 0.25)
         .and(() -> matchTime != -1.0)
         .and(DriverStation::isTeleopEnabled)
-        .onTrue(robotContainer.sys_endEffector.setVoltage(kEndEffector.SCORE_VOLTAGE));
+        .onTrue(robotContainer.sys_endEffector.setVoltage(ScoringLevel.LEVEL4.voltage));
   }
 
   /** This function is called periodically during all modes. */

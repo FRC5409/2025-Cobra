@@ -25,6 +25,12 @@
         {
           "type": "named",
           "data": {
+            "name": "AUTO_END"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "BACKOFF"
           }
         },
