@@ -33,6 +33,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
@@ -479,7 +480,7 @@ public class RobotContainer {
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
-                // .beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+                .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
                 .raceWith(
                     new ConditionalCommand(
                         Commands.waitSeconds(1.5), 
@@ -508,7 +509,7 @@ public class RobotContainer {
                     ),
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
-                // .beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+                .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
                 .raceWith(
                     new ConditionalCommand(
                         Commands.waitSeconds(1.5), 

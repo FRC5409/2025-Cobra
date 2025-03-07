@@ -80,9 +80,9 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(4.7, 0.0, 0.12);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(1.0, 0.0, 0.25);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(1.75);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(5000);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.5);

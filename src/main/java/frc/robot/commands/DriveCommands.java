@@ -48,7 +48,7 @@ import com.pathplanner.lib.util.FlippingUtil;
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double TRIGGER_DEADBAND = 0.01;
-  private static final double ANGLE_KP = 5.0;
+  private static final double ANGLE_KP = 7.0;
   private static final double ANGLE_KD = 0.4;
   private static final double ANGLE_MAX_VELOCITY = 8.0;
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
@@ -196,15 +196,7 @@ public class DriveCommands {
   }
 
     public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
-        ProfiledPIDController xController =
-        new ProfiledPIDController(
-            kAutoAlign.ALIGN_PID.kP,
-            kAutoAlign.ALIGN_PID.kI,
-            kAutoAlign.ALIGN_PID.kD,
-            new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
-        );
-
-        ProfiledPIDController yController =
+        ProfiledPIDController translationController =
         new ProfiledPIDController(
             kAutoAlign.ALIGN_PID.kP,
             kAutoAlign.ALIGN_PID.kI,
@@ -223,13 +215,16 @@ public class DriveCommands {
 
         return Commands.parallel(
             Commands.runOnce(() -> {
-                aligned = false;
-
                 Pose2d robotPose = drive.getPose();
+                Pose2d targetPose = target.get();
+
+                double xDiff = targetPose.getX() - robotPose.getX();
+                double yDiff = targetPose.getY() - robotPose.getY();
+                
+                aligned = false;
                 ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
         
-                xController.reset(robotPose.getX(), speeds.vxMetersPerSecond);
-                yController.reset(robotPose.getY(), speeds.vyMetersPerSecond);
+                translationController.reset(Math.hypot(xDiff, yDiff), Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
                 angleController.reset(drive.getRotation().getRadians());
             }),
             Commands.run(() -> {
@@ -241,16 +236,45 @@ public class DriveCommands {
 
                 Logger.recordOutput("AutoAlign/Target", targetPose);
         
-                double xSpeed = xController.calculate(robotPose.getX(), targetPose.getX());
-                double ySpeed = yController.calculate(robotPose.getY(), targetPose.getY());
+                double xDiff = targetPose.getX() - robotPose.getX();
+                double yDiff = targetPose.getY() - robotPose.getY();
+
+                double speed = Math.abs(translationController.calculate(Math.hypot(xDiff, yDiff), 0.0));
+
+                ChassisSpeeds fieldRelativeSpeeds = drive.getFieldRelativeSpeeds();
+                double robotSpeed = Math.hypot(fieldRelativeSpeeds.vxMetersPerSecond, fieldRelativeSpeeds.vyMetersPerSecond);
         
-                // Calculate angular speed
                 double omega =
                 angleController.calculate(
                     robotPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
-        
-        
-                drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omega, drive.getRotation()));
+
+                int n = (int) Math.ceil((2 * Math.PI * robotSpeed) / 
+                    (kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond) * translationController.getPeriod()));
+           
+                Rotation2d maxTheta = Rotation2d.fromRadians((n - 2) * Math.PI / n);
+                
+                Rotation2d currentAngle = Rotation2d.fromRadians(
+                    Math.atan2(fieldRelativeSpeeds.vyMetersPerSecond, fieldRelativeSpeeds.vxMetersPerSecond)
+                );
+                
+                Rotation2d targetAngle = Rotation2d.fromRadians(
+                    Math.atan2(yDiff, xDiff)
+                );
+                
+                double angleDiff = targetAngle.minus(currentAngle).getRadians();
+                angleDiff = MathUtil.angleModulus(angleDiff);
+                
+                Rotation2d setpointAngle;
+                if (Math.abs(angleDiff) <= maxTheta.getRadians()) {
+                    setpointAngle = targetAngle;
+                } else {
+                    setpointAngle = currentAngle.plus(Rotation2d.fromRadians(Math.copySign(maxTheta.getRadians(), angleDiff)));
+                }
+                
+                double speedX = speed * setpointAngle.getCos();
+                double speedY = speed * setpointAngle.getSin();
+                
+                drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, omega, drive.getRotation()));
             }, drive)
         ).until(() -> {
             Pose2d robotPose = drive.getPose();
