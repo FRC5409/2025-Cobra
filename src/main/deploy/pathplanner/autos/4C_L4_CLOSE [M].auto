@@ -53,7 +53,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "END WHEN COLLECTED"
+                        "name": "DRIVE_FORWARD"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "END_WHEN_COLLECTED"
                       }
                     },
                     {
@@ -78,7 +84,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "PREP ELEVATOR"
+                        "name": "PREP_ELEVATOR"
                       }
                     }
                   ]
@@ -123,7 +129,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "END WHEN COLLECTED"
+                        "name": "DRIVE_FORWARD"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "END_WHEN_COLLECTED"
                       }
                     },
                     {
@@ -148,7 +160,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "PREP ELEVATOR"
+                        "name": "PREP_ELEVATOR"
                       }
                     }
                   ]
@@ -193,7 +205,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "END WHEN COLLECTED"
+                        "name": "DRIVE_FORWARD"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "END_WHEN_COLLECTED"
                       }
                     },
                     {
@@ -218,7 +236,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "PREP ELEVATOR"
+                        "name": "PREP_ELEVATOR"
                       }
                     }
                   ]

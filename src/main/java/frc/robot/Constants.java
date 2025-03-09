@@ -73,17 +73,17 @@ public final class Constants {
     public static final boolean PRINT_AUTO_TIME = false;
 
     /** When this is true the robot will set it's position where the path starts when the auto is selected. */
-    public static final boolean RESET_ODOM_ON_CHANGE = true;
+    public static final boolean RESET_ODOM_ON_CHANGE = false;
 
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
     public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0, 0.0, 0.0);
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(1.0, 0.0, 0.25);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(10.0, 0.0, 0.25);
 
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(5000);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
 
     public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.5);
     public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.5);

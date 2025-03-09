@@ -27,6 +27,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -222,9 +223,8 @@ public class DriveCommands {
                 double yDiff = targetPose.getY() - robotPose.getY();
                 
                 aligned = false;
-                ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
-        
-                translationController.reset(Math.hypot(xDiff, yDiff), Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+                        
+                translationController.reset(Math.hypot(xDiff, yDiff));
                 angleController.reset(drive.getRotation().getRadians());
             }),
             Commands.run(() -> {
@@ -239,40 +239,16 @@ public class DriveCommands {
                 double xDiff = targetPose.getX() - robotPose.getX();
                 double yDiff = targetPose.getY() - robotPose.getY();
 
-                double speed = Math.abs(translationController.calculate(Math.hypot(xDiff, yDiff), 0.0));
+                double totalDiff = Math.hypot(xDiff, yDiff);
 
-                ChassisSpeeds fieldRelativeSpeeds = drive.getFieldRelativeSpeeds();
-                double robotSpeed = Math.hypot(fieldRelativeSpeeds.vxMetersPerSecond, fieldRelativeSpeeds.vyMetersPerSecond);
+                double speed = Math.abs(translationController.calculate(totalDiff, 0.0));
         
                 double omega =
                 angleController.calculate(
                     robotPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
-
-                int n = (int) Math.ceil((2 * Math.PI * robotSpeed) / 
-                    (kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond) * translationController.getPeriod()));
-           
-                Rotation2d maxTheta = Rotation2d.fromRadians((n - 2) * Math.PI / n);
-                
-                Rotation2d currentAngle = Rotation2d.fromRadians(
-                    Math.atan2(fieldRelativeSpeeds.vyMetersPerSecond, fieldRelativeSpeeds.vxMetersPerSecond)
-                );
-                
-                Rotation2d targetAngle = Rotation2d.fromRadians(
-                    Math.atan2(yDiff, xDiff)
-                );
-                
-                double angleDiff = targetAngle.minus(currentAngle).getRadians();
-                angleDiff = MathUtil.angleModulus(angleDiff);
-                
-                Rotation2d setpointAngle;
-                if (Math.abs(angleDiff) <= maxTheta.getRadians()) {
-                    setpointAngle = targetAngle;
-                } else {
-                    setpointAngle = currentAngle.plus(Rotation2d.fromRadians(Math.copySign(maxTheta.getRadians(), angleDiff)));
-                }
-                
-                double speedX = speed * setpointAngle.getCos();
-                double speedY = speed * setpointAngle.getSin();
+                                                                                           
+                double speedX = speed * (xDiff / totalDiff);
+                double speedY = speed * (yDiff / totalDiff);
                 
                 drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, omega, drive.getRotation()));
             }, drive)
@@ -284,13 +260,13 @@ public class DriveCommands {
 
             Angle difference = AlignHelper.rotationDifference(targetPose.getRotation(), robotPose.getRotation());
 
-            double distanceMeters = Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY());
+            Distance distanceMeters = Meters.of(Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()));
 
             Logger.recordOutput("AutoAlign/Distance To Alignment [m]", distanceMeters);
             Logger.recordOutput("AutoAlign/Angle To Alignment [degrees]", difference.in(Degrees));
         
             return
-                distanceMeters <= kAutoAlign.TRANSLATION_TOLLERANCE.in(Meters) &&
+                distanceMeters.lte(kAutoAlign.TRANSLATION_TOLLERANCE) &&
                 difference.lte(kAutoAlign.ROTATION_TOLLERANCE);
         }
     ).andThen(

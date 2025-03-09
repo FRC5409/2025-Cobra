@@ -276,6 +276,12 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  public void driveForward(double speedMetersPerSecond) {
+    for (int i = 0; i < 4; i++) {
+        modules[i].runSetpoint(new SwerveModuleState(speedMetersPerSecond, new Rotation2d()));
+    }
+  }
+
   public void pointWheelsToward(Rotation2d angle) {
     for (int i = 0; i < 4; i++) {
         modules[i].runSetpoint(new SwerveModuleState(0, angle));

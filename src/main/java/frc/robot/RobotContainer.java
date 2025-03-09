@@ -431,7 +431,7 @@ public class RobotContainer {
             Pose2d pose = path.getStartingHolonomicPose().get();
 
             return AutoBuilder.shouldFlip() ? FlippingUtil.flipFieldPose(pose) : pose;
-        } catch (IOException | ParseException e) {
+        } catch (IOException | ParseException | IndexOutOfBoundsException e) {
             return new Pose2d();
         }
     }
@@ -524,19 +524,21 @@ public class RobotContainer {
                 .finallyDo(() -> sys_endEffector.io.setVoltage(0.0))
         );
 
-        NamedCommands.registerCommand("PREP ELEVATOR", 
+        NamedCommands.registerCommand("PREP_ELEVATOR", 
             Commands.sequence(
                 sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
                 sys_elevator.elevatorGo(kElevator.ELEVATOR_PREP_HEIGHT)
             )
         );
       
-        NamedCommands.registerCommand("END WHEN COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.75));
+        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.75));
 
         NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
         NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
         NamedCommands.registerCommand("L3", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
         NamedCommands.registerCommand("L4", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL4, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
+
+        NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(0.75), sys_drive));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)

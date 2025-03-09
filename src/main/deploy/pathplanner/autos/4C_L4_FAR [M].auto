@@ -13,12 +13,6 @@
                 "data": {
                   "pathName": "IC to FL"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "PREP ELEVATOR"
-                }
               }
             ]
           }
@@ -59,7 +53,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "END WHEN COLLECTED"
+                        "name": "END_WHEN_COLLECTED"
                       }
                     },
                     {
@@ -79,12 +73,6 @@
                       "type": "named",
                       "data": {
                         "name": "IDLE"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "PREP ELEVATOR"
                       }
                     }
                   ]
@@ -129,7 +117,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "END WHEN COLLECTED"
+                        "name": "END_WHEN_COLLECTED"
                       }
                     },
                     {
@@ -149,12 +137,6 @@
                       "type": "named",
                       "data": {
                         "name": "IDLE"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "PREP ELEVATOR"
                       }
                     }
                   ]
@@ -199,7 +181,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "END WHEN COLLECTED"
+                        "name": "END_WHEN_COLLECTED"
                       }
                     },
                     {
@@ -219,12 +201,6 @@
                       "type": "named",
                       "data": {
                         "name": "IDLE"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "PREP ELEVATOR"
                       }
                     }
                   ]
