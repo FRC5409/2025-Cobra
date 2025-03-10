@@ -11,15 +11,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ALIGN_LEFT"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "L4"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ALIGN_LEFT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              }
+            ]
           }
         },
         {

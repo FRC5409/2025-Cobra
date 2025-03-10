@@ -17,6 +17,7 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.ProfiledController;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -196,36 +198,31 @@ public class DriveCommands {
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
+    @SuppressWarnings("resource")
     public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
-        ProfiledPIDController translationController =
-        new ProfiledPIDController(
-            kAutoAlign.ALIGN_PID.kP,
-            kAutoAlign.ALIGN_PID.kI,
-            kAutoAlign.ALIGN_PID.kD,
-            new TrapezoidProfile.Constraints(kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond), kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond))
+        ProfiledController translationController =
+        new ProfiledController(
+            kAutoAlign.ALIGN_PID,
+            kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond),
+            kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond)
         );
 
-        ProfiledPIDController angleController =
-        new ProfiledPIDController(
+        PIDController angleController =
+        new PIDController(
             ANGLE_KP,
             0.0,
-            ANGLE_KD,
-            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION)
+            ANGLE_KD
         );
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-        return Commands.parallel(
+        return Commands.sequence(
             Commands.runOnce(() -> {
-                Pose2d robotPose = drive.getPose();
-                Pose2d targetPose = target.get();
-
-                double xDiff = targetPose.getX() - robotPose.getX();
-                double yDiff = targetPose.getY() - robotPose.getY();
-                
                 aligned = false;
-                        
-                translationController.reset(Math.hypot(xDiff, yDiff));
-                angleController.reset(drive.getRotation().getRadians());
+
+                ChassisSpeeds speeds = drive.getFieldRelativeSpeeds();
+
+                translationController.reset(-Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+                angleController.reset();
             }),
             Commands.run(() -> {
                 Pose2d robotPose = drive.getPose();
@@ -233,8 +230,6 @@ public class DriveCommands {
 
                 if (AutoBuilder.shouldFlip())
                     targetPose = FlippingUtil.flipFieldPose(targetPose);
-
-                Logger.recordOutput("AutoAlign/Target", targetPose);
         
                 double xDiff = targetPose.getX() - robotPose.getX();
                 double yDiff = targetPose.getY() - robotPose.getY();
@@ -251,6 +246,10 @@ public class DriveCommands {
                 double speedY = speed * (yDiff / totalDiff);
                 
                 drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, omega, drive.getRotation()));
+
+                Logger.recordOutput("AutoAlign/Target", targetPose);
+                Logger.recordOutput("AutoAlign/SpeedOutput", speed);
+                Logger.recordOutput("AutoAlign/OmegaOutput", omega);
             }, drive)
         ).until(() -> {
             Pose2d robotPose = drive.getPose();
@@ -260,14 +259,14 @@ public class DriveCommands {
 
             Angle difference = AlignHelper.rotationDifference(targetPose.getRotation(), robotPose.getRotation());
 
-            Distance distanceMeters = Meters.of(Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()));
+            Distance distance = Meters.of(Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()));
 
-            Logger.recordOutput("AutoAlign/Distance To Alignment [m]", distanceMeters);
+            Logger.recordOutput("AutoAlign/Distance To Alignment [cm]", distance.in(Centimeters));
             Logger.recordOutput("AutoAlign/Angle To Alignment [degrees]", difference.in(Degrees));
         
             return
-                distanceMeters.lte(kAutoAlign.TRANSLATION_TOLLERANCE) &&
-                difference.lte(kAutoAlign.ROTATION_TOLLERANCE);
+                distance.lte(kAutoAlign.TRANSLATION_TOLERANCE) &&
+                difference.lte(kAutoAlign.ROTATION_TOLERANCE);
         }
     ).andThen(
         Commands.runOnce(() -> {

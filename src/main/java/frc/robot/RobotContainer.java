@@ -17,7 +17,6 @@ import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -33,6 +32,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -42,7 +42,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -134,7 +133,7 @@ public class RobotContainer {
 
     // Dashboard inputs
     protected final LoggedDashboardChooser<Command> autoChooser;
-    protected final Supplier<Boolean> runTelop;
+    protected final BooleanSupplier runTelop;
 
     // Alerts
     private final Alert primaryDisconnectedAlert = new Alert(
@@ -282,38 +281,28 @@ public class RobotContainer {
                     sys_drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         }
 
-        runTelop = DebugCommand.putNumber("Run Telop Auto", false);
+        runTelop = DebugCommand.putNumber("Run Telop Auto", false)::get;
 
         if (kAuto.RESET_ODOM_ON_CHANGE)
             autoChooser
                 .getSendableChooser()
                 .onChange(path -> resetPose());
 
-        SmartDashboard.putData(
-            "Reset",
-            Commands.runOnce(() -> resetPose()).ignoringDisable(true));
+        DebugCommand.register("Reset", Commands.runOnce(this::resetPose));
 
         // Configure the button bindings
         configureButtonBindings();
 
         // Controller Alerts
         new Trigger(() -> !primaryController.isConnected())
-                .onTrue(
-                    Commands.runOnce(() -> primaryDisconnectedAlert.set(true))
-                        .ignoringDisable(true)
-                )
-                .onFalse(
-                    Commands.runOnce(() -> primaryDisconnectedAlert.set(false))
+                .onChange(
+                    Commands.runOnce(() -> primaryDisconnectedAlert.set(!primaryController.isConnected()))
                         .ignoringDisable(true)
                 );
 
-            new Trigger(() -> !secondaryController.isConnected())
-                .onTrue(
-                    Commands.runOnce(() -> secondaryDisconnectedAlert.set(true))
-                        .ignoringDisable(true)
-                )
-                .onFalse(
-                    Commands.runOnce(() -> secondaryDisconnectedAlert.set(false))
+        new Trigger(() -> !secondaryController.isConnected())
+                .onChange(
+                    Commands.runOnce(() -> secondaryDisconnectedAlert.set(!secondaryController.isConnected()))
                         .ignoringDisable(true)
                 );
 
@@ -376,6 +365,7 @@ public class RobotContainer {
 
     public void updateSim() {
         SimulatedArena.getInstance().simulationPeriodic();
+
         Logger.recordOutput("Simulation/RobotPose", simConfig.getSimulatedDriveTrainPose());
         Logger.recordOutput(
                 "Simulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
@@ -531,7 +521,7 @@ public class RobotContainer {
             )
         );
       
-        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(0.75));
+        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.25));
 
         NamedCommands.registerCommand("L1", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL1, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
         NamedCommands.registerCommand("L2", new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2, DriveCommands::isAligned).onlyIf(sys_endEffector::coralDetected).withTimeout(2.5));
@@ -631,6 +621,7 @@ public class RobotContainer {
                         DriveCommands.alignToPoint(
                             sys_drive, 
                             () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.LEFT)
+                            .transformBy(new Transform2d(Feet.of(-3.0).in(Meters), 0, new Rotation2d()))
                         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                         getLevelSelectorCommand(true)
                     ).andThen(
@@ -648,6 +639,7 @@ public class RobotContainer {
                         DriveCommands.alignToPoint(
                             sys_drive, 
                             () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, kDirection.RIGHT)
+                            .transformBy(new Transform2d(Feet.of(-3.0).in(Meters), 0, new Rotation2d()))
                         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                         getLevelSelectorCommand(true)
                     ).andThen(
@@ -770,7 +762,7 @@ public class RobotContainer {
                 Commands.either(
                     AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
                     Commands.none(),
-                    runTelop::get
+                    runTelop
                 )
             );
     }

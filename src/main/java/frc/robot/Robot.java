@@ -180,7 +180,7 @@ public class Robot extends LoggedRobot {
     
     autoCommand.schedule();
 
-    RobotContainer.isTelopAuto = robotContainer.runTelop.get();
+    RobotContainer.isTelopAuto = robotContainer.runTelop.getAsBoolean();
     autoStartingConfigAlert.set(false);
 
     if (Constants.currentMode == Mode.SIM)
@@ -207,7 +207,7 @@ public class Robot extends LoggedRobot {
         autonomousCommand.cancel();
     }
 
-    if (robotContainer.runTelop.get())
+    if (robotContainer.runTelop.getAsBoolean())
         robotContainer.telopAutoCommand.schedule();
 
     autoStartingConfigAlert.set(false);

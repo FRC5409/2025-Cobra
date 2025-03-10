@@ -5,16 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "IC to FL"
-                }
-              }
-            ]
+            "pathName": "IC to FL"
           }
         },
         {
@@ -53,6 +46,12 @@
                     {
                       "type": "named",
                       "data": {
+                        "name": "DRIVE_FORWARD"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
                         "name": "END_WHEN_COLLECTED"
                       }
                     },
@@ -66,16 +65,9 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "IDLE"
-                      }
-                    }
-                  ]
+                  "name": "IDLE"
                 }
               }
             ]
@@ -117,6 +109,12 @@
                     {
                       "type": "named",
                       "data": {
+                        "name": "DRIVE_FORWARD"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
                         "name": "END_WHEN_COLLECTED"
                       }
                     },
@@ -130,16 +128,9 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "IDLE"
-                      }
-                    }
-                  ]
+                  "name": "IDLE"
                 }
               }
             ]
@@ -181,6 +172,12 @@
                     {
                       "type": "named",
                       "data": {
+                        "name": "DRIVE_FORWARD"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
                         "name": "END_WHEN_COLLECTED"
                       }
                     },
@@ -194,16 +191,9 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "IDLE"
-                      }
-                    }
-                  ]
+                  "name": "IDLE"
                 }
               }
             ]
@@ -229,21 +219,28 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "AUTO_END"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "BACKOFF"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "IDLE"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AUTO_END"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BACKOFF"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IDLE"
+                }
+              }
+            ]
           }
         }
       ]

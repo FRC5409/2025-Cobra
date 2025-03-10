@@ -80,13 +80,15 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(10.0, 0.0, 0.25);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(5.0, 0.0, 0.05);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(5000);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.75);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
 
-    public static final Distance TRANSLATION_TOLLERANCE = Centimeters.of(2.5);
-    public static final Angle    ROTATION_TOLLERANCE    = Degrees    .of(1.5);
+    // public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.5);
+    // public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.5);
+    public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(0.0);
+    public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(0.0);
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
@@ -97,7 +99,7 @@ public final class Constants {
 
     public static final Pose2d PROCESSOR_TARGET = new Pose2d(11.568, 7.500, Rotation2d.fromDegrees(-90.000));
 
-    public static final Time VELOCITY_TIME_ADJUSTEDMENT = Milliseconds.of(5000);
+    public static final Time VELOCITY_TIME_ADJUSTEDMENT = Milliseconds.of(250);
     public static final int  TIME_ADJUSTMENT_TIMEOUT = 10;
 
     public static final class kReef {
