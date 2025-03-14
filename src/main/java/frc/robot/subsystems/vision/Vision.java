@@ -61,6 +61,10 @@ public class Vision extends SubsystemBase {
         io.setRotation(rotation);
     }
 
+    public boolean hasTarget() {
+        return inputs.hasTarget;
+    }
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run

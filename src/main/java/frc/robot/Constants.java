@@ -73,7 +73,7 @@ public final class Constants {
     public static final boolean PRINT_AUTO_TIME = false;
 
     /** When this is true the robot will set it's position where the path starts when the auto is selected. */
-    public static final boolean RESET_ODOM_ON_CHANGE = false;
+    public static final boolean RESET_ODOM_ON_CHANGE = true;
 
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
     public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0, 0.0, 0.0);
@@ -85,10 +85,17 @@ public final class Constants {
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.75);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
 
-    // public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(2.5);
-    // public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(1.5);
-    public static final Distance TRANSLATION_TOLERANCE = Centimeters.of(0.0);
-    public static final Angle    ROTATION_TOLERANCE    = Degrees    .of(0.0);
+    public static final Distance TRANSLATION_TOLERANCE;
+    public static final Angle    ROTATION_TOLERANCE   ;
+    static {
+        if (TUNNING) {
+            TRANSLATION_TOLERANCE = Centimeters.of(0.0);
+            ROTATION_TOLERANCE    = Degrees    .of(0.0);
+        } else {
+           TRANSLATION_TOLERANCE = Centimeters.of(2.5);
+           ROTATION_TOLERANCE    = Degrees    .of(1.5);
+        }
+    }
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
@@ -190,8 +197,15 @@ public final class Constants {
         LEVEL2(      Meters.of(0.160), Degrees.of(83.0), 5.0),
         LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 5.0),
         LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.6),
-        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(70.5), 0.0),
-        LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(70.5), 0.0),
+
+        // TODO: Tune these values
+        LEVEL1_DIST( Meters.of(0.030), Degrees.of(100.), 2.0),
+        LEVEL2_DIST( Meters.of(0.160), Degrees.of(83.0), 5.0),
+        LEVEL3_DIST( Meters.of(0.360), Degrees.of(83.0), 5.0),
+        LEVEL4_DIST( Meters.of(0.665), Degrees.of(87.0), 7.6),
+
+        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
+        LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
         /** Not Implemented */
         BARGE(       Meters.of(0.650), Degrees.of(100.), 0.0),
         /** Not Implemented */
