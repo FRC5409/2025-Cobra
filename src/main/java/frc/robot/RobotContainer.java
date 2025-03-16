@@ -146,6 +146,16 @@ public class RobotContainer {
     //         "Control Board Disconnected!",
     //         AlertType.kError);
 
+    private final Alert leftTriggerAlert = new Alert(
+        "Left Trigger never tested!",
+        AlertType.kWarning
+    );
+
+    private final Alert rightTriggerAlert = new Alert(
+        "Right Trigger never tested!",
+        AlertType.kWarning
+    );
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -233,6 +243,9 @@ public class RobotContainer {
 
         AutoCommands.setupNodeChooser();
         registerCommands();
+
+        leftTriggerAlert.set(true);
+        rightTriggerAlert.set(true);
 
         // Commands
         telopAutoCommand = AutoCommands.telopAutoCommand(
@@ -676,6 +689,19 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+
+        primaryController.leftTrigger(0.75)
+            .onTrue(
+                Commands.runOnce(() -> leftTriggerAlert.set(false))
+                    .ignoringDisable(true)
+            );
+
+        primaryController.rightTrigger(0.75)
+            .onTrue(
+                Commands.runOnce(() -> rightTriggerAlert.set(false))
+                    .ignoringDisable(true)
+            );
+
         // Default command, normal field-relative drive
         sys_drive.setDefaultCommand(
             DriveCommands.joystickDrive(
