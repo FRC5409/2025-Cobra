@@ -82,8 +82,9 @@ public final class Constants {
   public static final class kAutoAlign {
     public static final PIDConstants ALIGN_PID = new PIDConstants(5.0, 0.0, 0.05);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY     = MetersPerSecond         .of(2.75);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION = MetersPerSecondPerSecond.of(8.0);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY          = MetersPerSecond         .of(2.75);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(6.00);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(14.0);
 
     public static final Distance TRANSLATION_TOLERANCE;
     public static final Angle    ROTATION_TOLERANCE   ;
@@ -99,7 +100,7 @@ public final class Constants {
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
-        MAX_AUTO_ALIGN_ACCELERATION,
+        MAX_AUTO_ALIGN_ACCELERATION_SLOW,
         RadiansPerSecond.of(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / Drive.DRIVE_BASE_RADIUS),
         DegreesPerSecondPerSecond.of(720.0)
     );

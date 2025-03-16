@@ -52,6 +52,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
 import frc.robot.Constants.kAuto;
+import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveCommands;
@@ -435,8 +436,13 @@ public class RobotContainer {
             return Commands.parallel(
                 DriveCommands.alignToPoint(
                     sys_drive, 
+
                     () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
-                    .transformBy(new Transform2d(-Feet.of(3.0).in(Meters), 0, new Rotation2d()))
+                        .transformBy(new Transform2d(-Feet.of(3.0).in(Meters), 0, new Rotation2d())),
+
+                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
+                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
+                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                 level == null ? getLevelSelectorCommand(false) : 
                 new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, () -> false)
@@ -446,7 +452,12 @@ public class RobotContainer {
                 Commands.parallel(
                     DriveCommands.alignToPoint(
                         sys_drive, 
-                        () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
+
+                        () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side),
+
+                        () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
+                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
+                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
                     ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                     level == null ? getLevelSelectorCommand(true) : 
                     new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
@@ -459,8 +470,13 @@ public class RobotContainer {
                 Commands.parallel(
                     DriveCommands.alignToPoint(
                         sys_drive, 
+
                         () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
-                        .transformBy(new Transform2d(-Inches.of(5).in(Meters), 0, new Rotation2d()))
+                            .transformBy(new Transform2d(-Inches.of(5).in(Meters), 0, new Rotation2d())),
+
+                        () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
+                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
+                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
                     ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                     level == null ? getLevelSelectorDistCommand(true) : 
                     new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)

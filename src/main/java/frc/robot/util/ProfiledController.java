@@ -9,8 +9,8 @@ import edu.wpi.first.units.measure.Time;
 public class ProfiledController {
 
     private final PIDController controller;
-    private final double maxVelocity;
-    private final double maxAcceleration;
+    private double maxVelocity;
+    private double maxAcceleration;
 
     private double lastPoint;
 
@@ -18,8 +18,7 @@ public class ProfiledController {
         controller = new PIDController(PID.kP, PID.kI, PID.kD, period.in(Seconds));
         controller.setIZone(PID.iZone);
 
-        this.maxVelocity = maxVelocity;
-        this.maxAcceleration = maxAcceleration;
+        setContraints(maxVelocity, maxAcceleration);
     }
     
 
@@ -29,6 +28,19 @@ public class ProfiledController {
 
     public ProfiledController(double kP, double kI, double kD, double maxVelocity, double maxAcceleration) {
         this(new PIDConstants(kP, kI, kD), maxVelocity, maxAcceleration);
+    }
+
+    public void setContraints(double velo, double accel) {
+        setMaxVelocity(velo);
+        setMaxAcceleration(accel);
+    }
+
+    public void setMaxVelocity(double velo) {
+        maxVelocity = Math.max(velo, 0.0);
+    }
+
+    public void setMaxAcceleration(double accel) {
+        maxAcceleration = Math.max(accel, 0.0);
     }
 
     public void reset() {

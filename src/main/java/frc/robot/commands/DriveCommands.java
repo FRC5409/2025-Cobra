@@ -29,6 +29,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -197,22 +198,21 @@ public class DriveCommands {
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
-
     @SuppressWarnings("resource")
-    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
+    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target, Supplier<LinearAcceleration> maxAccel) {
         ProfiledController translationController =
-        new ProfiledController(
-            kAutoAlign.ALIGN_PID,
-            kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond),
-            kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION.in(MetersPerSecondPerSecond)
-        );
+            new ProfiledController(
+                kAutoAlign.ALIGN_PID,
+                kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond),
+                maxAccel.get().in(MetersPerSecondPerSecond)
+            );
 
         PIDController angleController =
-        new PIDController(
-            ANGLE_KP,
-            0.0,
-            ANGLE_KD
-        );
+            new PIDController(
+                ANGLE_KP,
+                0.0,
+                ANGLE_KD
+            );
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 
         return Commands.sequence(
@@ -225,6 +225,8 @@ public class DriveCommands {
                 angleController.reset();
             }),
             Commands.run(() -> {
+                translationController.setMaxAcceleration(maxAccel.get().in(MetersPerSecondPerSecond));
+                
                 Pose2d robotPose = drive.getPose();
                 Pose2d targetPose = target.get();
 
@@ -250,6 +252,7 @@ public class DriveCommands {
                 Logger.recordOutput("AutoAlign/Target", targetPose);
                 Logger.recordOutput("AutoAlign/SpeedOutput", speed);
                 Logger.recordOutput("AutoAlign/OmegaOutput", omega);
+                Logger.recordOutput("AutoAlign/Accel [m/s^2]", maxAccel.get().in(MetersPerSecondPerSecond));
             }, drive)
         ).until(() -> {
             Pose2d robotPose = drive.getPose();
@@ -274,7 +277,11 @@ public class DriveCommands {
             aligned = true;
         }, drive)
     );
-  }
+    }
+
+    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
+        return alignToPoint(drive, target, () -> kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW);
+    }
 
   /**
    * Measures the velocity feedforward constants for the drive motors.
