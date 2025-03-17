@@ -1,8 +1,12 @@
 package frc.robot.subsystems.collector;
 
+import static edu.wpi.first.units.Units.*;
+
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,10 +21,14 @@ public class EndEffector extends SubsystemBase {
     public final EndEffectorIO io;
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
 
+    private final LoggedNetworkNumber tofRange;
+
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
+
+        tofRange = new LoggedNetworkNumber("ToF Range", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
 
         DebugCommand.register("EndEffector Run Forward", setVoltage(3));
         DebugCommand.register("EndEffector Run Backwards", setVoltage(-3));
@@ -92,7 +100,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean coralDetected(){
-        return io.getTofRange().lte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
+        return io.getTofRange().lte(Millimeters.of(tofRange.get()));
     }
 
     public double getCurrent() {
@@ -102,6 +110,9 @@ public class EndEffector extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+
+        SmartDashboard.putBoolean("Coral Status", coralDetected());
+        SmartDashboard.putNumber("ToF Distance", io.getTofRange().in(Millimeters));
 
         // Logging
         io.updateInputs(inputs);
