@@ -213,6 +213,8 @@ public final class Constants {
       public static final double IDLE_VOLTAGE  =  3.5;
       public static final double SCORE_VOLTAGE =  7.6;
       public static final double ALGAE_VOLTAGE = -4.0;
+
+      public static final PIDConstants ENDEFFECTOR_PID = new PIDConstants(0.0, 0.0, 0.0);
   }
 
   public static final class kElevator {

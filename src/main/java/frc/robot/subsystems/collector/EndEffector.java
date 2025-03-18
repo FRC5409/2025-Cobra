@@ -27,7 +27,6 @@ public class EndEffector extends SubsystemBase {
         DebugCommand.register("EndEffector Stop", setVoltage(0));
     }
 
-    // Run until coral is detected then wait 50ms then stop
     public Command runUntilCoralDetected(double voltage) {
         if (Constants.currentMode == Mode.SIM)
             return Commands.sequence(
@@ -55,7 +54,6 @@ public class EndEffector extends SubsystemBase {
             ).unless(this::coralDetected);
 
     }
-    // Run until coral is no longer detected, if spike in current, wait then rerun
     public Command runUntilCoralNotDetected(double voltage) {
         if (Constants.currentMode == Mode.SIM)
             return Commands.sequence(
@@ -90,6 +88,12 @@ public class EndEffector extends SubsystemBase {
             this
         );
     }
+    public Command setVelocity(double velocity){
+        return Commands.runOnce(
+            () -> io.setVelocity(velocity), 
+            this
+        );
+    }
 
     public boolean coralDetected(){
         return io.getTofRange().lte(kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION);
@@ -97,6 +101,10 @@ public class EndEffector extends SubsystemBase {
 
     public double getCurrent() {
         return io.getMotorCurrent();
+    }
+
+    public double getVelocity(){
+        return io.getVelocity();
     }
 
     @Override

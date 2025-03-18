@@ -19,4 +19,6 @@ public interface EndEffectorIO {
     public default void updateInputs(EndEffectorInputs inputs) {}
     public default Distance getTofRange(){ return Meters.of(0);}
     public default double getMotorCurrent() { return 0.0; }
+    public default void setVelocity(double velocity){}
+    public default double getVelocity(){return 0.0;}
 } 

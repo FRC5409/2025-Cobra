@@ -6,7 +6,9 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -25,6 +27,8 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
     private TalonFX endEffectorMotor;
     private TalonFXConfigurator endEffectorConfig;
     private CurrentLimitsConfigs currentConfig;
+    private Slot0Configs pidConfig;
+    private VelocityVoltage m_request;
 
     private StatusSignal<Voltage> deviceVoltage;
     private StatusSignal<Current> deviceCurrent;
@@ -38,11 +42,19 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         // Creating Objects
         endEffectorMotor = new TalonFX(ID);
         endEffectorConfig = endEffectorMotor.getConfigurator();
-        currentConfig = new CurrentLimitsConfigs();
+        pidConfig = new Slot0Configs()
+            .withKP(kEndEffector.ENDEFFECTOR_PID.kP)
+            .withKI(kEndEffector.ENDEFFECTOR_PID.kI)
+            .withKD(kEndEffector.ENDEFFECTOR_PID.kD);
+        
+        endEffectorConfig.apply(pidConfig);
+
+        m_request = new VelocityVoltage(0).withSlot(0);
 
         // Setting Configs
-        currentConfig.SupplyCurrentLimit = kEndEffector.CURRENT_LIMIT;
-        currentConfig.SupplyCurrentLimitEnable = true;
+        currentConfig = new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(kEndEffector.CURRENT_LIMIT)
+            .withSupplyCurrentLimitEnable(true);
         endEffectorConfig.apply(currentConfig);
 
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
@@ -85,6 +97,16 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
     @Override
     public double getMotorCurrent() {
         return deviceCurrent.getValueAsDouble();
+    }
+
+    @Override
+    public void setVelocity(double velocity){
+        endEffectorMotor.setControl(m_request.withVelocity(velocity).withFeedForward(0.0));
+    }
+
+    @Override
+    public double getVelocity(){
+        return endEffectorMotor.getVelocity().getValueAsDouble();
     }
 
     @Override 
