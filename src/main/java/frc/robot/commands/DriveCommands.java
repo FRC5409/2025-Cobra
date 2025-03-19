@@ -30,6 +30,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -252,7 +253,7 @@ public class DriveCommands {
                 Logger.recordOutput("AutoAlign/Target", targetPose);
                 Logger.recordOutput("AutoAlign/SpeedOutput", speed);
                 Logger.recordOutput("AutoAlign/OmegaOutput", omega);
-                Logger.recordOutput("AutoAlign/Accel [m/s^2]", maxAccel.get().in(MetersPerSecondPerSecond));
+                Logger.recordOutput("AutoAlign/Accel [m per s^2]", maxAccel.get().in(MetersPerSecondPerSecond));
             }, drive)
         ).until(() -> {
             Pose2d robotPose = drive.getPose();
@@ -264,12 +265,17 @@ public class DriveCommands {
 
             Distance distance = Meters.of(Math.hypot(robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY()));
 
+            ChassisSpeeds speeds = drive.getChassisSpeeds();
+            LinearVelocity robotSpeed = MetersPerSecond.of(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+
             Logger.recordOutput("AutoAlign/Distance To Alignment [cm]", distance.in(Centimeters));
             Logger.recordOutput("AutoAlign/Angle To Alignment [degrees]", difference.in(Degrees));
+            Logger.recordOutput("AutoAlign/Velocity [m per s]", robotSpeed.in(MetersPerSecond));
         
             return
                 distance.lte(kAutoAlign.TRANSLATION_TOLERANCE) &&
-                difference.lte(kAutoAlign.ROTATION_TOLERANCE);
+                difference.lte(kAutoAlign.ROTATION_TOLERANCE) &&
+                robotSpeed.lte(kAutoAlign.VELOCITY_TOLERANCE);
         }
     ).andThen(
         Commands.runOnce(() -> {
@@ -280,7 +286,7 @@ public class DriveCommands {
     }
 
     public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
-        return alignToPoint(drive, target, () -> kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW);
+        return alignToPoint(drive, target, () -> kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST);
     }
 
   /**

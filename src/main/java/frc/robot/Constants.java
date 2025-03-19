@@ -47,7 +47,7 @@ import frc.robot.util.FieldMirror;
  */
 
 public final class Constants {
-  public static final Mode simMode = Mode.SIM;
+  public static final Mode simMode = Mode.REPLAY;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   public static enum Mode {
@@ -88,6 +88,7 @@ public final class Constants {
 
     public static final Distance TRANSLATION_TOLERANCE;
     public static final Angle    ROTATION_TOLERANCE   ;
+    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.25);
     static {
         if (TUNNING) {
             TRANSLATION_TOLERANCE = Centimeters.of(0.0);
