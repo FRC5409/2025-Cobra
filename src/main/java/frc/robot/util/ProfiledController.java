@@ -43,6 +43,14 @@ public class ProfiledController {
         maxAcceleration = Math.max(accel, 0.0);
     }
 
+    public double getMaxVelocity() {
+        return maxVelocity;
+    }
+
+    public double getMaxAcceleration() {
+        return maxAcceleration;
+    }
+
     public void reset() {
         reset(0.0);
     }

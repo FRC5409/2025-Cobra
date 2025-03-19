@@ -82,26 +82,27 @@ public final class Constants {
   public static final class kAutoAlign {
     public static final PIDConstants ALIGN_PID = new PIDConstants(4.9, 0.0, 0.28);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY          = MetersPerSecond         .of(2.25);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(10.0);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_SLOW     = MetersPerSecond         .of(2.00);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_FAST     = MetersPerSecond         .of(2.75);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(7.00);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(14.0);
 
     public static final Distance TRANSLATION_TOLERANCE;
     public static final Angle    ROTATION_TOLERANCE   ;
-    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.25);
+    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.12);
     static {
         if (TUNNING) {
-            TRANSLATION_TOLERANCE = Centimeters.of(0.0);
-            ROTATION_TOLERANCE    = Degrees    .of(0.0);
+            TRANSLATION_TOLERANCE = Centimeters.of(0.00);
+            ROTATION_TOLERANCE    = Degrees    .of(0.00);
         } else {
-           TRANSLATION_TOLERANCE = Centimeters.of(1.75);
-           ROTATION_TOLERANCE    = Degrees    .of(1.25);
+            TRANSLATION_TOLERANCE = Centimeters.of(1.75);
+            ROTATION_TOLERANCE    = Degrees    .of(1.25);
         }
     }
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
-        MAX_AUTO_ALIGN_ACCELERATION_SLOW,
+        MAX_AUTO_ALIGN_ACCELERATION_FAST,
         RadiansPerSecond.of(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / Drive.DRIVE_BASE_RADIUS),
         DegreesPerSecondPerSecond.of(720.0)
     );

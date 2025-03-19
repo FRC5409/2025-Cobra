@@ -200,11 +200,11 @@ public class DriveCommands {
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
     @SuppressWarnings("resource")
-    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target, Supplier<LinearAcceleration> maxAccel) {
+    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target, Supplier<LinearVelocity> maxVelo, Supplier<LinearAcceleration> maxAccel) {
         ProfiledController translationController =
             new ProfiledController(
                 kAutoAlign.ALIGN_PID,
-                kAutoAlign.MAX_AUTO_ALIGN_VELOCITY.in(MetersPerSecond),
+                maxVelo.get().in(MetersPerSecond),
                 maxAccel.get().in(MetersPerSecondPerSecond)
             );
 
@@ -226,7 +226,7 @@ public class DriveCommands {
                 angleController.reset();
             }),
             Commands.run(() -> {
-                translationController.setMaxAcceleration(maxAccel.get().in(MetersPerSecondPerSecond));
+                translationController.setContraints(maxVelo.get().in(MetersPerSecond), maxAccel.get().in(MetersPerSecondPerSecond));
                 
                 Pose2d robotPose = drive.getPose();
                 Pose2d targetPose = target.get();
@@ -253,7 +253,8 @@ public class DriveCommands {
                 Logger.recordOutput("AutoAlign/Target", targetPose);
                 Logger.recordOutput("AutoAlign/SpeedOutput", speed);
                 Logger.recordOutput("AutoAlign/OmegaOutput", omega);
-                Logger.recordOutput("AutoAlign/Accel [m per s^2]", maxAccel.get().in(MetersPerSecondPerSecond));
+                Logger.recordOutput("AutoAlign/MaxVelo [m per s]", translationController.getMaxVelocity());
+                Logger.recordOutput("AutoAlign/MaxAccel [m per s^2]", translationController.getMaxAcceleration());
             }, drive)
         ).until(() -> {
             Pose2d robotPose = drive.getPose();
@@ -286,7 +287,7 @@ public class DriveCommands {
     }
 
     public static Command alignToPoint(Drive drive, Supplier<Pose2d> target) {
-        return alignToPoint(drive, target, () -> kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST);
+        return alignToPoint(drive, target, () -> kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_FAST, () -> kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST);
     }
 
   /**

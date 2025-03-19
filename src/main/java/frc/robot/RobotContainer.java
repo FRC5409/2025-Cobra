@@ -440,9 +440,13 @@ public class RobotContainer {
                     () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
                         .transformBy(new Transform2d(-Feet.of(1.0).in(Meters), 0, new Rotation2d())),
 
-                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
-                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
-                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
+                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 
+                        ? kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_SLOW
+                        : kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_FAST,
+
+                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 
+                        ? kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW
+                        : kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                 level == null ?
                 getLevelSelectorCommand(false) : 
@@ -455,9 +459,13 @@ public class RobotContainer {
 
                     () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side),
 
-                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
-                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
-                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
+                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 
+                        ? kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_SLOW
+                        : kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_FAST,
+
+                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4
+                        ? kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW
+                        : kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
                 level == null ? 
                 getLevelSelectorCommand(true) : 
