@@ -117,6 +117,7 @@ public class EndEffector extends SubsystemBase {
         // Logging
         io.updateInputs(inputs);
         Logger.processInputs("EndEffector", inputs);
+        Logger.recordOutput("EndEffector/Coral Detected", coralDetected());
 
         // System.out.println(inputs.tofDistance); --- Use when testing
 

@@ -125,7 +125,7 @@ public class VisionIOLimelight implements VisionIO {
 
         Rotation2d robotYaw = drive.getRotation();
         if (DriverStation.isEnabled()) {
-            if (LimelightHelpers.getTA(kVision.CAM_NAME) >= 0.7 && Math.abs(speeds.vxMetersPerSecond) < 0.1 && Math.abs(speeds.vyMetersPerSecond) < 0.1 && Math.abs(speeds.omegaRadiansPerSecond) < 0.1) {
+            if (LimelightHelpers.getTA(kVision.CAM_NAME) >= 1.5 && Math.abs(speeds.vxMetersPerSecond) < 0.1 && Math.abs(speeds.vyMetersPerSecond) < 0.1 && Math.abs(speeds.omegaRadiansPerSecond) < 0.1) {
                 LimelightHelpers.SetIMUMode(kVision.CAM_NAME, kIMU_MODE.FUSED.ID);
                 robotYaw = LimelightHelpers.getBotPoseEstimate_wpiBlue(kVision.CAM_NAME).pose.getRotation();
                 logMode("FUSED");
