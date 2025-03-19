@@ -31,6 +31,12 @@
                       }
                     },
                     {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.05
+                      }
+                    },
+                    {
                       "type": "named",
                       "data": {
                         "name": "DRIVE_FORWARD"
@@ -78,6 +84,12 @@
                       "type": "path",
                       "data": {
                         "pathName": "BL to LP"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.05
                       }
                     },
                     {
@@ -131,6 +143,12 @@
                       }
                     },
                     {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.05
+                      }
+                    },
+                    {
                       "type": "named",
                       "data": {
                         "name": "DRIVE_FORWARD"
@@ -163,7 +181,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_LEFT_L4"
+            "name": "SCORE_LEFT_L2"
           }
         },
         {

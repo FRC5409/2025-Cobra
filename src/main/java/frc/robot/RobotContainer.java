@@ -117,7 +117,7 @@ public class RobotContainer {
     // Commands
     protected final Command telopAutoCommand;
   
-    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL3;
+    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL4;
 
     // Controller
     private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -438,50 +438,65 @@ public class RobotContainer {
                     sys_drive, 
 
                     () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
-                        .transformBy(new Transform2d(-Feet.of(3.0).in(Meters), 0, new Rotation2d())),
+                        .transformBy(new Transform2d(-Feet.of(1.0).in(Meters), 0, new Rotation2d())),
 
                     () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
                     kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
                     kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
-                level == null ? getLevelSelectorCommand(false) : 
+                level == null ?
+                getLevelSelectorCommand(false) : 
                 new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, () -> false)
             );
         else
-            return Commands.race(
-                Commands.parallel(
-                    DriveCommands.alignToPoint(
-                        sys_drive, 
+            return Commands.parallel(
+                DriveCommands.alignToPoint(
+                    sys_drive, 
 
-                        () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side),
+                    () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side),
 
-                        () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
-                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
-                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
-                    ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
-                    level == null ? getLevelSelectorCommand(true) : 
-                    new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
-                ),
-                Commands.sequence(
-                    Commands.waitUntil(() -> !Drive.isSafe()),
-                    Commands.waitSeconds(0.5)
-                )
-            ).andThen(
-                Commands.parallel(
-                    DriveCommands.alignToPoint(
-                        sys_drive, 
-
-                        () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
-                            .transformBy(new Transform2d(-Inches.of(5).in(Meters), 0, new Rotation2d())),
-
-                        () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
-                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
-                        kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
-                    ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
-                    level == null ? getLevelSelectorDistCommand(true) : 
-                    new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
-                ).unless(DriveCommands::isAligned)
+                    () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
+                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
+                    kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
+                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+                level == null ? 
+                getLevelSelectorCommand(true) : 
+                new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
             );
+            // return Commands.race(
+            //     Commands.parallel(
+            //         DriveCommands.alignToPoint(
+            //             sys_drive, 
+
+            //             () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side),
+
+            //             () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
+            //             kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
+            //             kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
+            //         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+            //         level == null ? getLevelSelectorCommand(true) : 
+            //         new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
+            //     ),
+            //     Commands.sequence(
+            //         Commands.waitUntil(() -> !Drive.isSafe()),
+            //         Commands.waitSeconds(1.5)
+            //     )
+            // ).andThen(
+            //     Commands.parallel(
+            //         DriveCommands.alignToPoint(
+            //             sys_drive, 
+
+            //             () -> AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
+            //                 .transformBy(new Transform2d(-Inches.of(5).in(Meters), 0, new Rotation2d())),
+
+            //             () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 ? 
+            //             kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW :
+            //             kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
+            //         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
+            //         level == null ? getLevelSelectorDistCommand(true) : 
+            //         new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
+            //     ).unless(DriveCommands::isAligned)
+            // );
     }
 
     @AutoLogOutput(key = "Odometry/StartingPose")
@@ -544,13 +559,8 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
         NamedCommands.registerCommand(
@@ -561,16 +571,11 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
-            NamedCommands.registerCommand(
+        NamedCommands.registerCommand(
                 "SCORE_LEFT_L3",
                 new ConditionalCommand(
                     fullAutoScore(kDirection.LEFT, ScoringLevel.LEVEL3),
@@ -578,13 +583,8 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
         NamedCommands.registerCommand(
@@ -595,16 +595,11 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
-            NamedCommands.registerCommand(
+        NamedCommands.registerCommand(
                 "SCORE_LEFT_L2",
                 new ConditionalCommand(
                     fullAutoScore(kDirection.LEFT, ScoringLevel.LEVEL2),
@@ -612,13 +607,8 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
         NamedCommands.registerCommand(
@@ -629,16 +619,11 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
-            NamedCommands.registerCommand(
+        NamedCommands.registerCommand(
                 "SCORE_LEFT_L1",
                 new ConditionalCommand(
                     fullAutoScore(kDirection.LEFT, ScoringLevel.LEVEL1),
@@ -646,13 +631,8 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
         NamedCommands.registerCommand(
@@ -663,13 +643,8 @@ public class RobotContainer {
                     () -> !autoChooser.getSendableChooser().getSelected().startsWith("{R}")
                 )
                 .beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()))
-                .raceWith(
-                    new ConditionalCommand(
-                        Commands.waitSeconds(1.5), 
-                        Commands.waitSeconds(0.5), 
-                        sys_endEffector::coralDetected
-                    )
-                )
+                .withTimeout(2.0)
+                .onlyIf(sys_endEffector::coralDetected)
             );
 
         NamedCommands.registerCommand("IDLE",
@@ -686,7 +661,7 @@ public class RobotContainer {
       
         NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.25));
 
-        NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(0.75), sys_drive));
+        NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(-0.25), sys_drive));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)

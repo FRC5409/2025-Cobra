@@ -80,10 +80,10 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(5.0, 0.0, 0.05);
+    public static final PIDConstants ALIGN_PID = new PIDConstants(4.9, 0.0, 0.28);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY          = MetersPerSecond         .of(2.75);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(6.00);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY          = MetersPerSecond         .of(2.25);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(10.0);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(14.0);
 
     public static final Distance TRANSLATION_TOLERANCE;
@@ -93,8 +93,8 @@ public final class Constants {
             TRANSLATION_TOLERANCE = Centimeters.of(0.0);
             ROTATION_TOLERANCE    = Degrees    .of(0.0);
         } else {
-           TRANSLATION_TOLERANCE = Centimeters.of(2.5);
-           ROTATION_TOLERANCE    = Degrees    .of(1.5);
+           TRANSLATION_TOLERANCE = Centimeters.of(1.75);
+           ROTATION_TOLERANCE    = Degrees    .of(1.25);
         }
     }
 
@@ -111,8 +111,8 @@ public final class Constants {
     public static final int  TIME_ADJUSTMENT_TIMEOUT = 10;
 
     public static final class kReef {
-      public static final Transform2d LEFT_OFFSET_TO_BRANCH  = new Transform2d(0.35, 0.18, new Rotation2d());
-      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.35, -0.18, new Rotation2d());
+      public static final Transform2d LEFT_OFFSET_TO_BRANCH  = new Transform2d(0.36, 0.18, new Rotation2d());
+      public static final Transform2d RIGHT_OFFSET_TO_BRANCH = new Transform2d(0.36, -0.18, new Rotation2d());
 
       private static final Pose2d generatePose(Rotation2d rotation) {
         final double mx = 4.48945;
@@ -173,9 +173,9 @@ public final class Constants {
 
     public static final double MAGNET_SENSOR_OFFSET = -0.344727;
 
-    public static final double kP = 150.0;
+    public static final double kP = 112.0;
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kD = 0.0075;
     public static final double kG = 0.025 * 12.0;
 
     public static final double   ARM_GEARING      = (72/22) * 4*9;
@@ -190,19 +190,19 @@ public final class Constants {
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(88);
     public static final Angle PICKUP_ANGLE  = Degrees.of(104.5);
 
-    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.75, 0.0, 0.2);
+    public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.25, 0.0, 0.3);
   }
 
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.030), Degrees.of(100.), 2.0),
-        LEVEL2(      Meters.of(0.160), Degrees.of(83.0), 5.0),
-        LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 5.0),
+        LEVEL2(      Meters.of(0.160), Degrees.of(83.0), 6.5),
+        LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 6.5),
         LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.6),
 
         // TODO: Tune these values
         LEVEL1_DIST( Meters.of(0.030), Degrees.of(100.), 2.0),
-        LEVEL2_DIST( Meters.of(0.160), Degrees.of(83.0), 5.0),
-        LEVEL3_DIST( Meters.of(0.360), Degrees.of(83.0), 5.0),
+        LEVEL2_DIST( Meters.of(0.160), Degrees.of(83.0), 6.5),
+        LEVEL3_DIST( Meters.of(0.360), Degrees.of(83.0), 6.5),
         LEVEL4_DIST( Meters.of(0.665), Degrees.of(87.0), 7.6),
 
         LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
@@ -227,7 +227,7 @@ public final class Constants {
       public static final int ENDEFFECTOR_MOTOR_ID = 23;
       public static final int CURRENT_LIMIT = 40;
       public static final int TIMOFFLIGHT_SENSORID = 28;
-      public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(110);
+      public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(140);
 
       public static final double IDLE_VOLTAGE  =  3.5;
       public static final double ALGAE_VOLTAGE = -4.0;
@@ -249,7 +249,7 @@ public final class Constants {
 
     public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.30);
 
-    public static final Distance IDLING_HEIGHT = Meters.of(0.029);
+    public static final Distance IDLING_HEIGHT = Meters.of(0.022);
   }
 
   public static final class kVision {
