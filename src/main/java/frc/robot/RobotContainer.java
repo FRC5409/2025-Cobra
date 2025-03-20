@@ -15,6 +15,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import frc.robot.util.CustomAutos.*;
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
 import org.ironmaple.simulation.SimulatedArena;
@@ -29,6 +30,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -89,6 +91,7 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.CaseCommand;
+import frc.robot.util.CustomAutos;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
 import frc.robot.util.AlignHelper.kClosestType;
@@ -263,6 +266,17 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("None", Commands.none());
 
+        try {
+            autoChooser.addOption("Test", CustomAutos.buildAuto(
+                new ResetRequest(pose -> resetPose(pose), PathPlannerAuto.getPathGroupFromAutoFile("4C_L4_CLOSE [M]").get(0).getStartingHolonomicPose().get()),
+                new PathRequest("IC to FL"),
+                new CommandRequest("SCORE_RIGHT_L4")
+            ));
+        } catch (FileVersionException | IOException | ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         for (String auto : AutoBuilder.getAllAutoNames()) {
             if (auto.endsWith("[M]")) {
                 String autoName = auto.replace("[M]", "");
@@ -300,9 +314,9 @@ public class RobotContainer {
         if (kAuto.RESET_ODOM_ON_CHANGE)
             autoChooser
                 .getSendableChooser()
-                .onChange(path -> resetPose());
+                .onChange(path -> resetPose(getStartingPose()));
 
-        DebugCommand.register("Reset", Commands.runOnce(this::resetPose));
+        DebugCommand.register("Reset", Commands.runOnce(() -> resetPose(getStartingPose())).ignoringDisable(true));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -347,7 +361,7 @@ public class RobotContainer {
                     secondaryDisconnectedAlert.set(!secondaryController.isConnected());
                     // controlDisconnectedAlert.set(!controlBoard.isConnected());
 
-                    resetPose();
+                    resetPose(getStartingPose());
                 }).ignoringDisable(true)
             )
         );
@@ -387,12 +401,11 @@ public class RobotContainer {
                 "Simulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
-    private void resetPose() {
-        Pose2d startingPose = getStartingPose();
+    private void resetPose(Pose2d pose) {
         if (Constants.currentMode == Mode.SIM)
-            simConfig.setSimulationWorldPose(startingPose);
+            simConfig.setSimulationWorldPose(pose);
 
-        sys_drive.setPose(startingPose);
+        sys_drive.setPose(pose);
     }
 
     private Command getLevelSelectorCommand(boolean ends) {
