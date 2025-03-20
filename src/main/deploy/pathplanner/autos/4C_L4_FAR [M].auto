@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "IC to FL"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "IC to FL"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PREP_ELEVATOR"
+                }
+              }
+            ]
           }
         },
         {
@@ -28,6 +41,12 @@
                       "type": "path",
                       "data": {
                         "pathName": "FL to LP"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.05
                       }
                     },
                     {
@@ -52,9 +71,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP_ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -81,6 +113,12 @@
                       }
                     },
                     {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.05
+                      }
+                    },
+                    {
                       "type": "named",
                       "data": {
                         "name": "DRIVE_FORWARD"
@@ -102,9 +140,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP_ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -131,6 +182,12 @@
                       }
                     },
                     {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.05
+                      }
+                    },
+                    {
                       "type": "named",
                       "data": {
                         "name": "DRIVE_FORWARD"
@@ -152,9 +209,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP_ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]

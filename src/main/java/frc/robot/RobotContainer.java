@@ -713,9 +713,12 @@ public class RobotContainer {
 
         primaryController.start()
             .onTrue(
-                sys_elevator.elevatorGo(ScoringLevel.LEVEL4.elevatorSetpoint)
-                    .onlyIf(() -> sys_armPivot.getPosition().lte(kArmPivot.MOVEMENT_SETPOINT.plus(Degrees.of(1.0))))
-            ).onFalse(sys_elevator.startManualMove(0.0));
+                Commands.runOnce(sys_drive::coastMode)
+                    .ignoringDisable(true)
+            ).onFalse(
+                Commands.runOnce(sys_drive::brakeMode)
+                    .ignoringDisable(true)
+            );
 
         // // Reset gyro to 0° when Start button is pressed
         // primaryController

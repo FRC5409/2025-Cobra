@@ -83,7 +83,7 @@ public final class Constants {
     public static final PIDConstants ALIGN_PID = new PIDConstants(4.9, 0.0, 0.28);
 
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_SLOW     = MetersPerSecond         .of(2.00);
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_FAST     = MetersPerSecond         .of(3.00);
+    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_FAST     = MetersPerSecond         .of(2.75);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(8.00);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(25.0);
 
