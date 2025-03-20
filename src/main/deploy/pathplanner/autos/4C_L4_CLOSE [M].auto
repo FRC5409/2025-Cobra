@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "IC to FL"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "IC to FL"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PREP_ELEVATOR"
+                }
+              }
+            ]
           }
         },
         {
@@ -58,9 +71,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP_ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -114,9 +140,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP_ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -170,9 +209,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IDLE"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PREP_ELEVATOR"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -181,7 +233,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_LEFT_L2"
+            "name": "SCORE_LEFT_L4"
           }
         },
         {

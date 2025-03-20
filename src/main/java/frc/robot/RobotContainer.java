@@ -667,7 +667,7 @@ public class RobotContainer {
             )
         );
       
-        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.25));
+        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.75));
 
         NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(-0.25), sys_drive));
 
@@ -749,6 +749,17 @@ public class RobotContainer {
                 )
             );
 
+        primaryController.y()
+            .whileTrue(
+                DriveCommands.alignToPoint(sys_drive, () -> FlippingUtil.flipFieldPose(new Pose2d(14.031, 5.008, new Rotation2d(-1.843))))
+                .alongWith(
+                    new ScoreCommand(sys_elevator, sys_armPivot, ScoringLevel.LEVEL1),
+                    Commands.waitUntil(DriveCommands::isAligned).andThen(
+                        sys_endEffector.setVoltage(ScoringLevel.LEVEL1.voltage)
+                    )
+                )
+            ).onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
         primaryController.x()
             .whileTrue(
                 new ConditionalCommand(
@@ -780,7 +791,7 @@ public class RobotContainer {
                     ).deadlineFor(
                         Commands.repeatingSequence(
                             Commands.waitUntil(() -> !sys_vision.hasTarget()),
-                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.25)),
+                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.5)),
                             Commands.waitUntil(sys_vision::hasTarget),
                             Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
                         ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
@@ -799,7 +810,7 @@ public class RobotContainer {
                     ).deadlineFor(
                         Commands.repeatingSequence(
                             Commands.waitUntil(() -> !sys_vision.hasTarget()),
-                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.25)),
+                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.5)),
                             Commands.waitUntil(sys_vision::hasTarget),
                             Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
                         ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))

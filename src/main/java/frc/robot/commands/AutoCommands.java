@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kAutoAlign;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.Constants.kAutoAlign.kReef;
 import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.commands.scoring.RemoveAlgae;
@@ -201,7 +202,7 @@ public class AutoCommands {
         Command idealAlgae = 
             Commands.sequence(
                 AutoCommands.alignToAlgae(sys_drive),
-                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
+                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= kEndEffector.ALGAE_CURRENT),
                 AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
             ).alongWith(
                 new SelectorCommand(
@@ -218,8 +219,7 @@ public class AutoCommands {
                     new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
                     new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
                     () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                ),
-                Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
+                ).raceWith(Commands.waitUntil(() -> sys_endEffector.getCurrent() >= kEndEffector.ALGAE_CURRENT)),
                 AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
             );
         
@@ -227,7 +227,7 @@ public class AutoCommands {
             AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).andThen(
                 Commands.sequence(
                     AutoCommands.alignToAlgae(sys_drive),
-                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 25.0).withTimeout(1.0),
+                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= kEndEffector.ALGAE_CURRENT),
                     AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
                 ).alongWith(
                     new SelectorCommand(

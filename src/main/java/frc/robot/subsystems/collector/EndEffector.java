@@ -23,6 +23,8 @@ public class EndEffector extends SubsystemBase {
 
     private final LoggedNetworkNumber tofRange;
 
+    private int timer = 0;
+
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
     public EndEffector(EndEffectorIO io) {
@@ -50,17 +52,28 @@ public class EndEffector extends SubsystemBase {
                 )
             );
         else
-            return Commands.parallel(
-                    Commands.runOnce(
-                        () -> io.setVoltage(voltage), this
-                    ),
-                    Commands.waitUntil(this::coralDetected)
-            ).andThen(
-                Commands.waitSeconds(0.0),
-                Commands.runOnce(
-                    ()-> io.setVoltage(0), this
+            return Commands.repeatingSequence(
+                setVoltage(voltage).alongWith(Commands.runOnce(() -> timer = 0)),
+                new WaitThen(
+                    0.2,
+                    Commands.waitUntil(() -> {
+                        if (io.getMotorCurrent() >= kEndEffector.CURRENT_LIMIT - 3)
+                            return ++timer > 5;
+                        else
+                            timer = 0;
+
+                        return false;
+                    })
+                ),
+                setVoltage(0.0),
+                Commands.waitSeconds(0.1)
+            ).raceWith(
+                Commands.sequence(
+                    Commands.waitUntil(this::coralDetected),
+                    Commands.waitSeconds(0.075)
                 )
-            ).unless(this::coralDetected);
+            ).unless(this::coralDetected)
+            .finallyDo(() -> io.setVoltage(0.0));
 
     }
     // Run until coral is no longer detected, if spike in current, wait then rerun
@@ -81,11 +94,11 @@ public class EndEffector extends SubsystemBase {
             return Commands.repeatingSequence(
                 setVoltage(voltage),
                 new WaitThen(
-                    0.1,
+                    0.2,
                     Commands.waitUntil(() -> io.getMotorCurrent() >= kEndEffector.CURRENT_LIMIT - 3)
                 ),
                 setVoltage(-kEndEffector.IDLE_VOLTAGE),
-                Commands.waitSeconds(0.2),
+                Commands.waitSeconds(0.15),
                 setVoltage(0.0),
                 Commands.waitSeconds(0.25)
             ).onlyWhile(this::coralDetected)
