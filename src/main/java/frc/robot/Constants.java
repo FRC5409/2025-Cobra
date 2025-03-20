@@ -84,12 +84,12 @@ public final class Constants {
 
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_SLOW     = MetersPerSecond         .of(2.00);
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_FAST     = MetersPerSecond         .of(2.75);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(7.00);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(14.0);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(8.00);
+    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(25.0);
 
     public static final Distance TRANSLATION_TOLERANCE;
     public static final Angle    ROTATION_TOLERANCE   ;
-    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.12);
+    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.1);
     static {
         if (TUNNING) {
             TRANSLATION_TOLERANCE = Centimeters.of(0.00);
@@ -196,19 +196,19 @@ public final class Constants {
   }
 
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.030), Degrees.of(100.), 2.0),
-        LEVEL2(      Meters.of(0.160), Degrees.of(83.0), 6.5),
-        LEVEL3(      Meters.of(0.360), Degrees.of(83.0), 6.5),
+        LEVEL1(      Meters.of(0.043), Degrees.of(100.), 12.),
+        LEVEL2(      Meters.of(0.170), Degrees.of(83.0), 6.5),
+        LEVEL3(      Meters.of(0.370), Degrees.of(83.0), 6.5),
         LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.6),
 
         // TODO: Tune these values
         LEVEL1_DIST( Meters.of(0.030), Degrees.of(100.), 2.0),
-        LEVEL2_DIST( Meters.of(0.160), Degrees.of(83.0), 6.5),
-        LEVEL3_DIST( Meters.of(0.360), Degrees.of(83.0), 6.5),
+        LEVEL2_DIST( Meters.of(0.170), Degrees.of(83.0), 6.5),
+        LEVEL3_DIST( Meters.of(0.370), Degrees.of(83.0), 6.5),
         LEVEL4_DIST( Meters.of(0.665), Degrees.of(87.0), 7.6),
 
-        LEVEL2_ALGAE(Meters.of(0.230), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
-        LEVEL3_ALGAE(Meters.of(0.430), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
+        LEVEL2_ALGAE(Meters.of(0.220), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
+        LEVEL3_ALGAE(Meters.of(0.420), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
         /** Not Implemented */
         BARGE(       Meters.of(0.650), Degrees.of(100.), 0.0),
         /** Not Implemented */
@@ -231,8 +231,10 @@ public final class Constants {
       public static final int TIMOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(140);
 
-      public static final double IDLE_VOLTAGE  =  3.5;
+      public static final double IDLE_VOLTAGE  =  5.5;
       public static final double ALGAE_VOLTAGE = -4.0;
+
+      public static final double ALGAE_CURRENT = 20.0;
   }
 
   public static final class kElevator {
@@ -249,7 +251,7 @@ public final class Constants {
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
     public static final double ELEVATOR_MAX_HEIGHT = 0.652587890625;
 
-    public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.30);
+    public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.175);
 
     public static final Distance IDLING_HEIGHT = Meters.of(0.022);
   }

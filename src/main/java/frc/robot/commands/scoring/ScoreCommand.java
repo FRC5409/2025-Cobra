@@ -20,4 +20,12 @@ public class ScoreCommand extends SequentialCommandGroup {
             sys_score.runUntilCoralNotDetected(level.voltage)
         );
     }
+
+    public ScoreCommand(Elevator sys_elevator, ArmPivot sys_pivot, ScoringLevel level) {
+        super(
+            sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
+            sys_elevator.elevatorGo(level.elevatorSetpoint),
+            sys_pivot.moveArm(level.pivotAngle)
+        );
+    }
 }
