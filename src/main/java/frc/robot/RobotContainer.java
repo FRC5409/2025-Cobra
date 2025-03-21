@@ -30,7 +30,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -263,29 +262,16 @@ public class RobotContainer {
         ).onlyWhile(() -> isTelopAuto);
 
         // Set up auto routines
-        autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-        autoChooser.addDefaultOption("None", Commands.none());
+        autoChooser = CustomAutos.buildChooser(this::resetPose);
 
-        try {
-            autoChooser.addOption("Test", CustomAutos.buildAuto(
-                new ResetRequest(pose -> resetPose(pose), PathPlannerAuto.getPathGroupFromAutoFile("4C_L4_CLOSE [M]").get(0).getStartingHolonomicPose().get()),
-                new PathRequest("IC to FL"),
-                new CommandRequest("SCORE_RIGHT_L4")
-            ));
-        } catch (FileVersionException | IOException | ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        for (String auto : AutoBuilder.getAllAutoNames()) {
-            if (auto.endsWith("[M]")) {
-                String autoName = auto.replace("[M]", "");
-                autoChooser.addOption("{L} - " + autoName, new PathPlannerAuto(auto, false));
-                autoChooser.addOption("{R} - " + autoName, new PathPlannerAuto(auto, true ));
-            } else {
-                autoChooser.addOption(auto, new PathPlannerAuto(auto));
-            }
-        }
+        CustomAutos.addOption(
+            new Auto("Test", new Pose2d(7.062, 5.130, Rotation2d.fromDegrees(-120.000)), true).withRequest(
+                new SequentialRequest(
+                    new PathRequest("IC to FL"),
+                    new CommandRequest(NamedCommands.getCommand("SCORE_RIGHT_L4"))
+                )
+            )
+        );
 
         if (Constants.TUNNING) {
             // Set up SysId routines
@@ -310,11 +296,6 @@ public class RobotContainer {
         }
 
         runTelop = DebugCommand.putNumber("Run Telop Auto", false)::get;
-
-        if (kAuto.RESET_ODOM_ON_CHANGE)
-            autoChooser
-                .getSendableChooser()
-                .onChange(path -> resetPose(getStartingPose()));
 
         DebugCommand.register("Reset", Commands.runOnce(() -> resetPose(getStartingPose())).ignoringDisable(true));
 
@@ -361,7 +342,7 @@ public class RobotContainer {
                     secondaryDisconnectedAlert.set(!secondaryController.isConnected());
                     // controlDisconnectedAlert.set(!controlBoard.isConnected());
 
-                    resetPose(getStartingPose());
+                    CustomAutos.resetPose();
                 }).ignoringDisable(true)
             )
         );
