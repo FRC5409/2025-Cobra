@@ -197,8 +197,8 @@ public final class Constants {
 
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.043), Degrees.of(100.), 12.),
-        LEVEL2(      Meters.of(0.170), Degrees.of(83.0), 6.5),
-        LEVEL3(      Meters.of(0.370), Degrees.of(83.0), 6.5),
+        LEVEL2(      Meters.of(0.180), Degrees.of(73.0), 6.5),
+        LEVEL3(      Meters.of(0.380), Degrees.of(73.0), 6.5),
         LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.5),
 
         // TODO: Tune these values
