@@ -32,7 +32,7 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
     private StatusSignal<AngularVelocity> deviceVelocity;
     private StatusSignal<Angle> devicePosition;
     
-    private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMOFFLIGHT_SENSORID);
+    private final TimeOfFlight tof = new TimeOfFlight(kEndEffector.TIMEOFFLIGHT_SENSORID);
 
     public EndEffectorIOTalonFx(int ID) {
         // Creating Objects
@@ -103,3 +103,14 @@ public class EndEffectorIOTalonFx implements EndEffectorIO {
         inputs.endEffectorPosition = devicePosition.getValueAsDouble();
     }
 }
+
+// DELETE IF NO NEW ToF SENSOR ADDED
+
+// tof_l1.setRangingMode(RangingMode.Short, 50);
+
+
+// @Override
+    // public Distance getTofRange_L1(){
+    //     return Millimeters.of(tof_l1.getRange());
+    // }
+

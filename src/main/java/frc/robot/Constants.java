@@ -191,12 +191,13 @@ public final class Constants {
 
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(88);
     public static final Angle PICKUP_ANGLE  = Degrees.of(104.5);
+    public static final Angle PICKUP_ANGLE_L1 = Degrees.of(82.50);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.25, 0.0, 0.3);
   }
 
     public static enum ScoringLevel {
-        LEVEL1(      Meters.of(0.043), Degrees.of(100.), 12.),
+        LEVEL1(      Meters.of(0.0), Degrees.of(72.), -5.5),
         LEVEL2(      Meters.of(0.185), Degrees.of(75.0), 5.5),
         LEVEL3(      Meters.of(0.385), Degrees.of(75.0), 5.5),
         LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.5),
@@ -228,7 +229,7 @@ public final class Constants {
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 23;
       public static final int CURRENT_LIMIT = 40;
-      public static final int TIMOFFLIGHT_SENSORID = 28;
+      public static final int TIMEOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(140);
 
       public static final double IDLE_VOLTAGE  =  5.5;
@@ -254,6 +255,7 @@ public final class Constants {
     public static final Distance ELEVATOR_PREP_HEIGHT = Meters.of(0.175);
 
     public static final Distance IDLING_HEIGHT = Meters.of(0.022);
+    public static final Distance IDLING_HEIGHT_L1 = Meters.of(0.95);
   }
 
   public static final class kVision {

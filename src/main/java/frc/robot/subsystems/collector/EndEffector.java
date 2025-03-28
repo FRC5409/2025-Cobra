@@ -23,6 +23,7 @@ public class EndEffector extends SubsystemBase {
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
 
     private final LoggedNetworkNumber tofRange;
+    private final LoggedNetworkNumber tofRange_L1;
     private final LoggedNetworkNumber voltageOffset;
 
     private int timer = 0;
@@ -33,6 +34,7 @@ public class EndEffector extends SubsystemBase {
         this.io = io;
 
         tofRange = new LoggedNetworkNumber("ToF Range", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
+        tofRange_L1 = new LoggedNetworkNumber("ToF Range L1", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
         voltageOffset = new LoggedNetworkNumber("Voltage offset", 0.0);
 
         DebugCommand.register("EndEffector Run Forward", setVoltage(3));
@@ -154,3 +156,78 @@ public class EndEffector extends SubsystemBase {
     }
 
 }
+
+
+// DELETE IF NO NEW ToF SENSOR IS ADDED
+
+// public Command runUntilCoralNotDetected_L1(double voltage){
+//     if (Constants.currentMode == Mode.SIM)
+//         return Commands.sequence(
+//             Commands.runOnce(
+//                 () -> io.setVoltage(voltage), 
+//                 this
+//             ),
+//             Commands.waitSeconds(0.2),
+//             Commands.runOnce(
+//                 () -> io.setVoltage(0), 
+//                 this
+//             )
+//         );
+//     else
+//         return Commands.repeatingSequence(
+//             setVoltage(() -> voltage - voltageOffset.get()),
+//             new WaitThen(
+//                 0.2,
+//                 Commands.waitUntil(() -> io.getMotorCurrent() >= kEndEffector.CURRENT_LIMIT - 3)
+//             ),
+//             setVoltage(-kEndEffector.IDLE_VOLTAGE),
+//             Commands.waitSeconds(0.15),
+//             setVoltage(0.0),
+//             Commands.waitSeconds(0.25)
+//         ).onlyWhile(this::coralDetectedL1)
+//         .finallyDo(() -> io.setVoltage(0.0));
+// }
+
+// public Command runUntilCoralDetected_L1(double voltage){
+//     if (Constants.currentMode == Mode.SIM)
+//         return Commands.sequence(
+//             Commands.runOnce(
+//                 () -> io.setVoltage(voltage), 
+//                 this
+//             ),
+//             Commands.waitSeconds(0.8),
+//             Commands.runOnce(
+//                 () -> io.setVoltage(0), 
+//                 this
+//             )
+//         );
+//     else
+//         return Commands.repeatingSequence(
+//             setVoltage(voltage).alongWith(Commands.runOnce(() -> timer = 0)),
+//             new WaitThen(
+//                 0.2,
+//                 Commands.waitUntil(() -> {
+//                     if (io.getMotorCurrent() >= kEndEffector.CURRENT_LIMIT - 3)
+//                         return ++timer > 5;
+//                     else
+//                         timer = 0;
+
+//                     return false;
+//                 })
+//             ),
+//             setVoltage(0.0),
+//             Commands.waitSeconds(0.1)
+//         ).raceWith(
+//             Commands.sequence(
+//                 Commands.waitUntil(this::coralDetectedL1),
+//                 Commands.waitSeconds(0.075)
+//             )
+//         ).unless(this::coralDetectedL1)
+//         .finallyDo(() -> io.setVoltage(0.0));
+// }
+
+// public boolean coralDetectedL1(){
+//     return io.getTofRange_L1().lte(Millimeters.of(tofRange_L1.get()));
+// }
+
+// SmartDashboard.putNumber("ToF Distance L1", io.getTofRange_L1().in(Millimeters));

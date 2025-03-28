@@ -25,6 +25,8 @@ import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -117,7 +119,7 @@ public class RobotContainer {
     // Commands
     protected final Command telopAutoCommand;
   
-    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL4;
+    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
 
     // Controller
     private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -545,6 +547,7 @@ public class RobotContainer {
         DebugCommand.register("Algae L3", new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE));
 
         DebugCommand.register("Idle", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        DebugCommand.register("Idle L1", new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector,true));
 
         DebugCommand.register("Setup Auto [R]", 
             Commands.runOnce(sys_drive::coastMode, sys_drive).andThen(
@@ -659,6 +662,10 @@ public class RobotContainer {
             new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
                 .finallyDo(() -> sys_endEffector.io.setVoltage(0.0))
         );
+
+        NamedCommands.registerCommand("IDLEL1", 
+            new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector,true)
+                .finallyDo(() -> sys_endEffector.io.setVoltage(0.0)));
 
         NamedCommands.registerCommand("PREP_ELEVATOR", 
             Commands.sequence(
@@ -859,6 +866,9 @@ public class RobotContainer {
         secondaryController.start()
             .onTrue(Commands.runOnce(() -> removeAlgae = true).ignoringDisable(true))
             .onFalse(Commands.runOnce(() -> removeAlgae = false).ignoringDisable(true));
+
+        secondaryController.povUp()
+            .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector,true));
 
         // Wanted to try something new. Could have just made a method
         // BiFunction<kReefPosition, Boolean, Command> selectGenerator = new BiFunction<AutoCommands.kReefPosition,Boolean,Command>() {

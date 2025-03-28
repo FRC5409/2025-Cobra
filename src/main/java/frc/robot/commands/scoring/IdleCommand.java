@@ -27,4 +27,17 @@ public class IdleCommand extends SequentialCommandGroup {
             sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT)
         );
     }
+
+    public IdleCommand(Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, boolean l1_isTrue){
+        super(
+            sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
+            Commands.waitUntil(Drive::isSafe),
+            sys_elevator.elevatorGo(kElevator.IDLING_HEIGHT_L1),
+            // Commands.deadline(
+                sys_endeffector.setVoltage(kEndEffector.IDLE_VOLTAGE),
+                sys_pivot.moveArm(kArmPivot.PICKUP_ANGLE_L1)
+            // ),
+            // sys_pivot.moveArm(kArmPivot.MOVEMENT_SETPOINT)
+        );
+    }
 }

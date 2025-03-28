@@ -50,7 +50,7 @@ public class ArmPivot extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Arm", inputs);
-        Logger.recordOutput("Components/End Effector", new Pose3d(new Translation3d(0.231, -0.023, 0.155 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, -getPosition().in(Radians), 0)));
+        Logger.recordOutput("Components/End Effector", new Pose3d(new Translation3d(0.0, -0.03, 0 + Elevator.getElevatorStage2Pose3dPose().getZ()), new Rotation3d(0, -getPosition().in(Radians), 0)));
 
         motorConnectedAlert.set(!inputs.connected);
         cancoderConnected.set(!inputs.cancoderConnected || inputs.magnetHealth == MagnetHealthValue.Magnet_Invalid);
