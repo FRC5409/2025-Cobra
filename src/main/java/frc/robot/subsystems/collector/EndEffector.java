@@ -23,7 +23,6 @@ public class EndEffector extends SubsystemBase {
     private final EndEffectorInputsAutoLogged inputs = new EndEffectorInputsAutoLogged();
 
     private final LoggedNetworkNumber tofRange;
-    private final LoggedNetworkNumber tofRange_L1;
     private final LoggedNetworkNumber voltageOffset;
 
     private int timer = 0;
@@ -34,7 +33,6 @@ public class EndEffector extends SubsystemBase {
         this.io = io;
 
         tofRange = new LoggedNetworkNumber("ToF Range", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
-        tofRange_L1 = new LoggedNetworkNumber("ToF Range L1", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
         voltageOffset = new LoggedNetworkNumber("Voltage offset", 0.0);
 
         DebugCommand.register("EndEffector Run Forward", setVoltage(3));
@@ -159,6 +157,11 @@ public class EndEffector extends SubsystemBase {
 
 
 // DELETE IF NO NEW ToF SENSOR IS ADDED
+
+// private final LoggedNetworkNumber tofRange_L1;
+
+// tofRange_L1 = new LoggedNetworkNumber("ToF Range L1", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
+
 
 // public Command runUntilCoralNotDetected_L1(double voltage){
 //     if (Constants.currentMode == Mode.SIM)

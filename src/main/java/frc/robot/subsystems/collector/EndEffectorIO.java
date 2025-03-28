@@ -1,6 +1,5 @@
 package frc.robot.subsystems.collector;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Millimeters;
 
 import org.littletonrobotics.junction.AutoLog;
