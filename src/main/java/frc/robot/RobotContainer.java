@@ -117,7 +117,7 @@ public class RobotContainer {
     // Commands
     protected final Command telopAutoCommand;
   
-    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL1;
+    private ScoringLevel selectedScoringLevel = ScoringLevel.LEVEL4;
 
     // Controller
     private final CommandXboxController primaryController   = new CommandXboxController(0);
@@ -467,8 +467,7 @@ public class RobotContainer {
                             return AlignHelper.getClosestL1(sys_drive.getBlueSidePose(), kClosestType.DISTANCE)
                             .transformBy(new Transform2d(Feet.of(0.8).in(Meters), 0, new Rotation2d()));
                         else
-                            return AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side)
-                            .transformBy(new Transform2d(-Feet.of(1.0).in(Meters), 0, new Rotation2d()));
+                            return AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side);
                     },
 
                     () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 
@@ -745,13 +744,13 @@ public class RobotContainer {
         //                                         new Rotation2d())),
         //                         sys_drive).ignoringDisable(true));
 
-        // primaryController
-        //     .back()
-        //     .or(() -> secondaryController.getHID().getBackButton())
-        //         .whileFalse(
-        //             Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
-        //                 .andThen(telopAutoCommand)
-        //         );
+        primaryController
+            .back()
+            .or(() -> secondaryController.getHID().getBackButton())
+                .whileFalse(
+                    Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
+                        .andThen(telopAutoCommand)
+                );
 
         primaryController.a()
             .onTrue(
@@ -845,6 +844,14 @@ public class RobotContainer {
                         new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
                     )
                 );
+
+        primaryController.leftBumper()
+            .and(() -> isTelopAuto)
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
+
+        primaryController.rightBumper()
+            .and(() -> isTelopAuto)
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
         primaryController.povLeft()
             .and(() -> !isTelopAuto)

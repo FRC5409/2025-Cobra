@@ -64,7 +64,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LP to BL"
+                        "pathName": "LP to B"
                       }
                     }
                   ]
@@ -95,7 +95,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_LEFT_L4"
+            "name": "SCORE_LEFT_L2"
           }
         },
         {
@@ -109,7 +109,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "BL to LP"
+                        "pathName": "B to LP"
                       }
                     },
                     {
@@ -202,7 +202,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LP to B"
+                        "pathName": "LP to BL"
                       }
                     }
                   ]
@@ -227,7 +227,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_LEFT_L2"
+            "name": "SCORE_LEFT_L4"
           }
         },
         {
@@ -235,15 +235,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "AUTO_END"
+                  "pathName": "BL to LP"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "BACKOFF"
+                  "name": "AUTO_END"
                 }
               },
               {

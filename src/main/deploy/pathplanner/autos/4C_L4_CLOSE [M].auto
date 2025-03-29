@@ -241,15 +241,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "AUTO_END"
+                  "pathName": "B to LP"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "BACKOFF"
+                  "name": "AUTO_END"
                 }
               },
               {

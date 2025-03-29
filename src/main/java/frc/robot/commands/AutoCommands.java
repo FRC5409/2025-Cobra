@@ -21,7 +21,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -250,32 +249,17 @@ public class AutoCommands {
     }
 
     public static Command telopAutoCommand(Drive drive, Elevator sys_elevator, ArmPivot sys_pivot, EndEffector sys_endeffector, Command scoringCommand, BooleanSupplier isAlgae, BooleanSupplier waitBeforeScoring) {
-        Command waitForAlgae = RobotBase.isReal() ? 
-            Commands.waitUntil(() -> sys_endeffector.getCurrent() >= 20.0) :
-            Commands.waitSeconds(0.5);
-
         return Commands.sequence(
-            // TODO: TEST AT MULTIPLE AUTO POSITIONS
             Commands.parallel(
                 new IdleCommand(sys_elevator, sys_pivot, sys_endeffector),
-                pathFindToNearestStation(drive).unless(sys_endeffector::coralDetected)
-            ),
-            pathFindToReef(drive, () -> target),
+                pathFindToNearestStation(drive)
+            ).unless(sys_endeffector::coralDetected).until(sys_endeffector::coralDetected),
+            Commands.waitSeconds(1.0),
+            pathFindToReef(drive, () -> target).onlyWhile(Drive::isSafe).onlyWhile(sys_endeffector::coralDetected),
+            Commands.waitSeconds(1.0),
             alignToBranch(drive, () -> (scoreRight.getBoolean(false) ? kDirection.RIGHT : kDirection.LEFT))
                 .alongWith(scoringCommand),
-            backOffFromAlgae(drive, new Rotation2d())
-                .andThen(alignToAlgae(drive))
-                .alongWith(
-                    new ConditionalCommand(
-                        new RemoveAlgae(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL2_ALGAE), 
-                        new RemoveAlgae(sys_elevator, sys_pivot, sys_endeffector, ScoringLevel.LEVEL3_ALGAE), 
-                        () -> AlignHelper.getAlgaeHeight(drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                    )
-                )
-                .andThen(
-                    waitForAlgae,
-                    backOffFromAlgae(drive, Rotation2d.fromDegrees(180.0))
-                ).onlyIf(isAlgae)
+            automaticAlgae(drive, sys_endeffector, sys_elevator, sys_pivot).onlyIf(isAlgae)
         ).repeatedly();
     }
 }

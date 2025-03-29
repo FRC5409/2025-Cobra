@@ -26,7 +26,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_RIGHT_L4"
+            "name": "SCORE_LEFT_L4"
           }
         },
         {
@@ -233,7 +233,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_LEFT_L4"
+            "name": "SCORE_RIGHT_L4"
           }
         },
         {
@@ -241,15 +241,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "AUTO_END"
+                  "pathName": "FL to LP"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "BACKOFF"
+                  "name": "AUTO_END"
                 }
               },
               {
