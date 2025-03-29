@@ -221,6 +221,12 @@
                     {
                       "type": "named",
                       "data": {
+                        "name": "CORAL_COAST"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
                         "name": "PREP_ELEVATOR"
                       }
                     }

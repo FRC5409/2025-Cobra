@@ -569,6 +569,9 @@ public class RobotContainer {
             )
         );
 
+        DebugCommand.register("CORAL COAST", Commands.runOnce(sys_endEffector::coast));
+        DebugCommand.register("CORAL BRAKE", Commands.runOnce(sys_endEffector::brake));
+
         // NAMED COMMANDS
         NamedCommands.registerCommand(
                 "SCORE_LEFT_L4",
@@ -690,6 +693,8 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("BACKOFF", AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()));
+
+        NamedCommands.registerCommand("CORAL_COAST", Commands.runOnce(sys_endEffector::coast));
 
         NamedCommands.registerCommand("AUTO_END", AutoTimer.end(kAuto.PRINT_AUTO_TIME));
     }

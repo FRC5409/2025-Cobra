@@ -133,6 +133,14 @@ public class EndEffector extends SubsystemBase {
         return io.getMotorCurrent();
     }
 
+    public void coast() {
+        io.coastMode();
+    }
+
+    public void brake() {
+        io.brakeMode();
+    }
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run

@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -130,10 +131,11 @@ public class Robot extends LoggedRobot {
             ).ignoringDisable(true)
         );
 
-    new Trigger(() -> matchTime <= 0.25)
-        .and(() -> matchTime != -1.0)
+    new Trigger(() -> matchTime <= 0.5)
         .and(DriverStation::isTeleopEnabled)
-        .onTrue(robotContainer.sys_endEffector.setVoltage(ScoringLevel.LEVEL4.voltage));
+        .onTrue(
+            robotContainer.sys_endEffector.setVoltage(ScoringLevel.LEVEL4.voltage).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        );
   }
 
   /** This function is called periodically during all modes. */
@@ -213,6 +215,7 @@ public class Robot extends LoggedRobot {
     autoStartingConfigAlert.set(false);
 
     robotContainer.sys_drive.brakeMode();
+    robotContainer.sys_endEffector.brake();
   }
 
   /** This function is called periodically during operator control. */
