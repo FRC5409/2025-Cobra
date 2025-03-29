@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -134,7 +133,15 @@ public class Robot extends LoggedRobot {
     new Trigger(() -> matchTime <= 0.5)
         .and(DriverStation::isTeleopEnabled)
         .onTrue(
-            robotContainer.sys_endEffector.setVoltage(ScoringLevel.LEVEL4.voltage).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+            Commands.either(
+                Commands.runOnce(() ->
+                    robotContainer.sys_endEffector.io.setVoltage(ScoringLevel.LEVEL4.voltage)
+                ),
+                Commands.runOnce(() ->
+                    robotContainer.sys_endEffector.io.setVoltage(ScoringLevel.LEVEL1.voltage)
+                ),
+                robotContainer.sys_endEffector::coralDetected
+            )
         );
   }
 
