@@ -868,12 +868,12 @@ public class RobotContainer {
             );
 
         primaryController.povUp()
-            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE))
-            .onFalse(sys_endEffector.setVoltage(0.0));
+            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
+            .onFalse(sys_endEffector.setVoltage(0.0, false));
 
         primaryController.povDown()
-            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE))
-            .onFalse(sys_endEffector.setVoltage(0.0));
+            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
+            .onFalse(sys_endEffector.setVoltage(0.0, false));
 
         // SECONDARY CONTROLLER
 

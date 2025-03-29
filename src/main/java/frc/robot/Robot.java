@@ -135,10 +135,10 @@ public class Robot extends LoggedRobot {
         .onTrue(
             Commands.either(
                 Commands.runOnce(() ->
-                    robotContainer.sys_endEffector.io.setVoltage(ScoringLevel.LEVEL4.voltage)
+                    robotContainer.sys_endEffector.setVoltage(ScoringLevel.LEVEL4.voltage, false)
                 ),
                 Commands.runOnce(() ->
-                    robotContainer.sys_endEffector.io.setVoltage(ScoringLevel.LEVEL1.voltage)
+                    robotContainer.sys_endEffector.setVoltage(ScoringLevel.LEVEL1.voltage, false)
                 ),
                 robotContainer.sys_endEffector::coralDetected
             )

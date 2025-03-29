@@ -119,10 +119,17 @@ public class EndEffector extends SubsystemBase {
     }
 
     public Command setVoltage(double voltage){
-        return Commands.runOnce(
-            () -> io.setVoltage(voltage), 
-            this
-        );
+        return setVoltage(voltage, true);
+    }
+
+    public Command setVoltage(double voltage, boolean interupt) {
+        if (interupt)
+            return Commands.runOnce(
+                () -> io.setVoltage(voltage), 
+                this
+            );
+
+        return Commands.runOnce(() -> io.setVoltage(voltage));
     }
 
     public boolean coralDetected(){
