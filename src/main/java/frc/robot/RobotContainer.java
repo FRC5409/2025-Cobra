@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
@@ -799,7 +800,8 @@ public class RobotContainer {
                     ),
                     AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot),
                     sys_endEffector::coralDetected
-                ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+                ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+                .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
             )
             .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
