@@ -687,6 +687,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.75));
 
         NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(-0.75), sys_drive));
+        NamedCommands.registerCommand("BUMP", Commands.runOnce(() -> sys_drive.driveForward(-2.0), sys_drive));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
