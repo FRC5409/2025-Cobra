@@ -211,16 +211,16 @@ public class AutoCommands {
                 )
             );
 
-        Command L4Algae = 
-            Commands.sequence(
-                AutoCommands.alignToAlgae(sys_drive),
-                new SelectorCommand(
-                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
-                    new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
-                    () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
-                ).raceWith(Commands.waitUntil(() -> sys_endEffector.getCurrent() >= kEndEffector.ALGAE_CURRENT)),
-                AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
-            );
+        // Command L4Algae = 
+        //     Commands.sequence(
+        //         AutoCommands.alignToAlgae(sys_drive),
+        //         new SelectorCommand(
+        //             new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL2_ALGAE), 
+        //             new RemoveAlgae(sys_elevator, sys_armPivot, sys_endEffector, ScoringLevel.LEVEL3_ALGAE), 
+        //             () -> AlignHelper.getAlgaeHeight(sys_drive.getBlueSidePose()) == ScoringLevel.LEVEL2_ALGAE
+        //         ).raceWith(Commands.waitUntil(() -> sys_endEffector.getCurrent() >= kEndEffector.ALGAE_CURRENT)),
+        //         AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).withTimeout(0.5)
+        //     );
         
         Command tooCloseAlgae = 
             AutoCommands.backOffFromAlgae(sys_drive, new Rotation2d()).andThen(
@@ -237,13 +237,19 @@ public class AutoCommands {
                 )
             );
 
+        // return Commands.either(
+        //     idealAlgae, 
+        //     Commands.either(
+        //         tooCloseAlgae, 
+        //         L4Algae, 
+        //         () -> sys_elevator.getPosition().lte(ScoringLevel.LEVEL3.elevatorSetpoint.plus(Centimeters.of(5.0)))
+        //     ), 
+        //     Drive::isSafe
+        // );
+
         return Commands.either(
             idealAlgae, 
-            Commands.either(
-                tooCloseAlgae, 
-                L4Algae, 
-                () -> sys_elevator.getPosition().lte(ScoringLevel.LEVEL3.elevatorSetpoint.plus(Centimeters.of(5.0)))
-            ), 
+            tooCloseAlgae,
             Drive::isSafe
         );
     }
@@ -252,7 +258,11 @@ public class AutoCommands {
         return Commands.sequence(
             Commands.parallel(
                 new IdleCommand(sys_elevator, sys_pivot, sys_endeffector),
-                pathFindToNearestStation(drive)
+                Commands.sequence(
+                    pathFindToNearestStation(drive),
+                    Commands.runOnce(() -> drive.driveForward(-0.75), drive),
+                    Commands.idle(drive)
+                )
             ).unless(sys_endeffector::coralDetected).until(sys_endeffector::coralDetected),
             Commands.waitSeconds(1.0),
             pathFindToReef(drive, () -> target).onlyWhile(Drive::isSafe).onlyWhile(sys_endeffector::coralDetected),

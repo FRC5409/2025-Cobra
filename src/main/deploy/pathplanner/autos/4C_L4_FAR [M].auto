@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "IC to FL"
+                  "pathName": "IC to FLL"
                 }
               },
               {
@@ -40,13 +40,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "FL to LP"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.05
+                        "pathName": "FLL to LP"
                       }
                     },
                     {
@@ -113,12 +107,6 @@
                       }
                     },
                     {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.05
-                      }
-                    },
-                    {
                       "type": "named",
                       "data": {
                         "name": "DRIVE_FORWARD"
@@ -182,12 +170,6 @@
                       }
                     },
                     {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.05
-                      }
-                    },
-                    {
                       "type": "named",
                       "data": {
                         "name": "DRIVE_FORWARD"
@@ -202,7 +184,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LP to FL"
+                        "pathName": "LP to FLR"
                       }
                     }
                   ]
@@ -216,6 +198,12 @@
                       "type": "named",
                       "data": {
                         "name": "IDLE"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "CORAL_COAST"
                       }
                     },
                     {
@@ -243,7 +231,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FL to LP"
+                  "pathName": "FLR to LP"
                 }
               },
               {

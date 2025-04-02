@@ -363,17 +363,17 @@ public class RobotContainer {
 
         double degrees = targetAngle.in(Degrees);
         if (degrees > -120 && degrees <= -60)
-            AutoCommands.target = kReefPosition.CLOSE;
-        else if (degrees > -60 && degrees <= 0)
-            AutoCommands.target = kReefPosition.CLOSE_LEFT;
-        else if (degrees > 0 && degrees <= 60)
-            AutoCommands.target = kReefPosition.FAR_LEFT;
-        else if (degrees > 60 && degrees <= 120)
             AutoCommands.target = kReefPosition.FAR;
-        else if (degrees > 120 && degrees <= 180)
+        else if (degrees > -60 && degrees <= 0)
             AutoCommands.target = kReefPosition.FAR_RIGHT;
-        else
+        else if (degrees > 0 && degrees <= 60)
             AutoCommands.target = kReefPosition.CLOSE_RIGHT;
+        else if (degrees > 60 && degrees <= 120)
+            AutoCommands.target = kReefPosition.CLOSE;
+        else if (degrees > 120 && degrees <= 180)
+            AutoCommands.target = kReefPosition.CLOSE_LEFT;
+        else
+            AutoCommands.target = kReefPosition.FAR_LEFT;
 
         Logger.recordOutput("Scoring Position", AutoCommands.target);
     }
@@ -684,7 +684,10 @@ public class RobotContainer {
             )
         );
       
-        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.75));
+        // NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(sys_endEffector::coralDetected).withTimeout(1.75));
+        NamedCommands.registerCommand("END_WHEN_COLLECTED", Commands.waitUntil(() ->
+            sys_endEffector.getCurrent() >= 32 || sys_endEffector.coralDetected()
+        ));
 
         NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(-0.75), sys_drive));
         NamedCommands.registerCommand("BUMP", Commands.runOnce(() -> sys_drive.driveForward(-2.0), sys_drive));

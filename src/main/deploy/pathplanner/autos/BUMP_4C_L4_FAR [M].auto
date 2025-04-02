@@ -17,7 +17,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 0.1
+                  "waitTime": 0.5
                 }
               }
             ]
@@ -221,7 +221,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LP to FL"
+                        "pathName": "LP to FLR"
                       }
                     }
                   ]

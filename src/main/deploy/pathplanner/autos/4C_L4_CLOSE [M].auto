@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "IC to FL"
+                  "pathName": "IC to FLL"
                 }
               },
               {
@@ -26,7 +26,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SCORE_RIGHT_L4"
+            "name": "SCORE_LEFT_L4"
           }
         },
         {
@@ -40,7 +40,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "FL to LP"
+                        "pathName": "FLL to LP"
                       }
                     },
                     {
