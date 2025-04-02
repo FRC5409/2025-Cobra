@@ -209,8 +209,8 @@ public final class Constants {
 
     public static enum ScoringLevel {
         LEVEL1(      Meters.of(0.010), Degrees.of(66.0), -3.0),
-        LEVEL2(      Meters.of(0.17), Degrees.of(86.0), 6.0),
-        LEVEL3(      Meters.of(0.37), Degrees.of(86.0), 6.0),
+        LEVEL2(      Meters.of(0.17), Degrees.of(86.0), 4.5),
+        LEVEL3(      Meters.of(0.37), Degrees.of(86.0), 4.5),
         LEVEL4(      Meters.of(0.665), Degrees.of(87.0), 7.5),
 
         LEVEL2_ALGAE(Meters.of(0.220), Degrees.of(70.5), 0.0), // No voltages, stored in algae voltage
