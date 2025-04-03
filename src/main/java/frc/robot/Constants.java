@@ -202,7 +202,7 @@ public final class Constants {
     public static final Angle MOVEMENT_SETPOINT = Degrees.of(88);
     public static final Angle PICKUP_ANGLE  = Degrees.of(104.5);
 
-    public static final Angle L1_PICKUP_ANGLE = Degrees.of(86);
+    public static final Angle L1_PICKUP_ANGLE = Degrees.of(86.5);
 
     public static final PIDConstants SIMULATED_PID_VALUES = new PIDConstants(3.25, 0.0, 0.3);
   }

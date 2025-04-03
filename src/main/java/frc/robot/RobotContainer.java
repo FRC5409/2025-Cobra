@@ -783,7 +783,7 @@ public class RobotContainer {
                 Commands.sequence(
                     sys_endEffector.setVoltage(2.5),
                     sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
-                    sys_elevator.elevatorGo(Meters.of(0.145)),
+                    sys_elevator.elevatorGo(Meters.of(0.123)),
                     sys_armPivot.moveArm(kArmPivot.L1_PICKUP_ANGLE)
                 )
             ).onFalse(
