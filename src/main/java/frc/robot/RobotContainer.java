@@ -734,6 +734,27 @@ public class RobotContainer {
             )
         );
 
+        final double leavingSpeed = 3.5 // m/s
+        / sys_drive.getMaxLinearSpeedMetersPerSec(); 
+
+        primaryController.povRight()
+            .whileTrue(
+                Commands.sequence(
+                    DriveCommands.joystickDrive(
+                        sys_drive,
+                        () -> -primaryController.getLeftY(),
+                        () -> -primaryController.getLeftX(),
+                        () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+                    ).until(() -> sys_endEffector.getCurrent() >= 30),
+                    DriveCommands.joystickDrive(
+                        sys_drive,
+                        () -> -primaryController.getLeftY() + Math.sqrt(leavingSpeed) * -sys_drive.getRotation().getSin(),
+                        () -> -primaryController.getLeftX() + Math.sqrt(leavingSpeed) * -sys_drive.getRotation().getCos(),
+                        () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+                    )
+                )
+            );
+
         primaryController.start()
             .onTrue(
                 Commands.runOnce(sys_drive::coastMode)
@@ -754,13 +775,13 @@ public class RobotContainer {
         //                                         new Rotation2d())),
         //                         sys_drive).ignoringDisable(true));
 
-        primaryController
-            .back()
-            .or(() -> secondaryController.getHID().getBackButton())
-                .whileFalse(
-                    Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
-                        .andThen(telopAutoCommand)
-                );
+        // primaryController
+        //     .back()
+        //     .or(() -> secondaryController.getHID().getBackButton())
+        //         .whileFalse(
+        //             Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
+        //                 .andThen(telopAutoCommand)
+        //         );
 
         primaryController.a()
             .onTrue(
