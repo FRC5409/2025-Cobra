@@ -738,7 +738,9 @@ public class RobotContainer {
             .whileTrue(
                 Commands.sequence(
                     Commands.runOnce(() -> sys_drive.driveForward(-0.8)),
-                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 30)
+                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 30).alongWith(
+                        Commands.idle(sys_drive)
+                    )
                 )
             );
 
