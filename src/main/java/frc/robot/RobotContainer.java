@@ -734,24 +734,11 @@ public class RobotContainer {
             )
         );
 
-        final double leavingSpeed = 3.5 // m/s
-        / sys_drive.getMaxLinearSpeedMetersPerSec(); 
-
         primaryController.povRight()
             .whileTrue(
                 Commands.sequence(
-                    DriveCommands.joystickDrive(
-                        sys_drive,
-                        () -> -primaryController.getLeftY(),
-                        () -> -primaryController.getLeftX(),
-                        () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
-                    ).until(() -> sys_endEffector.getCurrent() >= 30),
-                    DriveCommands.joystickDrive(
-                        sys_drive,
-                        () -> -primaryController.getLeftY() + Math.sqrt(leavingSpeed) * -sys_drive.getRotation().getSin(),
-                        () -> -primaryController.getLeftX() + Math.sqrt(leavingSpeed) * -sys_drive.getRotation().getCos(),
-                        () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
-                    )
+                    Commands.runOnce(() -> sys_drive.driveForward(-0.8)),
+                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 30)
                 )
             );
 
