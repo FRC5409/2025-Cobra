@@ -88,16 +88,17 @@ public final class Constants {
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(8.00);
     public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(16.0);
 
+    // WHOS IN THE HOUSE??
     public static final Distance TRANSLATION_TOLERANCE;
     public static final Angle    ROTATION_TOLERANCE   ;
-    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.1);
+    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.18);
     public static final LinearVelocity AUTO_VELOCITY_TOLERANCE = MetersPerSecond.of(0.15);
     static {
         if (TUNNING) {
             TRANSLATION_TOLERANCE = Centimeters.of(0.00);
             ROTATION_TOLERANCE    = Degrees    .of(0.00);
         } else {
-            TRANSLATION_TOLERANCE = Centimeters.of(2.00);
+            TRANSLATION_TOLERANCE = Centimeters.of(1.50);
             ROTATION_TOLERANCE    = Degrees    .of(1.25);
         }
     }
