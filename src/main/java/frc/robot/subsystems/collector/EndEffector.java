@@ -42,10 +42,8 @@ public class EndEffector extends SubsystemBase {
     }
 
     /**
-     * Set voltage to given voltage. If current spikes for more than 5 seconds set voltage to 0 and 
+     * Set motor to given voltage. If current spikes for more than 5 seconds set voltage to 0 and 
      * retry until coral detected unless coral is detected earlier, then it sets voltage to 0
-     * 
-     * @param voltage
      */
     public Command runUntilCoralDetected(double voltage) {
         if (Constants.currentMode == Mode.SIM)
@@ -85,18 +83,15 @@ public class EndEffector extends SubsystemBase {
     }
 
     /**
-     * Run runUntilCoralNotDetected command with a set voltage (voltage is a double)
-     * @param voltage
+     * Run runUntilCoralNotDetected command with a set voltage 
      */
     public Command runUntilCoralNotDetected(double voltage) {
         return runUntilCoralNotDetected(() -> voltage);
     }
     /**
-     * Sets voltage to voltage minus the voltage offset 
+     * Sets motor to given voltage minus the voltage offset 
      * then wait for a current spike (Hit a branch) and retract the coral 
      * if its still in the end effector
-     * (voltage is a DoubleSupplier)
-     * @param voltage
      */
     public Command runUntilCoralNotDetected(DoubleSupplier voltage) {
         if (Constants.currentMode == Mode.SIM)
@@ -127,8 +122,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     /**
-     * Set given voltage to io (voltage is a DoubleSupplier)
-     * @param voltageSupplier
+     * Set given voltage to io 
      */
     public Command setVoltage(DoubleSupplier voltageSupplier) {
         return Commands.runOnce(
@@ -138,13 +132,15 @@ public class EndEffector extends SubsystemBase {
     }
 
     /**
-     * Set given voltage to io (voltage is double)
+     * Set given voltage to io with an interupt
      * @param voltage
      */
     public Command setVoltage(double voltage){
         return setVoltage(voltage, true);
     }
-
+    /**
+     * Set voltage with/without an interupt
+     */
     public Command setVoltage(double voltage, boolean interupt) {
         if (interupt)
             return Commands.runOnce(
@@ -187,7 +183,7 @@ public class EndEffector extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
 
-        // Put coral status and ToF Distance to advantage kit (logging)
+        // Put coral status and ToF Distance to elastic
         SmartDashboard.putBoolean("Coral Status", coralDetected());
         SmartDashboard.putNumber("ToF Distance", io.getTofRange().in(Millimeters));
 
