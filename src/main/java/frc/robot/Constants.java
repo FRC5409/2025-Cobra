@@ -98,7 +98,7 @@ public final class Constants {
             TRANSLATION_TOLERANCE = Centimeters.of(0.00);
             ROTATION_TOLERANCE    = Degrees    .of(0.00);
         } else {
-            TRANSLATION_TOLERANCE = Centimeters.of(1.50);
+            TRANSLATION_TOLERANCE = Centimeters.of(2.00);
             ROTATION_TOLERANCE    = Degrees    .of(1.25);
         }
     }
