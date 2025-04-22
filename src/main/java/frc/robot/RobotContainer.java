@@ -734,16 +734,6 @@ public class RobotContainer {
             )
         );
 
-        primaryController.povRight()
-            .whileTrue(
-                Commands.sequence(
-                    Commands.runOnce(() -> sys_drive.driveForward(-0.8)),
-                    Commands.waitUntil(() -> sys_endEffector.getCurrent() >= 30).deadlineFor(
-                        Commands.idle(sys_drive)
-                    )
-                )
-            );
-
         primaryController.start()
             .onTrue(
                 Commands.runOnce(sys_drive::coastMode)
