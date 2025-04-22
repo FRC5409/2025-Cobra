@@ -26,21 +26,27 @@ public class EndEffector extends SubsystemBase {
     private final LoggedNetworkNumber voltageOffset;
 
     private int timer = 0;
-
+    // Create an end effector motor not connected alert
     private Alert alert = new Alert("End Effector Motor Not Connected", AlertType.kError);
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
-
+        // Logging
         tofRange = new LoggedNetworkNumber("ToF Range", kEndEffector.TIMEOFFLIGHT_DISTANCE_VALIDATION.in(Millimeters));
         voltageOffset = new LoggedNetworkNumber("Voltage offset", 0.0);
 
+        // Debug commands
         DebugCommand.register("EndEffector Run Forward", setVoltage(3));
         DebugCommand.register("EndEffector Run Backwards", setVoltage(-3));
         DebugCommand.register("EndEffector Stop", setVoltage(0));
     }
 
-    // Run until coral is detected then wait 50ms then stop
+    /**
+     * Set voltage to given voltage. If current spikes for more than 5 seconds set voltage to 0 and 
+     * retry until coral detected unless coral is detected earlier, then it sets voltage to 0
+     * 
+     * @param voltage
+     */
     public Command runUntilCoralDetected(double voltage) {
         if (Constants.currentMode == Mode.SIM)
             return Commands.sequence(
@@ -76,13 +82,22 @@ public class EndEffector extends SubsystemBase {
                 Commands.waitSeconds(0.175)
             ).unless(this::coralDetected)
             .finallyDo(() -> io.setVoltage(0.0));
-
     }
-    // Run until coral is no longer detected, if spike in current, wait then rerun
+
+    /**
+     * Run runUntilCoralNotDetected command with a set voltage (voltage is a double)
+     * @param voltage
+     */
     public Command runUntilCoralNotDetected(double voltage) {
         return runUntilCoralNotDetected(() -> voltage);
     }
-
+    /**
+     * Sets voltage to voltage minus the voltage offset 
+     * then wait for a current spike (Hit a branch) and retract the coral 
+     * if its still in the end effector
+     * (voltage is a DoubleSupplier)
+     * @param voltage
+     */
     public Command runUntilCoralNotDetected(DoubleSupplier voltage) {
         if (Constants.currentMode == Mode.SIM)
             return Commands.sequence(
@@ -111,6 +126,10 @@ public class EndEffector extends SubsystemBase {
             .finallyDo(() -> io.setVoltage(0.0));
     }
 
+    /**
+     * Set given voltage to io (voltage is a DoubleSupplier)
+     * @param voltageSupplier
+     */
     public Command setVoltage(DoubleSupplier voltageSupplier) {
         return Commands.runOnce(
             () -> io.setVoltage(voltageSupplier.getAsDouble()),
@@ -118,6 +137,10 @@ public class EndEffector extends SubsystemBase {
         );
     }
 
+    /**
+     * Set given voltage to io (voltage is double)
+     * @param voltage
+     */
     public Command setVoltage(double voltage){
         return setVoltage(voltage, true);
     }
@@ -131,19 +154,31 @@ public class EndEffector extends SubsystemBase {
 
         return Commands.runOnce(() -> io.setVoltage(voltage));
     }
-
+    /**
+     * 
+     * @return
+     *      True or false if object detected within range of the ToF Sensor
+     */
     public boolean coralDetected(){
         return io.getTofRange().lte(Millimeters.of(tofRange.get()));
     }
-
+    /**
+     * 
+     * @return
+     *       IO motor current
+     */
     public double getCurrent() {
         return io.getMotorCurrent();
     }
-
+    /**
+     * Set IO motor to coast mode
+     */
     public void coast() {
         io.coastMode();
     }
-
+    /**
+     * Set IO motor to brake mode
+     */
     public void brake() {
         io.brakeMode();
     }
@@ -152,15 +187,14 @@ public class EndEffector extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
 
+        // Put coral status and ToF Distance to advantage kit (logging)
         SmartDashboard.putBoolean("Coral Status", coralDetected());
         SmartDashboard.putNumber("ToF Distance", io.getTofRange().in(Millimeters));
 
-        // Logging
+        // Log Proccessing
         io.updateInputs(inputs);
         Logger.processInputs("EndEffector", inputs);
         Logger.recordOutput("EndEffector/Coral Detected", coralDetected());
-
-        // System.out.println(inputs.tofDistance); --- Use when testing
 
         // Alert if motor is not connected
         alert.set(!inputs.endEffectorConnection);
