@@ -121,7 +121,7 @@ public final class Constants {
 
       /**
        * Generates a pose that is useable for us of each reef face.
-       * @param rotation The rotation of the facee
+       * @param rotation The rotation of the face
        * @return a pose2d of that face
        */
       private static final Pose2d generatePose(Rotation2d rotation) {
