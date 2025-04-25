@@ -809,52 +809,52 @@ public class RobotContainer {
         //     )
         //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
-        primaryController.start()
-            .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        // primaryController.start()
+        //     .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
-        // primaryController
-        //     .leftBumper()
-        //     .and(() -> !isTelopAuto)
-        //         .whileTrue(
-        //             Commands.sequence(
-        //                 fullAutoScore(kDirection.LEFT, null),
-        //                 new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-        //             ).deadlineFor(
-        //                 Commands.repeatingSequence(
-        //                     Commands.waitUntil(() -> !sys_vision.hasTarget()),
-        //                     Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.5)),
-        //                     Commands.waitUntil(sys_vision::hasTarget),
-        //                     Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-        //                 ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-        //             )
-        //         ).onFalse(
-        //             Commands.sequence(
-        //                 Commands.waitSeconds(0.5).onlyIf(() -> selectedScoringLevel == ScoringLevel.LEVEL1),
-        //                 new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-        //             )
-        //         );
+        primaryController
+            .leftBumper()
+            .and(() -> !isTelopAuto)
+                .whileTrue(
+                    Commands.sequence(
+                        fullAutoScore(kDirection.LEFT, null),
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                    ).deadlineFor(
+                        Commands.repeatingSequence(
+                            Commands.waitUntil(() -> !sys_vision.hasTarget()),
+                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.5)),
+                            Commands.waitUntil(sys_vision::hasTarget),
+                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+                        ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+                    )
+                ).onFalse(
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5).onlyIf(() -> selectedScoringLevel == ScoringLevel.LEVEL1),
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                    )
+                );
 
-        // primaryController
-        //     .rightBumper()
-        //     .and(() -> !isTelopAuto)
-        //         .whileTrue(
-        //             Commands.sequence(
-        //                 fullAutoScore(kDirection.RIGHT, null),
-        //                 new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-        //             ).deadlineFor(
-        //                 Commands.repeatingSequence(
-        //                     Commands.waitUntil(() -> !sys_vision.hasTarget()),
-        //                     Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.5)),
-        //                     Commands.waitUntil(sys_vision::hasTarget),
-        //                     Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-        //                 ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-        //             )
-        //         ).onFalse(
-        //             Commands.sequence(
-        //                 Commands.waitSeconds(0.5).onlyIf(() -> selectedScoringLevel == ScoringLevel.LEVEL1),
-        //                 new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-        //             )
-        //         );
+        primaryController
+            .rightBumper()
+            .and(() -> !isTelopAuto)
+                .whileTrue(
+                    Commands.sequence(
+                        fullAutoScore(kDirection.RIGHT, null),
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                    ).deadlineFor(
+                        Commands.repeatingSequence(
+                            Commands.waitUntil(() -> !sys_vision.hasTarget()),
+                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.5)),
+                            Commands.waitUntil(sys_vision::hasTarget),
+                            Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+                        ).finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+                    )
+                ).onFalse(
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5).onlyIf(() -> selectedScoringLevel == ScoringLevel.LEVEL1),
+                        new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                    )
+                );
 
         // primaryController.leftBumper()
         //     .and(() -> isTelopAuto)
@@ -885,11 +885,11 @@ public class RobotContainer {
 
         // secondaryController.a()
         //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
-        primaryController.b()
+        secondaryController.b()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL2));
-        primaryController.x()
+        secondaryController.x()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
-        primaryController.y()
+        secondaryController.y()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
 
         secondaryController.leftBumper()
