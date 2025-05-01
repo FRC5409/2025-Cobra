@@ -778,20 +778,20 @@ public class RobotContainer {
                 )
             );
 
-        // primaryController.y()
-        //     .whileTrue(
-        //         Commands.sequence(
-        //             sys_endEffector.setVoltage(2.5),
-        //             sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
-        //             sys_elevator.elevatorGo(Meters.of(0.123)),
-        //             sys_armPivot.moveArm(kArmPivot.L1_PICKUP_ANGLE)
-        //         )
-        //     ).onFalse(
-        //         Commands.sequence(
-        //             sys_armPivot.moveArm(Degrees.of(100.0)),
-        //             sys_elevator.elevatorGo(Meters.of(0.01))
-        //         )
-        //     );
+        primaryController.y()
+            .whileTrue(
+                Commands.sequence(
+                    sys_endEffector.setVoltage(2.5),
+                    sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
+                    sys_elevator.elevatorGo(Meters.of(0.123)),
+                    sys_armPivot.moveArm(kArmPivot.L1_PICKUP_ANGLE)
+                )
+            ).onFalse(
+                Commands.sequence(
+                    sys_armPivot.moveArm(Degrees.of(100.0)),
+                    sys_elevator.elevatorGo(Meters.of(0.01))
+                )
+            );
 
         // primaryController.x()
         //     .whileTrue(
@@ -809,8 +809,8 @@ public class RobotContainer {
         //     )
         //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
-        // primaryController.start()
-        //     .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+        primaryController.start()
+            .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         primaryController
             .leftBumper()
@@ -856,40 +856,40 @@ public class RobotContainer {
                     )
                 );
 
-        // primaryController.leftBumper()
-        //     .and(() -> isTelopAuto)
-        //     .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
+        primaryController.leftBumper()
+            .and(() -> isTelopAuto)
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
 
-        // primaryController.rightBumper()
-        //     .and(() -> isTelopAuto)
-        //     .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
+        primaryController.rightBumper()
+            .and(() -> isTelopAuto)
+            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
-        // primaryController.povLeft()
-        //     .and(() -> !isTelopAuto)
-        //     .whileTrue(
-        //         DriveCommands.alignToPoint(
-        //             sys_drive, 
-        //             () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
-        //         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-        //     );
+        primaryController.povLeft()
+            .and(() -> !isTelopAuto)
+            .whileTrue(
+                DriveCommands.alignToPoint(
+                    sys_drive, 
+                    () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
+                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+            );
 
-        primaryController.povUp()
-            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
-            .onFalse(sys_endEffector.setVoltage(0.0, false));
+        // primaryController.povUp()
+        //     .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
+        //     .onFalse(sys_endEffector.setVoltage(0.0, false));
 
-        primaryController.povDown()
-            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
-            .onFalse(sys_endEffector.setVoltage(0.0, false));
+        // primaryController.povDown()
+        //     .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
+        //     .onFalse(sys_endEffector.setVoltage(0.0, false));
 
         // SECONDARY CONTROLLER
 
         // secondaryController.a()
         //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
-        secondaryController.b()
+        primaryController.povDown()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL2));
-        secondaryController.x()
+        primaryController.povLeft()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
-        secondaryController.y()
+        primaryController.povUp()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
 
         secondaryController.leftBumper()
