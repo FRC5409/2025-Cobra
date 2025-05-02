@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.FlippingUtil;
 
@@ -61,7 +62,10 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 1.0; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
-  public static double speedModifier = 1;
+
+  public static LoggedNetworkNumber n = new LoggedNetworkNumber("n", 1);
+  public static LoggedNetworkNumber m = new LoggedNetworkNumber("m", 1);
+  public static LoggedNetworkNumber p = new LoggedNetworkNumber("p", 20);
 
   private static boolean aligned = false;
 
@@ -85,20 +89,24 @@ public class DriveCommands {
         .getTranslation();
   }
 
-  // Increase drive speed
-  public static Command setSpeedHigh(Drive drive) {
-    return Commands.run(
-            () -> {
-              speedModifier = 1.0;
-            });
+  private static double fastPow(double b, double e) {
+    return fastPow(b, (int) e);
   }
 
-  // Decrease drive speed
-  public static Command setSpeedLow(Drive drive) {
-    return Commands.run(
-            () -> {
-              speedModifier = 0.5;
-            });
+  private static double fastPow(double b, int e) {
+    double cnt = b;
+    for (int i = 0; i < e; i++)
+        cnt *= b;
+
+    return cnt;
+  }
+
+  public static double sensFunction(double input) {
+    double nVal = n.get();
+    double mVal = m.get();
+    double pVal = p.get();
+
+    return nVal * Math.copySign(fastPow(input, mVal), input) + (1 - nVal) * Math.copySign(fastPow(input, pVal), input);
   }
 
   /**
@@ -118,18 +126,19 @@ public class DriveCommands {
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), TRIGGER_DEADBAND);
 
-          // Square rotation value for more precise control
-          omega = Math.copySign(Math.pow(Math.abs(omega), 2.0), omega);
+          omega = sensFunction(omega);
 
-          if (Math.abs(omega) >= TRIGGER_DEADBAND)
-            omega += Math.copySign(0.05, omega);
+        //   omega = Math.copySign(Math.pow(Math.abs(omega), 2.0), omega);
+
+        //   if (Math.abs(omega) >= TRIGGER_DEADBAND)
+        //     omega += Math.copySign(0.05, omega);
 
           // Convert to field relative speeds & send command
 
           ChassisSpeeds  speeds = new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                  omega * drive.getMaxAngularSpeedRadPerSec()*speedModifier);
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  omega * drive.getMaxAngularSpeedRadPerSec());
           
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
@@ -181,8 +190,8 @@ public class DriveCommands {
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
                     new ChassisSpeeds(
-                        linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                        linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                        linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                        linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                         omega);
               boolean isFlipped =
                     DriverStation.getAlliance().isPresent()
