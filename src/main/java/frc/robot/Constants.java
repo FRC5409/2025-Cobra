@@ -129,13 +129,13 @@ public final class Constants {
 
       public static final HashMap<kReefPosition, Pose2d> TARGETS = new HashMap<>();
       static {
-        TARGETS.put(kReefPosition.CLOSE_LEFT,   generatePose(Rotation2d.fromDegrees(-60.000)));
-        TARGETS.put(kReefPosition.FAR_LEFT,     generatePose(Rotation2d.fromDegrees(-120.000)));
-        TARGETS.put(kReefPosition.FAR,          generatePose(Rotation2d.fromDegrees(180.000)));
+        // TARGETS.put(kReefPosition.CLOSE_LEFT,   generatePose(Rotation2d.fromDegrees(-60.000)));
+        // TARGETS.put(kReefPosition.FAR_LEFT,     generatePose(Rotation2d.fromDegrees(-120.000)));
+        // TARGETS.put(kReefPosition.FAR,          generatePose(Rotation2d.fromDegrees(180.000)));
         TARGETS.put(kReefPosition.CLOSE,        generatePose(Rotation2d.fromDegrees(0.000)));
         
-        TARGETS.put(kReefPosition.CLOSE_RIGHT,  FieldMirror.mirrorPose(TARGETS.get(kReefPosition.CLOSE_LEFT)));
-        TARGETS.put(kReefPosition.FAR_RIGHT,    FieldMirror.mirrorPose(TARGETS.get(kReefPosition.FAR_LEFT)));
+        // TARGETS.put(kReefPosition.CLOSE_RIGHT,  FieldMirror.mirrorPose(TARGETS.get(kReefPosition.CLOSE_LEFT)));
+        // TARGETS.put(kReefPosition.FAR_RIGHT,    FieldMirror.mirrorPose(TARGETS.get(kReefPosition.FAR_LEFT)));
       }
 
       public static final HashMap<Pose2d, ScoringLevel> ALGAE_HEIGHTS = new HashMap<>();
