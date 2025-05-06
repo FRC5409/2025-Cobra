@@ -528,7 +528,7 @@ public class RobotContainer {
             autoName = autoName.substring(6) + "[M]";
         }
 
-        if (autoName.equals("None"))
+        if (autoName == null || autoName.equals("None"))
             return new Pose2d();
 
         try {
@@ -864,14 +864,14 @@ public class RobotContainer {
             .and(() -> isTelopAuto)
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
-        primaryController.povLeft()
-            .and(() -> !isTelopAuto)
-            .whileTrue(
-                DriveCommands.alignToPoint(
-                    sys_drive, 
-                    () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
-                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-            );
+        // primaryController.povLeft()
+        //     .and(() -> !isTelopAuto)
+        //     .whileTrue(
+        //         DriveCommands.alignToPoint(
+        //             sys_drive, 
+        //             () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
+        //         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+        //     );
 
         // primaryController.povUp()
         //     .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
