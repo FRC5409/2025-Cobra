@@ -234,11 +234,11 @@ public final class Constants {
 
   public static final class kEndEffector {
       public static final int ENDEFFECTOR_MOTOR_ID = 23;
-      public static final int CURRENT_LIMIT = 30;
+      public static final int CURRENT_LIMIT = 40;
       public static final int TIMOFFLIGHT_SENSORID = 28;
       public static final Distance TIMEOFFLIGHT_DISTANCE_VALIDATION = Millimeters.of(140);
 
-      public static final double IDLE_VOLTAGE  =  4.0;
+      public static final double IDLE_VOLTAGE  =  5.5;
       public static final double ALGAE_VOLTAGE = -4.0;
 
       public static final double ALGAE_CURRENT = 20.0;
@@ -247,12 +247,12 @@ public final class Constants {
   public static final class kElevator {
     public static final int MAIN_MOTOR_ID = 20;
     public static final int FOLLOWER_MOTOR_ID = 21;
-    public static final double CURRENT_LIMIT = 20.0;
+    public static final double CURRENT_LIMIT = 30.0;
     public static final double kGearing = 9.0/1.0;
     public static final Distance ELEVATOR_DRUMRADIUS = Inches.of(1.751/2.0);
     public static final double kCircumfrence = 2 * Math.PI * ELEVATOR_DRUMRADIUS.in(Meters);
     public static final double kRotationConverter = kCircumfrence / kGearing;
-    public static final PIDConstants TALONFX_PID = new PIDConstants(70, 0, 0);
+    public static final PIDConstants TALONFX_PID = new PIDConstants(100, 0, 0);
     public static final PIDConstants SIM_PID = new PIDConstants(10, 0, 0);
     public static final Mass ELEVATOR_MASS = Pound.of(52.95);
     public static final double ELEVATOR_MIN_HEIGHT = 0.0;
