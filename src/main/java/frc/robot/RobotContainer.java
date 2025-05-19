@@ -734,84 +734,20 @@ public class RobotContainer {
             )
         );
 
-        // primaryController.start()
-        //     .onTrue(
-        //         Commands.runOnce(sys_drive::coastMode)
-        //             .ignoringDisable(true)
-        //     ).onFalse(
-        //         Commands.runOnce(sys_drive::brakeMode)
-        //             .ignoringDisable(true)
-        //     );
-
-        // // Reset gyro to 0° when Start button is pressed
-        // primaryController
-        //         .start()
-        //         .onTrue(
-        //                 Commands.runOnce(
-        //                         () -> sys_drive.setPose(
-        //                                 new Pose2d(sys_drive.getPose()
-        //                                         .getTranslation(),
-        //                                         new Rotation2d())),
-        //                         sys_drive).ignoringDisable(true));
-
-        // primaryController
-        //     .back()
-        //     .or(() -> secondaryController.getHID().getBackButton())
-        //         .whileFalse(
-        //             Commands.runOnce(() -> isTelopAuto = !isTelopAuto)
-        //                 .andThen(telopAutoCommand)
-        //         );
-
-        primaryController.a()
-            .onTrue(
-                getLevelSelectorCommand(false)
-            )
-            .onFalse(
-                Commands.either(
-                    sys_endEffector.runUntilCoralNotDetected(() -> selectedScoringLevel.voltage),
-                    sys_endEffector.setVoltage(() -> selectedScoringLevel.voltage).withTimeout(1.0),
-                    sys_endEffector::coralDetected
-                )
-                .andThen(
-                    Commands.waitUntil(Drive::isSafe),
-                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
-                )
-            );
-
-        primaryController.y()
-            .whileTrue(
-                Commands.sequence(
-                    sys_endEffector.setVoltage(2.5),
-                    sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
-                    sys_elevator.elevatorGo(Meters.of(0.123)),
-                    sys_armPivot.moveArm(kArmPivot.L1_PICKUP_ANGLE)
-                )
-            ).onFalse(
-                Commands.sequence(
-                    sys_armPivot.moveArm(Degrees.of(100.0)),
-                    sys_elevator.elevatorGo(Meters.of(0.01))
-                )
-            );
-
-        // primaryController.x()
-        //     .whileTrue(
-        //         new ConditionalCommand(
-        //             Commands.sequence(
-        //                 Commands.runOnce(sys_drive::stop, sys_drive),
-        //                 Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.4))
-        //                     .alongWith(Commands.waitSeconds(1.0)),
-        //                 AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
-        //             ),
-        //             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot),
-        //             sys_endEffector::coralDetected
-        //         ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-        //         .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-        //     )
-        //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
-
         primaryController.start()
+            .onTrue(
+                Commands.runOnce(sys_drive::coastMode)
+                    .ignoringDisable(true)
+            ).onFalse(
+                Commands.runOnce(sys_drive::brakeMode)
+                    .ignoringDisable(true)
+            );
+
+        // Idle button
+        primaryController.b()
             .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
+        // Align left branch
         primaryController
             .leftBumper()
             .and(() -> !isTelopAuto)
@@ -834,6 +770,7 @@ public class RobotContainer {
                     )
                 );
 
+        // Align right branch
         primaryController
             .rightBumper()
             .and(() -> !isTelopAuto)
@@ -864,24 +801,16 @@ public class RobotContainer {
             .and(() -> isTelopAuto)
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
-        // primaryController.povLeft()
-        //     .and(() -> !isTelopAuto)
-        //     .whileTrue(
-        //         DriveCommands.alignToPoint(
-        //             sys_drive, 
-        //             () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
-        //         ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-        //     );
+        primaryController.povLeft()
+            .and(() -> !isTelopAuto)
+            .whileTrue(
+                DriveCommands.alignToPoint(
+                    sys_drive, 
+                    () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
+                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
+            );
 
-        // primaryController.povUp()
-        //     .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
-        //     .onFalse(sys_endEffector.setVoltage(0.0, false));
-
-        // primaryController.povDown()
-        //     .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
-        //     .onFalse(sys_endEffector.setVoltage(0.0, false));
-
-        // SECONDARY CONTROLLER
+        // LEVEL SELECTOR
 
         // secondaryController.a()
         //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
@@ -901,64 +830,8 @@ public class RobotContainer {
         secondaryController.start()
             .onTrue(Commands.runOnce(() -> removeAlgae = true).ignoringDisable(true))
             .onFalse(Commands.runOnce(() -> removeAlgae = false).ignoringDisable(true));
-
-        // Wanted to try something new. Could have just made a method
-        // BiFunction<kReefPosition, Boolean, Command> selectGenerator = new BiFunction<AutoCommands.kReefPosition,Boolean,Command>() {
-        //     @Override
-        //     public Command apply(kReefPosition reefPosition, Boolean scoreRight) {
-        //         return Commands.runOnce(() -> {
-        //             AutoCommands.target = reefPosition;
-        //             AutoCommands.scoreRight.setBoolean(scoreRight);
-        //         }).ignoringDisable(true);
-        //     }
-        // };
-
-        // CONTROL BOARD
-
-        // SELECTION
-        // controlBoard.button(kButton.CLOSE_LEFT_LEFT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.CLOSE_LEFT, false));
-        // controlBoard.button(kButton.CLOSE_LEFT_RIGHT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.CLOSE_LEFT, true));
-
-        // controlBoard.button(kButton.CLOSE_MIDDLE_LEFT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.CLOSE, false));
-        // controlBoard.button(kButton.CLOSE_MIDDLE_RIGHT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.CLOSE, true));
-
-        // controlBoard.button(kButton.CLOSE_RIGHT_LEFT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.CLOSE_RIGHT, false));
-        // controlBoard.button(kButton.CLOSE_RIGHT_RIGHT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.CLOSE_RIGHT, true));
-
-        // controlBoard.button(kButton.FAR_LEFT_LEFT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.FAR_LEFT, false));
-        // controlBoard.button(kButton.FAR_LEFT_RIGHT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.FAR_LEFT, true));
-
-        // controlBoard.button(kButton.FAR_MIDDLE_LEFT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.FAR, false));
-        // controlBoard.button(kButton.FAR_MIDDLE_RIGHT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.FAR, true));
-
-        // controlBoard.button(kButton.FAR_RIGHT_LEFT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.FAR_RIGHT, false));
-        // controlBoard.button(kButton.FAR_RIGHT_RIGHT)
-        //     .onTrue(selectGenerator.apply(kReefPosition.FAR_RIGHT, true));
-
-        // // LEVELS
-        // controlBoard.button(kButton.LEVEL_1)
-        //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
-
-        // controlBoard.button(kButton.LEVEL_2)
-        //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL2));
-
-        // controlBoard.button(kButton.LEVEL_3)
-        //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
-
-        // controlBoard.button(kButton.LEVEL_4)
-        //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
     }
+
 
     public Command prepLevelCommand(ScoringLevel level) {
         return Commands.runOnce(() -> {
