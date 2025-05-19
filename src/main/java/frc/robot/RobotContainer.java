@@ -801,15 +801,6 @@ public class RobotContainer {
             .and(() -> isTelopAuto)
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
-        primaryController.povLeft()
-            .and(() -> !isTelopAuto)
-            .whileTrue(
-                DriveCommands.alignToPoint(
-                    sys_drive, 
-                    () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
-                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-            );
-
         // LEVEL SELECTOR
 
         // secondaryController.a()
