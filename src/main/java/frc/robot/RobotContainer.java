@@ -837,14 +837,15 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return AutoTimer.start()
-            .alongWith(autoChooser.get())
-            .andThen(
-                Commands.either(
-                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
-                    Commands.none(),
-                    runTelop
-                )
-            );
+        return null;
+        // return AutoTimer.start()
+        //     .alongWith(autoChooser.get())
+        //     .andThen(
+        //         Commands.either(
+        //             AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
+        //             Commands.none(),
+        //             runTelop
+        //         )
+        //     );
     }
 }
