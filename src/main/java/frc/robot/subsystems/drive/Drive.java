@@ -330,7 +330,7 @@ public class Drive extends SubsystemBase {
   }
 
   public static boolean isSafe() {
-    return globalPose.getTranslation().getDistance(new Translation2d(4.48945, FlippingUtil.fieldSizeY / 2.0)) >= 1.45;
+    return globalPose.getTranslation().getDistance(new Translation2d(4.48945, FlippingUtil.fieldSizeY / 2.0)) >= 1.6;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
