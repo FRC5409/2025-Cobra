@@ -81,7 +81,7 @@ public final class Constants {
   }
 
   public static final class kAutoAlign {
-    public static final PIDConstants ALIGN_PID = new PIDConstants(4.9, 0.0, 0.28);
+    public static final frc.robot.util.ChargedAlign.PIDConstants ALIGN_PID = new frc.robot.util.ChargedAlign.PIDConstants(4.9, 0.0, 0.28);
 
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_SLOW     = MetersPerSecond         .of(2.00);
     public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_FAST     = MetersPerSecond         .of(2.75);

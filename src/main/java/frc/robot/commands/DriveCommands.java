@@ -39,7 +39,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
-import frc.robot.util.ProfiledController;
+import frc.robot.util.ChargedAlign.ProfiledController;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;

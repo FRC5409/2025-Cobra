@@ -1,9 +1,9 @@
-package frc.robot.util;
+package frc.robot.util.ChargedAlign;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.measure.Time;
 
 /**
@@ -19,6 +19,11 @@ public class ProfiledController {
 
     private double lastPoint;
 
+    private boolean continuous = false;
+    private double minimumInput;
+    private double maximumInput;
+
+
     /**
      * New ProfiledController class
      * @param PID The PID constants of the system
@@ -27,8 +32,8 @@ public class ProfiledController {
      * @param period How often the PID controller is updated
      */
     public ProfiledController(PIDConstants PID, double maxVelocity, double maxAcceleration, Time period) {
-        controller = new PIDController(PID.kP, PID.kI, PID.kD, period.in(Seconds));
-        controller.setIZone(PID.iZone);
+        controller = new PIDController(PID.getP(), PID.getI(), PID.getD(), period.in(Seconds));
+        controller.setIZone(PID.getIZone());
 
         setContraints(maxVelocity, maxAcceleration);
     }
@@ -83,6 +88,27 @@ public class ProfiledController {
     }
 
     /**
+     * Enables continuous input.
+     * <p>Rather then using the max and min input range as constraints, it considers them to be the same point and automatically calculates the shortest route to the setpoint.
+     * @param minimumInput The minimum value expected from the input.
+     * @param maximumInput The maximum value expected from the input.
+     */
+    public void enableContinuousInput(double minimumInput, double maximumInput) {
+        continuous = true;
+        this.minimumInput = minimumInput;
+        this.maximumInput = maximumInput;
+        controller.enableContinuousInput(minimumInput, maximumInput);
+    }
+
+    /**
+     * Disables continuous input.
+     */
+    public void disableContinuousInput() {
+        continuous = false;
+        controller.disableContinuousInput();
+    }
+
+    /**
      * @return TThe current max velocity of the system
      */
     public double getMaxVelocity() {
@@ -121,6 +147,13 @@ public class ProfiledController {
     public double calculate(double measurement, double setpoint) {
         double dt = controller.getPeriod();
     
+        double error = setpoint - measurement;
+        if (continuous) {
+            double range = maximumInput - minimumInput;
+            error = Math.IEEEremainder(error, range);
+            setpoint = measurement + error;
+        }
+
         double output = controller.calculate(measurement, setpoint);
     
         output = Math.max(-maxVelocity, Math.min(maxVelocity, output));

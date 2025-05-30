@@ -59,8 +59,12 @@ import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kDrive;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.AlignHelper;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.ChargedAlign.AlignConfig;
+import frc.robot.util.ChargedAlign.ChargedAlign;
+import frc.robot.util.ChargedAlign.PIDConstants;
 
 public class Drive extends SubsystemBase {
     // TunerConstants doesn't include these constants, so they are declared locally
@@ -167,6 +171,15 @@ public class Drive extends SubsystemBase {
           Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
 
+    // Configure AutoAlign
+    ChargedAlign.configure(
+        this::getPose,
+        this::getChassisSpeeds,
+        this::runVelocity,
+        new PIDConstants(5.0, 0.0, 0.0)
+    );
+    ChargedAlign.setConfig(new AlignConfig(MetersPerSecond.of(4.56), MetersPerSecondPerSecond.of(16.0), Centimeters.of(1.25), Degrees.of(1.0)));
+
     // Configure SysId
     sysId = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -187,6 +200,13 @@ public class Drive extends SubsystemBase {
     DebugCommand.register("Drive-Coast", Commands.runOnce(this::coastMode));
     DebugCommand.register("Drive-Brake", Commands.runOnce(this::brakeMode));
     DebugCommand.register("POSITION-REEF", Commands.runOnce(() -> setPose(new Pose2d(3.30, 4.037, new Rotation2d()))));
+
+    DebugCommand.register("Auto-Align-Test", ChargedAlign.run(() -> {
+        if (AutoBuilder.shouldFlip())
+            return FlippingUtil.flipFieldPose(AlignHelper.getClosestBranch(getBlueSidePose()));
+            
+        return AlignHelper.getClosestBranch(getBlueSidePose());
+    }, this).finallyDo(this::stop));
   }
 
   @Override
