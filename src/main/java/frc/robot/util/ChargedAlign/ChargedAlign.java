@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -23,7 +25,6 @@ public class ChargedAlign {
     private static Consumer<ChassisSpeeds> velocityConsumer;
 
     private static AlignConfig currentConfig;
-    private static ProfiledController headingController;
 
     private static Consumer<LinearVelocity> targetVelocityConsumer = velo   -> {};
     private static Consumer<AlignConfig>    currentConfigConsumer  = config -> {};
@@ -31,26 +32,21 @@ public class ChargedAlign {
 
     private ChargedAlign() {}
 
-    public static void configure(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotRelativeSpeeds, Consumer<ChassisSpeeds> fieldRelativeControl, PIDConstants headingConstants) {
+    public static void configure(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotRelativeSpeeds, Consumer<ChassisSpeeds> fieldRelativeControl) {
+        if (ChargedAlign.robotPose != null) throw new IllegalAccessError("Charged Align was already configured!");
+
         ChargedAlign.robotPose = robotPose;
         ChargedAlign.robotSpeeds = robotRelativeSpeeds;
         ChargedAlign.velocityConsumer = fieldRelativeControl;
 
-        headingController = new ProfiledController(headingConstants, 0, 0);
-        headingController.enableContinuousInput(-Math.PI, Math.PI);
         setConfig(new AlignConfig());
     }
 
     public static void setConfig(AlignConfig config) {
         currentConfig = config;
-
-        headingController.setContraints(
-            config.getMaxAngularVelocity().orElse(DegreesPerSecond.of(360000)).in(RadiansPerSecond),
-            config.getMaxAngularAcceleration().orElse(DegreesPerSecondPerSecond.of(360000)).in(RadiansPerSecondPerSecond)
-        );
     }
 
-    public void logCurrentState(Consumer<LinearVelocity> targetVelocity, Consumer<AlignConfig> currentConfig, Consumer<Pose2d> target) {
+    public static void setLogCallback(Consumer<LinearVelocity> targetVelocity, Consumer<AlignConfig> currentConfig, Consumer<Pose2d> target) {
         targetVelocityConsumer = targetVelocity;
         currentConfigConsumer = currentConfig;
         targetConsumer = target;
@@ -67,26 +63,17 @@ public class ChargedAlign {
      * @return The angle between them
      */
     private static Angle rotationDifference(Rotation2d r1, Rotation2d r2) {
-        double difference = r1.getRadians() - r2.getRadians();
-
-        difference = (difference + Math.PI) % (2 * Math.PI) - Math.PI;
-
-        while (difference < -Math.PI)
-            difference += 2 * Math.PI;
-
-        while (difference > Math.PI)
-            difference -= 2 * Math.PI;
-
-        return Radians.of(Math.abs(difference));
+        return Radians.of(MathUtil.angleModulus(r2.getRadians() - r1.getRadians()));
     }
 
     public static Command run(Supplier<Pose2d> targetPose, Subsystem driveSubsystem) {
         return new RunUntilCommand(() -> {
             AlignConfig config = currentConfig.copy();
 
+            ChassisSpeeds speeds = robotSpeeds.get();
             Pose2d robot = robotPose.get();
             Pose2d target = targetPose.get();
-            double robotSpeed = getMagnitude(robotSpeeds.get());
+            double robotSpeed = getMagnitude(speeds);
             double Vf = config.getEndVelocityMetersPerSecond();
             double d = robot.getTranslation().getDistance(target.getTranslation());
             
@@ -101,26 +88,74 @@ public class ChargedAlign {
             double targetVelocity = Math.sqrt(Math.max(0.0, Vf * Vf + 2 * maxAccel * d));
             
             double maxDeltaV = maxAccel * dt;
+
             double limitedVelocity = Math.min(robotSpeed + maxDeltaV, targetVelocity);
             
             double estimatedRobotSpeed = robotSpeed * 2.0 + maxDeltaV; // Mult by 2 for some reason...?
 
             double stoppingDistance = (estimatedRobotSpeed * estimatedRobotSpeed - Vf * Vf) / (2 * maxAccel);
 
-            if (d <= stoppingDistance)
-                limitedVelocity = Math.max(robotSpeed - maxDeltaV, Vf);
+            Logger.recordOutput("C/Stopping", stoppingDistance);
+            Logger.recordOutput("C/Distnce", d);
+
+            if (d <= stoppingDistance) {
+                double percentToTarget = 1.0 - (d / stoppingDistance);
+                percentToTarget = MathUtil.clamp(percentToTarget, 0.0, 1.0);
+            
+                double adjustedAccel = MathUtil.clamp(maxAccel * percentToTarget, 0.5 * maxAccel, maxAccel);
+                double deltaV = adjustedAccel * dt;
+            
+                limitedVelocity = Math.max(robotSpeed - deltaV, Vf);
+            }
+            
+            
+            Logger.recordOutput("C/SlowingDown", d <= stoppingDistance);
             
             Rotation2d theta = Rotation2d.fromRadians(Math.atan2(
                 target.getY() - robot.getY(),
                 target.getX() - robot.getX()
             ));
+
+            double maxAngularVelo = config.getMaxAngularVelocity().in(RadiansPerSecond);
+            double maxAngularAccel = config.getMaxAngularAcceleration().in(RadiansPerSecondPerSecond);
+
+            double currentOmega = speeds.omegaRadiansPerSecond;
+            double eTheta = rotationDifference(robot.getRotation(), target.getRotation()).in(Radians);
+            double omegaF = 0.0; // End angular velo 0
+
+            double angularTargetVelocity = Math.sqrt(Math.max(0.0, omegaF * omegaF + 2 * maxAngularAccel * Math.abs(eTheta)));
+            double maxAngularDeltaV = maxAngularAccel * dt;
+            double limitedAngularVelocity = Math.min(Math.abs(currentOmega) + maxAngularDeltaV, angularTargetVelocity);
+
+            double estimatedOmega = currentOmega * 2.0 + maxAngularDeltaV;
+
+            double angularStoppingDistance = (estimatedOmega * estimatedOmega - omegaF * omegaF) / (2 * maxAngularAccel);
+
+            if (Math.abs(eTheta) <= angularStoppingDistance) {
+                double percentToTarget = 1.0 - (Math.abs(eTheta) / angularStoppingDistance);
+                percentToTarget = MathUtil.clamp(percentToTarget, 0.0, 1.0);
             
+                double adjustedAngularAccel = MathUtil.clamp(maxAngularAccel * percentToTarget, 0.2 * maxAngularAccel, maxAngularAccel);
+                double angularDeltaV = adjustedAngularAccel * dt;
+            
+                limitedAngularVelocity = Math.max(Math.abs(currentOmega) - angularDeltaV, omegaF);
+            }
+            
+            
+            limitedAngularVelocity = Math.copySign(
+                Math.min(Math.abs(limitedAngularVelocity), maxAngularVelo),
+                eTheta
+            );
+
+            if (Math.abs(eTheta) <= config.getRotationTolerance().in(Radians))
+                limitedAngularVelocity = 0.0;
+
             velocityConsumer.accept(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                     new ChassisSpeeds(
                         limitedVelocity * theta.getCos(),
                         limitedVelocity * theta.getSin(),
-                        headingController.calculate(robot.getRotation().getRadians(), target.getRotation().getRadians())
+                        limitedAngularVelocity
                     ),
                     robot.getRotation()
                 )
@@ -135,7 +170,6 @@ public class ChargedAlign {
             return robot.getTranslation().getDistance(target.getTranslation()) <= config.getTranslationToleranceMeters()
                    && rotationDifference(robot.getRotation(), target.getRotation()).lte(config.getRotationTolerance());
         }, driveSubsystem)
-        .beforeStarting(() -> headingController.reset(robotSpeeds.get().omegaRadiansPerSecond))
         .finallyDo(() -> lastTimestamp = null);
     }
 }

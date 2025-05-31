@@ -3,7 +3,6 @@ package frc.robot.util.ChargedAlign;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
-import java.util.Optional;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -21,8 +20,8 @@ public class AlignConfig {
     private final Distance translationTolerance;
     private final Angle rotationTolerance;
 
-    private final Optional<AngularVelocity> maxAngularVelo;
-    private final Optional<AngularAcceleration> maxAngularAccel;
+    private final AngularVelocity maxAngularVelo;
+    private final AngularAcceleration maxAngularAccel;
 
     private final LinearVelocity endVelocity;
 
@@ -31,10 +30,10 @@ public class AlignConfig {
         this.maxAccel = requireNonNullParam(maxAcceleration, "maxAcceleration", "AlignConfig");
 
         this.translationTolerance = requireNonNullParam(translationTolerance, "translationTolerance", "AlignConfig");
-        this.rotationTolerance = requireNonNullParam(rotationTolerance, "translationTolerance", "AlignConfig");
+        this.rotationTolerance    = requireNonNullParam(rotationTolerance, "translationTolerance", "AlignConfig");
 
-        this.maxAngularVelo  = Optional.ofNullable(maxAngularVelocity);
-        this.maxAngularAccel = Optional.ofNullable(maxAngularAcceleration);
+        this.maxAngularVelo  = requireNonNullParam(maxAngularVelocity, "maxAngularVelocity", "AlignConfig");
+        this.maxAngularAccel = requireNonNullParam(maxAngularAcceleration, "maxAngularAcceleration", "AlignConfig");
 
         this.endVelocity = endVelocity;
 
@@ -42,11 +41,11 @@ public class AlignConfig {
     }
 
     public AlignConfig(LinearVelocity maxVelocity, LinearAcceleration maxAcceleration, Distance translationTolerance, Angle rotationTolerance, LinearVelocity endVelocity) {
-        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, null, null, endVelocity);
+        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, DegreesPerSecond.of(540), DegreesPerSecondPerSecond.of(720), endVelocity);
     }
 
     public AlignConfig(LinearVelocity maxVelocity, LinearAcceleration maxAcceleration, Distance translationTolerance, Angle rotationTolerance) {
-        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, null, null, MetersPerSecond.of(0.0));
+        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, DegreesPerSecond.of(540), DegreesPerSecondPerSecond.of(720), MetersPerSecond.of(0.0));
     }
 
     public AlignConfig() {
@@ -69,11 +68,11 @@ public class AlignConfig {
         return rotationTolerance;
     }
 
-    public Optional<AngularVelocity> getMaxAngularVelocity() {
+    public AngularVelocity getMaxAngularVelocity() {
         return maxAngularVelo;
     }
 
-    public Optional<AngularAcceleration> getMaxAngularAcceleration() {
+    public AngularAcceleration getMaxAngularAcceleration() {
         return maxAngularAccel;
     }
 
@@ -112,6 +111,6 @@ public class AlignConfig {
     }
 
     public AlignConfig copy() {
-        return new AlignConfig(endVelocity, maxAccel, translationTolerance, rotationTolerance, maxAngularVelo.get(), maxAngularAccel.get(), endVelocity);
+        return new AlignConfig(endVelocity, maxAccel, translationTolerance, rotationTolerance, maxAngularVelo, maxAngularAccel, endVelocity);
     }
 }

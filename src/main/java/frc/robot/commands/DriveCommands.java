@@ -200,18 +200,21 @@ public class DriveCommands {
      * @return A command that will automatically align to a point on the field
      */
     public static Command alignToPoint(Drive drive, Supplier<Pose2d> target, AlignConfig config) {
-        return Commands.sequence(
-            ChargedAlign.run(() -> {
-                if (AutoBuilder.shouldFlip()) 
-                    return FlippingUtil.flipFieldPose(target.get());
+        return Commands.parallel(
+            Commands.runOnce(() -> ChargedAlign.setConfig(config)),
+            Commands.sequence(
+                ChargedAlign.run(() -> {
+                    if (AutoBuilder.shouldFlip()) 
+                        return FlippingUtil.flipFieldPose(target.get());
 
-                return target.get();
-            }, drive),
-            Commands.runOnce(() -> {
-                drive.stop();
-                aligned = true;
-            }, drive)
-        ).beforeStarting(() -> ChargedAlign.setConfig(config));
+                    return target.get();
+                }, drive),
+                Commands.runOnce(() -> {
+                    drive.stop();
+                    aligned = true;
+                }, drive).onlyIf(() -> config.getEndVelocityMetersPerSecond() == 0.0)
+            )
+        );
     }
 
   /**

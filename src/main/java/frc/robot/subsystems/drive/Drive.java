@@ -64,7 +64,6 @@ import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.ChargedAlign.AlignConfig;
 import frc.robot.util.ChargedAlign.ChargedAlign;
-import frc.robot.util.ChargedAlign.PIDConstants;
 
 public class Drive extends SubsystemBase {
     // TunerConstants doesn't include these constants, so they are declared locally
@@ -175,10 +174,14 @@ public class Drive extends SubsystemBase {
     ChargedAlign.configure(
         this::getPose,
         this::getChassisSpeeds,
-        this::runVelocity,
-        new PIDConstants(5.0, 0.0, 0.0)
+        this::runVelocity
     );
     ChargedAlign.setConfig(new AlignConfig(MetersPerSecond.of(4.56), MetersPerSecondPerSecond.of(16.0), Centimeters.of(1.25), Degrees.of(1.0)));
+    ChargedAlign.setLogCallback(
+        targetVelo -> Logger.recordOutput("Charged/TargetVelocity", targetVelo.in(MetersPerSecond)),
+        autoConfig -> Logger.recordOutput("Charged/MaxAccel", autoConfig.getMaxAccelerationMetersPerSecondPerSecond()),
+        targetPose -> Logger.recordOutput("Charged/TargetPose", targetPose)
+    );
 
     // Configure SysId
     sysId = new SysIdRoutine(
