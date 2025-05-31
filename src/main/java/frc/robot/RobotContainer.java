@@ -56,6 +56,7 @@ import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kDrive;
 import frc.robot.commands.AutoCommands;
+import frc.robot.commands.AutoGroups;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
 import frc.robot.commands.scoring.IdleCommand;
@@ -273,6 +274,8 @@ public class RobotContainer {
             }
         }
 
+        autoChooser.addOption("L4_TEST", AutoGroups.CLOSE_4_L4(sys_drive));
+
         if (Constants.TUNNING) {
             // Set up SysId routines
             autoChooser.addOption(
@@ -447,13 +450,7 @@ public class RobotContainer {
                         return AlignHelper.getClosestBranch(sys_drive.getBlueSidePose(), kClosestType.DISTANCE, side);
                 },
 
-                () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4 
-                    ? kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_SLOW
-                    : kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_FAST,
-
-                () -> (level == null ? selectedScoringLevel : level) == ScoringLevel.LEVEL4
-                    ? kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_SLOW
-                    : kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST
+                kAutoAlign.L4Config
             ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds())),
             level == null ? 
             getLevelSelectorCommand(true) : 
@@ -811,15 +808,6 @@ public class RobotContainer {
         primaryController.rightBumper()
             .and(() -> isTelopAuto)
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
-
-        primaryController.povLeft()
-            .and(() -> !isTelopAuto)
-            .whileTrue(
-                DriveCommands.alignToPoint(
-                    sys_drive, 
-                    () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
-                ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
-            );
 
         primaryController.povUp()
             .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))

@@ -30,8 +30,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
@@ -40,6 +38,7 @@ import frc.robot.commands.AutoCommands.kReefPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.FieldMirror;
+import frc.robot.util.ChargedAlign.AlignConfig;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -74,7 +73,7 @@ public final class Constants {
     public static final boolean PRINT_AUTO_TIME = false;
 
     /** When this is true the robot will set it's position where the path starts when the auto is selected. */
-    public static final boolean RESET_ODOM_ON_CHANGE = true;
+    public static final boolean RESET_ODOM_ON_CHANGE = false;
 
     public static final PIDConstants TRANSLATION_PID = new PIDConstants(5.0, 0.0, 0.0);
     public static final PIDConstants ROTATION_PID    = new PIDConstants(5.0, 0.0, 0.0);
@@ -83,29 +82,39 @@ public final class Constants {
   public static final class kAutoAlign {
     public static final frc.robot.util.ChargedAlign.PIDConstants ALIGN_PID = new frc.robot.util.ChargedAlign.PIDConstants(4.9, 0.0, 0.28);
 
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_SLOW     = MetersPerSecond         .of(2.00);
-    public static final LinearVelocity     MAX_AUTO_ALIGN_VELOCITY_FAST     = MetersPerSecond         .of(2.75);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_SLOW = MetersPerSecondPerSecond.of(8.00);
-    public static final LinearAcceleration MAX_AUTO_ALIGN_ACCELERATION_FAST = MetersPerSecondPerSecond.of(16.0);
+    public static final AlignConfig L4Config = new AlignConfig(
+        MetersPerSecond.of(4.56),
+        MetersPerSecondPerSecond.of(9.00),
+        Centimeters.of(2.00),
+        Degrees.of(1.25)
+    );
+
+    public static final AlignConfig normalConfig = new AlignConfig(
+        MetersPerSecond.of(4.56),
+        MetersPerSecondPerSecond.of(16.00),
+        Centimeters.of(2.00),
+        Degrees.of(1.25)
+    );
+
+    public static final AlignConfig algaeConfig = new AlignConfig(
+        MetersPerSecond.of(4.56),
+        MetersPerSecondPerSecond.of(16.00),
+        Centimeters.of(4.00),
+        Degrees.of(3.00)
+    );
+
+    public static final AlignConfig autoConfig = new AlignConfig(
+        MetersPerSecond.of(4.56),
+        MetersPerSecondPerSecond.of(20.0),
+        Centimeters.of(2.00),
+        Degrees.of(1.00)
+    );
 
     /* ------------ WHO'S IN THE HOUSE?? ------------- */
-    public static final Distance TRANSLATION_TOLERANCE;
-    public static final Angle    ROTATION_TOLERANCE   ;
-    public static final LinearVelocity VELOCITY_TOLERANCE = MetersPerSecond.of(0.18);
-    public static final LinearVelocity AUTO_VELOCITY_TOLERANCE = MetersPerSecond.of(0.15);
-    static {
-        if (TUNNING) {
-            TRANSLATION_TOLERANCE = Centimeters.of(0.00);
-            ROTATION_TOLERANCE    = Degrees    .of(0.00);
-        } else {
-            TRANSLATION_TOLERANCE = Centimeters.of(2.00);
-            ROTATION_TOLERANCE    = Degrees    .of(1.25);
-        }
-    }
 
     public static final PathConstraints PATH_FIND_CONSTRAINTS = new PathConstraints(
         TunerConstants.kSpeedAt12Volts,
-        MAX_AUTO_ALIGN_ACCELERATION_FAST,
+        MetersPerSecondPerSecond.of(16.0),
         RadiansPerSecond.of(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / Drive.DRIVE_BASE_RADIUS),
         DegreesPerSecondPerSecond.of(720.0)
     );

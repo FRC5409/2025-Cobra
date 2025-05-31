@@ -72,16 +72,15 @@ public class ChargedAlign {
     }
 
     public static Command run(Supplier<Pose2d> targetPose, Subsystem driveSubsystem) {
-        final LinearVelocity end = MetersPerSecond.of(0.0);
-        return run(targetPose, () -> end, driveSubsystem);
+        return run(targetPose, MetersPerSecond.of(0.0), driveSubsystem);
     }
 
-    public static Command run(Supplier<Pose2d> targetPose, Supplier<LinearVelocity> endVelocity, Subsystem driveSubsystem) {
+    public static Command run(Supplier<Pose2d> targetPose, LinearVelocity endVelocity, Subsystem driveSubsystem) {
         return Commands.run(() -> {
             Pose2d robot = robotPose.get();
             Pose2d target = targetPose.get();
             double robotSpeed = getMagnitude(robotSpeeds.get());
-            double Vf = endVelocity.get().in(MetersPerSecond);
+            double Vf = endVelocity.in(MetersPerSecond);
             double d = robot.getTranslation().getDistance(target.getTranslation());
             
             double maxAccel = currentConfig.getMaxAccelerationMetersPerSecondPerSecond();

@@ -205,7 +205,8 @@ public class AutoCommands {
     public static Command alignToBranch(Drive drive, Supplier<kDirection> direction) {
         return DriveCommands.alignToPoint(
             drive, 
-            () -> AlignHelper.getClosestBranch(drive.getBlueSidePose(), kClosestType.DISTANCE, direction.get())
+            () -> AlignHelper.getClosestBranch(drive.getBlueSidePose(), kClosestType.DISTANCE, direction.get()),
+            kAutoAlign.L4Config
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
@@ -217,7 +218,9 @@ public class AutoCommands {
     public static Command alignToAlgae(Drive drive) {
         return DriveCommands.alignToPoint(
             drive,
-            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.385, 0.0, new Rotation2d()))
+            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.385, 0.0, new Rotation2d())),
+            kAutoAlign.algaeConfig,
+            MetersPerSecond.of(0.5)
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
@@ -230,7 +233,9 @@ public class AutoCommands {
     public static Command backOffFromAlgae(Drive drive, Rotation2d rotationOffset) {
         return DriveCommands.alignToPoint(
             drive, 
-            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0, 0, rotationOffset))
+            () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0, 0, rotationOffset)),
+            kAutoAlign.algaeConfig,
+            MetersPerSecond.of(2.0)
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
