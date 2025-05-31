@@ -76,8 +76,11 @@ public class ChargedAlign {
             double robotSpeed = getMagnitude(speeds);
             double Vf = config.getEndVelocityMetersPerSecond();
             double d = robot.getTranslation().getDistance(target.getTranslation());
+
+            d = MathUtil.applyDeadband(d, config.getTranslationToleranceMeters());
             
             double maxAccel = config.getMaxAccelerationMetersPerSecondPerSecond();
+            double maxVelo = config.getMaxVelocityMetersPerSecond();
             
             double dt;
             if (lastTimestamp == null)
@@ -85,30 +88,30 @@ public class ChargedAlign {
             else
                 dt = Timer.getFPGATimestamp() - lastTimestamp;
             
-            double targetVelocity = Math.sqrt(Math.max(0.0, Vf * Vf + 2 * maxAccel * d));
+            double targetVelocity = Math.min(Math.sqrt(Math.max(0.0, Vf * Vf + 2.0 * maxAccel * d)), maxVelo);
             
             double maxDeltaV = maxAccel * dt;
 
             double limitedVelocity = Math.min(robotSpeed + maxDeltaV, targetVelocity);
             
-            double estimatedRobotSpeed = robotSpeed * 2.0 + maxDeltaV; // Mult by 2 for some reason...?
+            double estimatedRobotSpeed = Math.min(robotSpeed + maxDeltaV, maxVelo) * 2.0;
 
-            double stoppingDistance = (estimatedRobotSpeed * estimatedRobotSpeed - Vf * Vf) / (2 * maxAccel);
-
-            Logger.recordOutput("C/Stopping", stoppingDistance);
-            Logger.recordOutput("C/Distnce", d);
+            double stoppingDistance = (estimatedRobotSpeed * estimatedRobotSpeed - Vf * Vf) / (2.0 * maxAccel);
 
             if (d <= stoppingDistance) {
                 double percentToTarget = 1.0 - (d / stoppingDistance);
+                Logger.recordOutput("C/Percent", percentToTarget);
                 percentToTarget = MathUtil.clamp(percentToTarget, 0.0, 1.0);
             
-                double adjustedAccel = MathUtil.clamp(maxAccel * percentToTarget, 0.5 * maxAccel, maxAccel);
+                double adjustedAccel = MathUtil.clamp(maxAccel * 2.0 * percentToTarget, 0.20 * maxAccel, maxAccel * 2.0);
                 double deltaV = adjustedAccel * dt;
             
-                limitedVelocity = Math.max(robotSpeed - deltaV, Vf);
+                if (robotSpeed >= Vf)
+                    limitedVelocity = Math.max(robotSpeed - deltaV, Vf);
             }
             
-            
+            Logger.recordOutput("C/Stopping", stoppingDistance);
+            Logger.recordOutput("C/Distnce", d);
             Logger.recordOutput("C/SlowingDown", d <= stoppingDistance);
             
             Rotation2d theta = Rotation2d.fromRadians(Math.atan2(
@@ -121,7 +124,7 @@ public class ChargedAlign {
 
             double currentOmega = speeds.omegaRadiansPerSecond;
             double eTheta = rotationDifference(robot.getRotation(), target.getRotation()).in(Radians);
-            double omegaF = 0.0; // End angular velo 0
+            double omegaF = 0.0; // End angular velo 0 - maybe a future command
 
             double angularTargetVelocity = Math.sqrt(Math.max(0.0, omegaF * omegaF + 2 * maxAngularAccel * Math.abs(eTheta)));
             double maxAngularDeltaV = maxAngularAccel * dt;
@@ -164,11 +167,13 @@ public class ChargedAlign {
             targetVelocityConsumer.accept(MetersPerSecond.of(limitedVelocity));
             currentConfigConsumer.accept(config);
             targetConsumer.accept(target);
+
+            boolean ends = d <= config.getTranslationToleranceMeters()
+                && Math.abs(rotationDifference(robot.getRotation(), target.getRotation()).in(Radians)) <= config.getRotationTolerance().in(Radians);
             
             lastTimestamp = Timer.getFPGATimestamp();
 
-            return robot.getTranslation().getDistance(target.getTranslation()) <= config.getTranslationToleranceMeters()
-                   && rotationDifference(robot.getRotation(), target.getRotation()).lte(config.getRotationTolerance());
+            return ends;
         }, driveSubsystem)
         .finallyDo(() -> lastTimestamp = null);
     }

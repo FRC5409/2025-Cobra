@@ -87,28 +87,31 @@ public final class Constants {
         MetersPerSecondPerSecond.of(9.00),
         Centimeters.of(2.00),
         Degrees.of(1.25)
-    );
+    ).withName("L4");
 
     public static final AlignConfig normalConfig = new AlignConfig(
         MetersPerSecond.of(4.56),
         MetersPerSecondPerSecond.of(16.00),
         Centimeters.of(2.00),
         Degrees.of(1.25)
-    );
+    ).withName("Normal");
 
     public static final AlignConfig algaeConfig = new AlignConfig(
         MetersPerSecond.of(4.56),
         MetersPerSecondPerSecond.of(16.00),
         Centimeters.of(4.00),
         Degrees.of(3.00)
-    );
+    ).withName("Algae");
 
     public static final AlignConfig autoConfig = new AlignConfig(
         MetersPerSecond.of(4.56),
-        MetersPerSecondPerSecond.of(20.0),
-        Centimeters.of(2.00),
-        Degrees.of(1.00)
-    );
+        MetersPerSecondPerSecond.of(25.0),
+        Centimeters.of(2.50),
+        Degrees.of(1.50),
+        DegreesPerSecond.of(1080.0),
+        DegreesPerSecondPerSecond.of(960.0),
+        MetersPerSecond.of(0.0)
+    ).withName("Auto");
 
     /* ------------ WHO'S IN THE HOUSE?? ------------- */
 

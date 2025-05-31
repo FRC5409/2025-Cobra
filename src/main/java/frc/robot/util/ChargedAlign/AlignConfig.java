@@ -111,6 +111,6 @@ public class AlignConfig {
     }
 
     public AlignConfig copy() {
-        return new AlignConfig(endVelocity, maxAccel, translationTolerance, rotationTolerance, maxAngularVelo, maxAngularAccel, endVelocity);
+        return new AlignConfig(maxVelo, maxAccel, translationTolerance, rotationTolerance, maxAngularVelo, maxAngularAccel, endVelocity).withName(name);
     }
 }

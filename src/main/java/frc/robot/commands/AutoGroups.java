@@ -19,6 +19,7 @@ public class AutoGroups {
     public static Command CLOSE_4_L4(Drive drive) {
         return Commands.sequence(
             DriveCommands.alignToPoint(drive, () -> kReef.BRANCHES.get("FAR_RIGHT.L"), kAutoAlign.autoConfig),
+            Commands.waitSeconds(0.5),
             DriveCommands.alignToPoint(drive, () -> new Pose2d(4.04, 2.36, Rotation2d.fromDegrees(120.0)),
                 new AlignConfig(
                     MetersPerSecond.of(4.56),
@@ -28,11 +29,16 @@ public class AutoGroups {
                     MetersPerSecond.of(4.56)
                 )
             ),
-            DriveCommands.alignToPoint(drive, () -> new Pose2d(1.68, 0.90, Rotation2d.fromDegrees(54.60)), kAutoAlign.autoConfig),
+            DriveCommands.alignToPoint(drive, () -> new Pose2d(1.638, 0.749, Rotation2d.fromDegrees(54)), kAutoAlign.autoConfig),
+            Commands.waitSeconds(0.5),
             DriveCommands.alignToPoint(drive, () -> kReef.BRANCHES.get("CLOSE_RIGHT.R"), kAutoAlign.autoConfig),
-            DriveCommands.alignToPoint(drive, () -> new Pose2d(1.68, 0.90, Rotation2d.fromDegrees(54.60)), kAutoAlign.autoConfig),
+            Commands.waitSeconds(0.5),
+            DriveCommands.alignToPoint(drive, () -> new Pose2d(1.638, 0.749, Rotation2d.fromDegrees(54)), kAutoAlign.autoConfig),
+            Commands.waitSeconds(0.5),
             DriveCommands.alignToPoint(drive, () -> kReef.BRANCHES.get("CLOSE_RIGHT.L"), kAutoAlign.autoConfig),
-            DriveCommands.alignToPoint(drive, () -> new Pose2d(1.68, 0.90, Rotation2d.fromDegrees(54.60)), kAutoAlign.autoConfig),
+            Commands.waitSeconds(0.5),
+            DriveCommands.alignToPoint(drive, () -> new Pose2d(1.638, 0.749, Rotation2d.fromDegrees(54)), kAutoAlign.autoConfig),
+            Commands.waitSeconds(0.5),
             DriveCommands.alignToPoint(drive, () -> kReef.BRANCHES.get("CLOSE.R"), kAutoAlign.autoConfig),
             AutoTimer.end(false)
         );

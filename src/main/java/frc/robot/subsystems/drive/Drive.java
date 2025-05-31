@@ -179,7 +179,7 @@ public class Drive extends SubsystemBase {
     ChargedAlign.setConfig(new AlignConfig(MetersPerSecond.of(4.56), MetersPerSecondPerSecond.of(16.0), Centimeters.of(1.25), Degrees.of(1.0)));
     ChargedAlign.setLogCallback(
         targetVelo -> Logger.recordOutput("Charged/TargetVelocity", targetVelo.in(MetersPerSecond)),
-        autoConfig -> Logger.recordOutput("Charged/MaxAccel", autoConfig.getMaxAccelerationMetersPerSecondPerSecond()),
+        autoConfig -> Logger.recordOutput("Charged/Name", autoConfig.getName()),
         targetPose -> Logger.recordOutput("Charged/TargetPose", targetPose)
     );
 
