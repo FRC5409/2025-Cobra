@@ -219,8 +219,7 @@ public class AutoCommands {
         return DriveCommands.alignToPoint(
             drive,
             () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0.385, 0.0, new Rotation2d())),
-            kAutoAlign.algaeConfig,
-            MetersPerSecond.of(0.5)
+            kAutoAlign.algaeConfig
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 
@@ -234,8 +233,7 @@ public class AutoCommands {
         return DriveCommands.alignToPoint(
             drive, 
             () -> AlignHelper.getClosestReef(drive.getBlueSidePose()).transformBy(new Transform2d(0, 0, rotationOffset)),
-            kAutoAlign.algaeConfig,
-            MetersPerSecond.of(2.0)
+            kAutoAlign.algaeConfig
         ).beforeStarting(() -> AlignHelper.reset(new ChassisSpeeds()));
     }
 

@@ -24,7 +24,9 @@ public class AlignConfig {
     private final Optional<AngularVelocity> maxAngularVelo;
     private final Optional<AngularAcceleration> maxAngularAccel;
 
-    public AlignConfig(LinearVelocity maxVelocity, LinearAcceleration maxAcceleration, Distance translationTolerance, Angle rotationTolerance, AngularVelocity maxAngularVelocity, AngularAcceleration maxAngularAcceleration) {
+    private final LinearVelocity endVelocity;
+
+    public AlignConfig(LinearVelocity maxVelocity, LinearAcceleration maxAcceleration, Distance translationTolerance, Angle rotationTolerance, AngularVelocity maxAngularVelocity, AngularAcceleration maxAngularAcceleration, LinearVelocity endVelocity) {
         this.maxVelo  = requireNonNullParam(maxVelocity, "maxVelocity", "AlignConfig");
         this.maxAccel = requireNonNullParam(maxAcceleration, "maxAcceleration", "AlignConfig");
 
@@ -34,11 +36,17 @@ public class AlignConfig {
         this.maxAngularVelo  = Optional.ofNullable(maxAngularVelocity);
         this.maxAngularAccel = Optional.ofNullable(maxAngularAcceleration);
 
+        this.endVelocity = endVelocity;
+
         name = "AlignConfig#" + hashCode();
     }
 
+    public AlignConfig(LinearVelocity maxVelocity, LinearAcceleration maxAcceleration, Distance translationTolerance, Angle rotationTolerance, LinearVelocity endVelocity) {
+        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, null, null, endVelocity);
+    }
+
     public AlignConfig(LinearVelocity maxVelocity, LinearAcceleration maxAcceleration, Distance translationTolerance, Angle rotationTolerance) {
-        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, null, null);
+        this(maxVelocity, maxAcceleration, translationTolerance, rotationTolerance, null, null, MetersPerSecond.of(0.0));
     }
 
     public AlignConfig() {
@@ -69,6 +77,10 @@ public class AlignConfig {
         return maxAngularAccel;
     }
 
+    public LinearVelocity getEndVelocity() {
+        return endVelocity;
+    }
+
     public double getMaxVelocityMetersPerSecond() {
         return maxVelo.in(MetersPerSecond);
     }
@@ -85,6 +97,10 @@ public class AlignConfig {
         return rotationTolerance.in(Radians);
     }
 
+    public double getEndVelocityMetersPerSecond() {
+        return endVelocity.in(MetersPerSecond);
+    }
+
     public AlignConfig withName(String name) {
         this.name = name;
 
@@ -93,5 +109,9 @@ public class AlignConfig {
 
     public String getName() {
         return name;
+    }
+
+    public AlignConfig copy() {
+        return new AlignConfig(endVelocity, maxAccel, translationTolerance, rotationTolerance, maxAngularVelo.get(), maxAngularAccel.get(), endVelocity);
     }
 }

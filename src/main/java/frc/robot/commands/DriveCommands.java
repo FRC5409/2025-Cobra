@@ -24,7 +24,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -193,38 +192,21 @@ public class DriveCommands {
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
-  /**
+    /**
      * Aligns to a specifc point on the field
      * @param drive The drive subsystem
-     * @param target the target position
+     * @param target the blue target position
      * @param config The auto align config to use
      * @return A command that will automatically align to a point on the field
      */
     public static Command alignToPoint(Drive drive, Supplier<Pose2d> target, AlignConfig config) {
         return Commands.sequence(
             ChargedAlign.run(() -> {
-                
-                if (AutoBuilder.shouldFlip())
+                if (AutoBuilder.shouldFlip()) 
                     return FlippingUtil.flipFieldPose(target.get());
-                    
+
                 return target.get();
             }, drive),
-            Commands.runOnce(() -> {
-                drive.stop();
-                aligned = true;
-            }, drive)
-        ).beforeStarting(() -> ChargedAlign.setConfig(config));
-    }
-    /**
-     * Aligns to a specifc point on the field
-     * @param drive The drive subsystem
-     * @param target the target position
-     * @param config The auto align config to use
-     * @return A command that will automatically align to a point on the field
-     */
-    public static Command alignToPoint(Drive drive, Supplier<Pose2d> target, AlignConfig config, LinearVelocity endVelo) {
-        return Commands.sequence(
-            ChargedAlign.run(target, endVelo, drive),
             Commands.runOnce(() -> {
                 drive.stop();
                 aligned = true;

@@ -11,7 +11,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class ChargedAlign {
@@ -25,6 +24,10 @@ public class ChargedAlign {
 
     private static AlignConfig currentConfig;
     private static ProfiledController headingController;
+
+    private static Consumer<LinearVelocity> targetVelocityConsumer = velo   -> {};
+    private static Consumer<AlignConfig>    currentConfigConsumer  = config -> {};
+    private static Consumer<Pose2d>         targetConsumer         = target -> {};
 
     private ChargedAlign() {}
 
@@ -45,6 +48,12 @@ public class ChargedAlign {
             config.getMaxAngularVelocity().orElse(DegreesPerSecond.of(360000)).in(RadiansPerSecond),
             config.getMaxAngularAcceleration().orElse(DegreesPerSecondPerSecond.of(360000)).in(RadiansPerSecondPerSecond)
         );
+    }
+
+    public void logCurrentState(Consumer<LinearVelocity> targetVelocity, Consumer<AlignConfig> currentConfig, Consumer<Pose2d> target) {
+        targetVelocityConsumer = targetVelocity;
+        currentConfigConsumer = currentConfig;
+        targetConsumer = target;
     }
 
     private static double getMagnitude(ChassisSpeeds speeds) {
@@ -72,18 +81,16 @@ public class ChargedAlign {
     }
 
     public static Command run(Supplier<Pose2d> targetPose, Subsystem driveSubsystem) {
-        return run(targetPose, MetersPerSecond.of(0.0), driveSubsystem);
-    }
+        return new RunUntilCommand(() -> {
+            AlignConfig config = currentConfig.copy();
 
-    public static Command run(Supplier<Pose2d> targetPose, LinearVelocity endVelocity, Subsystem driveSubsystem) {
-        return Commands.run(() -> {
             Pose2d robot = robotPose.get();
             Pose2d target = targetPose.get();
             double robotSpeed = getMagnitude(robotSpeeds.get());
-            double Vf = endVelocity.in(MetersPerSecond);
+            double Vf = config.getEndVelocityMetersPerSecond();
             double d = robot.getTranslation().getDistance(target.getTranslation());
             
-            double maxAccel = currentConfig.getMaxAccelerationMetersPerSecondPerSecond();
+            double maxAccel = config.getMaxAccelerationMetersPerSecondPerSecond();
             
             double dt;
             if (lastTimestamp == null)
@@ -118,16 +125,16 @@ public class ChargedAlign {
                     robot.getRotation()
                 )
             );
+
+            targetVelocityConsumer.accept(MetersPerSecond.of(limitedVelocity));
+            currentConfigConsumer.accept(config);
+            targetConsumer.accept(target);
             
             lastTimestamp = Timer.getFPGATimestamp();
-        }, driveSubsystem)
-        .until(() -> {
-            Pose2d robot = robotPose.get();
-            Pose2d target = targetPose.get();
 
-            return robot.getTranslation().getDistance(target.getTranslation()) <= currentConfig.getTranslationToleranceMeters()
-                   && rotationDifference(robot.getRotation(), target.getRotation()).lte(currentConfig.getRotationTolerance());
-        })
+            return robot.getTranslation().getDistance(target.getTranslation()) <= config.getTranslationToleranceMeters()
+                   && rotationDifference(robot.getRotation(), target.getRotation()).lte(config.getRotationTolerance());
+        }, driveSubsystem)
         .beforeStarting(() -> headingController.reset(robotSpeeds.get().omegaRadiansPerSecond))
         .finallyDo(() -> lastTimestamp = null);
     }
