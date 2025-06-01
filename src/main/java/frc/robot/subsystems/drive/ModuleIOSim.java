@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController.GenericMotorController;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,8 +32,8 @@ import frc.robot.generated.TunerConstants;
  */
 public class ModuleIOSim implements ModuleIO {
   // TunerConstants doesn't support separate sim constants, so they are declared locally
-  private static final double DRIVE_KP = 0.05;
-  private static final double DRIVE_KD = 0.0;
+  private static final LoggedNetworkNumber DRIVE_KP = new LoggedNetworkNumber("Tune/DriveKp", 0.5);
+  private static final LoggedNetworkNumber DRIVE_KD = new LoggedNetworkNumber("Tune/DriveKd", 0.0);
   
   private static final double TURN_KP = 8.0;
   private static final double TURN_KD = 0.0;
@@ -42,7 +43,7 @@ public class ModuleIOSim implements ModuleIO {
 
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
-    private PIDController driveController = new PIDController(DRIVE_KP, 0, DRIVE_KD);
+    private PIDController driveController = new PIDController(DRIVE_KP.get(), 0, DRIVE_KD.get());
     private PIDController turnController = new PIDController(TURN_KP, 0, TURN_KD);
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
@@ -92,6 +93,9 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     public void runControlLoops(double delta) {
+        driveController.setP(DRIVE_KP.get());
+        driveController.setD(DRIVE_KD.get());
+
         // Run control loops if activated
         if (driveClosedLoop) calculateDriveControlLoops();
         else driveController.reset();

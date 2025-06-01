@@ -259,7 +259,8 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
         AutoGroup.addOptions(autoChooser, 
-            AutoGroups.CLOSE_4_L4(sys_drive)
+            AutoGroups.CLOSE_4_L4(sys_drive),
+            AutoGroups.TEST_ALIGN(sys_drive)
         );
         
         runTelop = DebugCommand.putNumber("Run Telop Auto", false)::get;

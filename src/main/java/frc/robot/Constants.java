@@ -105,7 +105,7 @@ public final class Constants {
 
     public static final AlignConfig autoConfig = new AlignConfig(
         MetersPerSecond.of(4.56),
-        MetersPerSecondPerSecond.of(25.0),
+        MetersPerSecondPerSecond.of(12.0),
         Centimeters.of(2.50),
         Degrees.of(1.50),
         DegreesPerSecond.of(1080.0),

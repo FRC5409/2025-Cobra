@@ -106,13 +106,14 @@ public class ChargedAlign {
                 Logger.recordOutput("C/Percent", percentToTarget);
                 percentToTarget = MathUtil.clamp(percentToTarget, 0.0, 1.0);
             
-                double adjustedAccel = MathUtil.clamp(maxAccel * 2.0 * percentToTarget, 0.20 * maxAccel, maxAccel * 2.0);
+                double adjustedAccel = MathUtil.clamp(maxAccel * 1.1 * percentToTarget, 0.20 * maxAccel, maxAccel * 1.1);
                 double deltaV = adjustedAccel * dt;
             
                 if (robotSpeed >= Vf)
                     limitedVelocity = Math.max(robotSpeed - deltaV, Vf);
             }
             
+            Logger.recordOutput("C/RobotSpeed", robotSpeed);
             Logger.recordOutput("C/Stopping", stoppingDistance);
             Logger.recordOutput("C/Distnce", d);
             Logger.recordOutput("C/SlowingDown", d <= stoppingDistance);

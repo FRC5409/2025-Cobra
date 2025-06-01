@@ -41,4 +41,10 @@ public class AutoGroups {
             DriveCommands.alignToPoint(drive, () -> kReef.BRANCHES.get("CLOSE.R"), kAutoAlign.autoConfig)
         );
     }
+
+    public static AutoGroup TEST_ALIGN(Drive drive) {
+        return new AutoGroup("TEST", new Pose2d( 7.06, 2.92, Rotation2d.fromDegrees(180))).withCommands(
+            DriveCommands.alignToPoint(drive, () -> new Pose2d(3.81, 1.28, Rotation2d.fromDegrees(90)), kAutoAlign.autoConfig)
+        );
+    }
 }
