@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.*;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -63,9 +64,13 @@ import frc.robot.util.AlignHelper;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.ChargedAlign.AlignConfig;
+import frc.robot.util.ChargedAlign.AutoGroup;
 import frc.robot.util.ChargedAlign.ChargedAlign;
 
 public class Drive extends SubsystemBase {
+
+    public SwerveDriveSimulation robotSim;
+
     // TunerConstants doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
         ? 250.0
@@ -174,7 +179,8 @@ public class Drive extends SubsystemBase {
     ChargedAlign.configure(
         this::getPose,
         this::getChassisSpeeds,
-        this::runVelocity
+        this::runVelocity,
+        this::setPose
     );
     ChargedAlign.setConfig(new AlignConfig(MetersPerSecond.of(4.56), MetersPerSecondPerSecond.of(16.0), Centimeters.of(1.25), Degrees.of(1.0)));
     ChargedAlign.setLogCallback(
@@ -182,6 +188,10 @@ public class Drive extends SubsystemBase {
         autoConfig -> Logger.recordOutput("Charged/Name", autoConfig.getName()),
         targetPose -> Logger.recordOutput("Charged/TargetPose", targetPose)
     );
+    AutoGroup.setAutoTImeCallback((interupted, time) -> {
+        Logger.recordOutput("Auto/Auto Time", time.in(Seconds));
+        Logger.recordOutput("Auto/Auto Interupted", interupted);
+    });
 
     // Configure SysId
     sysId = new SysIdRoutine(
@@ -470,6 +480,9 @@ public class Drive extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    if (Constants.currentMode == Mode.SIM)
+        robotSim.setSimulationWorldPose(pose);
+        
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     vision.setRotation(pose.getRotation());
   }

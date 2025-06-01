@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class ChargedAlign {
 
-    private static final double timeLoop = 0.02;
+    private static final double deltaT = 0.02;
     private static Double lastTimestamp;
 
     private static Supplier<Pose2d> robotPose;
@@ -26,18 +26,21 @@ public class ChargedAlign {
 
     private static AlignConfig currentConfig;
 
+    protected static Consumer<Pose2d> poseResetter;
+
     private static Consumer<LinearVelocity> targetVelocityConsumer = velo   -> {};
     private static Consumer<AlignConfig>    currentConfigConsumer  = config -> {};
     private static Consumer<Pose2d>         targetConsumer         = target -> {};
 
     private ChargedAlign() {}
 
-    public static void configure(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotRelativeSpeeds, Consumer<ChassisSpeeds> fieldRelativeControl) {
+    public static void configure(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotRelativeSpeeds, Consumer<ChassisSpeeds> fieldRelativeControl, Consumer<Pose2d> poseReset) {
         if (ChargedAlign.robotPose != null) throw new IllegalAccessError("Charged Align was already configured!");
 
         ChargedAlign.robotPose = robotPose;
         ChargedAlign.robotSpeeds = robotRelativeSpeeds;
         ChargedAlign.velocityConsumer = fieldRelativeControl;
+        ChargedAlign.poseResetter = poseReset;
 
         setConfig(new AlignConfig());
     }
@@ -84,7 +87,7 @@ public class ChargedAlign {
             
             double dt;
             if (lastTimestamp == null)
-                dt = timeLoop;
+                dt = deltaT;
             else
                 dt = Timer.getFPGATimestamp() - lastTimestamp;
             

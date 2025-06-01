@@ -17,8 +17,6 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,8 +48,6 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private double matchTime = -1;
-
-  private final Alert autoStartingConfigAlert = new Alert("Auto Pose Mismatch!", AlertType.kWarning);
 
   public Robot() {
     // Record metadata
@@ -176,9 +172,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {
-    autoStartingConfigAlert.set(robotContainer.getStartingPose().getTranslation().getDistance(robotContainer.sys_drive.getPose().getTranslation()) > 0.25);
-  }
+  public void disabledPeriodic() {}
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -192,7 +186,6 @@ public class Robot extends LoggedRobot {
     autoCommand.schedule();
 
     RobotContainer.isTelopAuto = robotContainer.runTelop.getAsBoolean();
-    autoStartingConfigAlert.set(false);
 
     if (Constants.currentMode == Mode.SIM)
         SimulatedArena.getInstance().resetFieldForAuto();
@@ -220,8 +213,6 @@ public class Robot extends LoggedRobot {
 
     if (robotContainer.runTelop.getAsBoolean())
         robotContainer.telopAutoCommand.schedule();
-
-    autoStartingConfigAlert.set(false);
 
     robotContainer.sys_drive.brakeMode();
     robotContainer.sys_endEffector.brake();

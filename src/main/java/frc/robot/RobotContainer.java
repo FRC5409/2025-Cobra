@@ -15,21 +15,14 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.io.IOException;
 import java.util.function.BooleanSupplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.json.simple.parser.ParseException;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -46,7 +39,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.Mode;
@@ -95,6 +87,7 @@ import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
+import frc.robot.util.ChargedAlign.AutoGroup;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -135,7 +128,7 @@ public class RobotContainer {
         && Constants.currentMode == Mode.SIM;
 
     // Dashboard inputs
-    protected final LoggedDashboardChooser<Command> autoChooser;
+    protected final LoggedDashboardChooser<AutoGroup> autoChooser;
     protected final BooleanSupplier runTelop;
 
     // Alerts
@@ -220,6 +213,8 @@ public class RobotContainer {
                         new ModuleIOSim(simConfig.getModules()[3]),
                         sys_vision);
 
+                sys_drive.robotSim = simConfig;
+
                 if (runOpponent) {
                     final OpponentRobot sys_opponent = 
                         new OpponentRobot(new Pose2d(3, 3, Rotation2d.fromDegrees(0.0)));
@@ -262,50 +257,12 @@ public class RobotContainer {
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-        autoChooser.addDefaultOption("None", Commands.none());
 
-        for (String auto : AutoBuilder.getAllAutoNames()) {
-            if (auto.endsWith("[M]")) {
-                String autoName = auto.replace("[M]", "");
-                autoChooser.addOption("{L} - " + autoName, new PathPlannerAuto(auto, false));
-                autoChooser.addOption("{R} - " + autoName, new PathPlannerAuto(auto, true ));
-            } else {
-                autoChooser.addOption(auto, new PathPlannerAuto(auto));
-            }
-        }
-
-        autoChooser.addOption("L4_TEST", AutoGroups.CLOSE_4_L4(sys_drive));
-
-        if (Constants.TUNNING) {
-            // Set up SysId routines
-            autoChooser.addOption(
-                    "Drive Wheel Radius Characterization",
-                    DriveCommands.wheelRadiusCharacterization(sys_drive));
-            autoChooser.addOption(
-                    "Drive Simple FF Characterization",
-                    DriveCommands.feedforwardCharacterization(sys_drive));
-            autoChooser.addOption(
-                    "Drive SysId (Quasistatic Forward)",
-                    sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-            autoChooser.addOption(
-                    "Drive SysId (Quasistatic Reverse)",
-                    sys_drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-            autoChooser.addOption(
-                    "Drive SysId (Dynamic Forward)",
-                    sys_drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-            autoChooser.addOption(
-                    "Drive SysId (Dynamic Reverse)",
-                    sys_drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        }
-
+        AutoGroup.addOptions(autoChooser, 
+            AutoGroups.CLOSE_4_L4(sys_drive)
+        );
+        
         runTelop = DebugCommand.putNumber("Run Telop Auto", false)::get;
-
-        if (kAuto.RESET_ODOM_ON_CHANGE)
-            autoChooser
-                .getSendableChooser()
-                .onChange(path -> resetPose());
-
-        DebugCommand.register("Reset", Commands.runOnce(this::resetPose));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -329,8 +286,6 @@ public class RobotContainer {
                 Commands.runOnce(() -> {
                     primaryDisconnectedAlert.set(!primaryController.isConnected());
                     secondaryDisconnectedAlert.set(!secondaryController.isConnected());
-
-                    resetPose();
                 }).ignoringDisable(true)
             )
         );
@@ -374,17 +329,6 @@ public class RobotContainer {
                 "Simulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "Simulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-    }
-
-    /**
-     * Resets the pose of our robot to the starting pose of auto
-     */
-    private void resetPose() {
-        Pose2d startingPose = getStartingPose();
-        if (Constants.currentMode == Mode.SIM)
-            simConfig.setSimulationWorldPose(startingPose);
-
-        sys_drive.setPose(startingPose);
     }
 
     /**
@@ -456,36 +400,6 @@ public class RobotContainer {
             getLevelSelectorCommand(true) : 
             new ScoreCommand(sys_elevator, sys_armPivot, sys_endEffector, level, DriveCommands::isAligned)
         );
-    }
-
-    /**
-     * @return Pose2d of the starting pose of the robot
-     */
-    @AutoLogOutput(key = "Odometry/StartingPose")
-    public Pose2d getStartingPose() {
-        String autoName = autoChooser.getSendableChooser().getSelected();
-
-        boolean mirror = false;
-        if ((mirror = autoName.startsWith("{R}")) || autoName.startsWith("{L}")) {
-            autoName = autoName.substring(6) + "[M]";
-        }
-
-        if (autoName.equals("None"))
-            return new Pose2d();
-
-        try {
-            PathPlannerPath path = PathPlannerAuto.getPathGroupFromAutoFile(autoName)
-                    .get(0);
-    
-            if (mirror)
-                path = path.mirrorPath();
-                    
-            Pose2d pose = path.getStartingHolonomicPose().get();
-
-            return AutoBuilder.shouldFlip() ? FlippingUtil.flipFieldPose(pose) : pose;
-        } catch (IOException | ParseException | IndexOutOfBoundsException e) {
-            return new Pose2d();
-        }
     }
 
     /**
@@ -852,14 +766,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return AutoTimer.start()
-            .alongWith(autoChooser.get())
-            .andThen(
-                Commands.either(
-                    AutoCommands.telopAutoCommand(sys_drive, sys_elevator, sys_armPivot, sys_endEffector, getLevelSelectorCommand(true), () -> removeAlgae, () -> false), 
-                    Commands.none(),
-                    runTelop // If should run telop auto
-                )
-            );
+        return autoChooser.get().build();
     }
 }
