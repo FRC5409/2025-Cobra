@@ -13,10 +13,14 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -25,11 +29,13 @@ import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -43,35 +49,35 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kDrive;
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.commands.AutoCommands;
-import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.arm.ArmPivot;
-import frc.robot.subsystems.arm.ArmPivotIO;
-import frc.robot.subsystems.arm.ArmPivotIOSim;
-import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
-import frc.robot.Constants.kElevator;
-import frc.robot.Constants.kEndEffector;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.collector.EndEffector;
 import frc.robot.subsystems.collector.EndEffectorIO;
 import frc.robot.subsystems.collector.EndEffectorIOSim;
@@ -88,12 +94,12 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.AlignHelper.kClosestType;
+import frc.robot.util.AlignHelper.kDirection;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
-import frc.robot.util.AlignHelper.kClosestType;
-import frc.robot.util.AlignHelper.kDirection;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -743,6 +749,22 @@ public class RobotContainer {
                     .ignoringDisable(true)
             );
 
+        primaryController.x()
+            .whileTrue(
+                new ConditionalCommand(
+                    Commands.sequence(
+                        Commands.runOnce(sys_drive::stop, sys_drive),
+                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.4))
+                            .alongWith(Commands.waitSeconds(1.0)),
+                        AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
+                    ),
+                    AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot),
+                    sys_endEffector::coralDetected
+                ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+                .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+            )
+            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
         // Idle button
         primaryController.b()
             .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
@@ -805,18 +827,18 @@ public class RobotContainer {
 
         // secondaryController.a()
         //     .onTrue(prepLevelCommand(ScoringLevel.LEVEL1));
-        primaryController.povDown()
+        secondaryController.b()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL2));
-        primaryController.povLeft()
+        secondaryController.x()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL3));
-        primaryController.povUp()
+        secondaryController.y()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
 
-        secondaryController.leftBumper()
-            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
+        // secondaryController.leftBumper()
+        //     .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
 
-        secondaryController.rightBumper()
-            .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
+        // secondaryController.rightBumper()
+        //     .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
         secondaryController.start()
             .onTrue(Commands.runOnce(() -> removeAlgae = true).ignoringDisable(true))
