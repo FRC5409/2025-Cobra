@@ -70,6 +70,7 @@ import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -101,6 +102,7 @@ import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
 
+
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a
@@ -118,6 +120,7 @@ public class RobotContainer {
     protected final Elevator    sys_elevator;
     protected final EndEffector sys_endEffector;
     protected final ArmPivot    sys_armPivot;
+    protected final LED         sys_led;
 
     public static SwerveDriveSimulation simConfig;
 
@@ -187,6 +190,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(kArmPivot.FALCON_ID, kArmPivot.CANCODER_ID));
                 sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
                 sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
+                sys_led = new LED();
             }
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
@@ -231,6 +235,7 @@ public class RobotContainer {
                         new OpponentRobot(new Pose2d(3, 3, Rotation2d.fromDegrees(0.0)));
                     sys_opponent.setDefaultCommand(sys_opponent.joystickDrive(secondaryController));
                 }
+                sys_led = new LED();
             }
             default -> {
                 // Replayed robot, disable IO implementations
@@ -246,6 +251,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIO() {});
                 sys_elevator = new Elevator(new ElevatorIO(){});
                 sys_endEffector = new EndEffector(new EndEffectorIO() {});
+                sys_led = new LED();
             }
         }
 
@@ -749,6 +755,14 @@ public class RobotContainer {
                     .ignoringDisable(true)
             );
 
+        primaryController.povUp()
+            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
+            .onFalse(sys_endEffector.setVoltage(0.0, false));
+
+        primaryController.povDown()
+            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
+            .onFalse(sys_endEffector.setVoltage(0.0, false));
+
         primaryController.x()
             .whileTrue(
                 new ConditionalCommand(
@@ -768,6 +782,22 @@ public class RobotContainer {
         // Idle button
         primaryController.b()
             .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+
+        primaryController.a()
+            .onTrue(
+                getLevelSelectorCommand(false)
+            )
+            .onFalse(
+                Commands.either(
+                    sys_endEffector.runUntilCoralNotDetected(() -> selectedScoringLevel.voltage),
+                    sys_endEffector.setVoltage(() -> selectedScoringLevel.voltage).withTimeout(1.0),
+                    sys_endEffector::coralDetected
+                )
+                .andThen(
+                    Commands.waitUntil(Drive::isSafe),
+                    new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector)
+                )
+            );
 
         // Align left branch
         primaryController
