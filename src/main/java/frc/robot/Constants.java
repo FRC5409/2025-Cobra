@@ -284,4 +284,8 @@ public final class Constants {
                                                                         new Translation3d(0.1324, -0.2169, 0.3804),
                                                                         new Rotation3d(   0,  0,   Units.degreesToRadians(-20)));
   }
+  public static class kLED {
+    public static final int LEDCanId = 19;
+    public static final int numOfLED = 121;
+  }
 }
