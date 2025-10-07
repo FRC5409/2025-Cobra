@@ -87,6 +87,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.subsystems.LED;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.CaseCommand;
@@ -112,6 +113,7 @@ public class RobotContainer {
     protected final Elevator    sys_elevator;
     protected final EndEffector sys_endEffector;
     protected final ArmPivot    sys_armPivot;
+    protected final LED         sys_led;
 
     public static SwerveDriveSimulation simConfig;
 
@@ -180,6 +182,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(kArmPivot.FALCON_ID, kArmPivot.CANCODER_ID));
                 sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
                 sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
+                sys_led = new LED();
             }
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
@@ -200,6 +203,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIOSim());
                 sys_elevator = new Elevator(new ElevatorIOSim());
                 sys_endEffector = new EndEffector(new EndEffectorIOSim());
+                sys_led = new LED();
                 
                 simConfig = new SwerveDriveSimulation(
                     driveConfig,
@@ -239,6 +243,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIO() {});
                 sys_elevator = new Elevator(new ElevatorIO(){});
                 sys_endEffector = new EndEffector(new EndEffectorIO() {});
+                sys_led = new LED();
             }
         }
 
