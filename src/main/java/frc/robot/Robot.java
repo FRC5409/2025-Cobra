@@ -168,6 +168,7 @@ public class Robot extends LoggedRobot {
 
     StructHelper.update();
     robotContainer.updateScoringPosition();
+    SmartDashboard.putBoolean("Aahan Controls", robotContainer.aahanControls);
   }
 
   /** This function is called once when the robot is disabled. */

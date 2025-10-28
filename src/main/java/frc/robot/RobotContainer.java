@@ -42,8 +42,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -135,7 +133,7 @@ public class RobotContainer {
     private final CommandXboxController primaryController   = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
 
-    private boolean aahanControls = false;
+    public boolean aahanControls = false;
 
     /** If the robot is/should be running fully autonomously */
     public static boolean isTelopAuto = false;
@@ -276,7 +274,7 @@ public class RobotContainer {
         ).onlyWhile(() -> isTelopAuto);
 
         // Aaahan Controls
-       SmartDashboard.putBoolean("Aahan Controls", aahanControls);
+        SmartDashboard.putData("Aahan Controls Set", Commands.runOnce(() -> aahanControls = !aahanControls).ignoringDisable(true));
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -724,7 +722,7 @@ public class RobotContainer {
         //         );
 
         // Manual scoring if Vision doesn't work
-        new Trigger(() -> aahanControls ? primaryController.rightBumper().getAsBoolean() : primaryController.a().getAsBoolean())
+        new Trigger( () -> aahanControls ? primaryController.rightBumper().getAsBoolean() : primaryController.a().getAsBoolean())
             .onTrue(
                 getLevelSelectorCommand(false)
             )
@@ -741,7 +739,7 @@ public class RobotContainer {
             );
 
         // L1 pickup
-        (aahanControls ? primaryController.leftBumper() : primaryController.y())
+        new Trigger(() -> aahanControls ? primaryController.leftBumper().getAsBoolean() : primaryController.y().getAsBoolean())
             .whileTrue(
                 Commands.sequence(
                     sys_endEffector.setVoltage(2.5),
@@ -779,7 +777,7 @@ public class RobotContainer {
             .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // Align left branch
-        (aahanControls ?  new Trigger(() -> primaryController.getLeftTriggerAxis() > 0.1) : primaryController.leftBumper())
+        new Trigger( () -> aahanControls ?  new Trigger(() -> primaryController.getLeftTriggerAxis() > 0.1).getAsBoolean() : primaryController.leftBumper().getAsBoolean())
             .and(() -> !isTelopAuto)
                 .whileTrue(
                     Commands.sequence(
@@ -801,7 +799,7 @@ public class RobotContainer {
                 );
 
         // Align right branch
-        (aahanControls ? new Trigger(() -> primaryController.getRightTriggerAxis() > 0.1) : primaryController.rightBumper())
+        new Trigger( () -> aahanControls ? new Trigger(() -> primaryController.getRightTriggerAxis() > 0.1).getAsBoolean() : primaryController.rightBumper().getAsBoolean())
             .and(() -> !isTelopAuto)
                 .whileTrue(
                     Commands.sequence(
