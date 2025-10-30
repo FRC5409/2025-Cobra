@@ -13,10 +13,14 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -25,11 +29,13 @@ import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -42,36 +48,38 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.ScoringLevel;
 import frc.robot.Constants.kArmPivot;
 import frc.robot.Constants.kAuto;
 import frc.robot.Constants.kAutoAlign;
 import frc.robot.Constants.kDrive;
+import frc.robot.Constants.kElevator;
+import frc.robot.Constants.kEndEffector;
 import frc.robot.commands.AutoCommands;
-import frc.robot.commands.DriveCommands;
 import frc.robot.commands.AutoCommands.kReefPosition;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.arm.ArmPivot;
-import frc.robot.subsystems.arm.ArmPivotIO;
-import frc.robot.subsystems.arm.ArmPivotIOSim;
-import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
-import frc.robot.Constants.kElevator;
-import frc.robot.Constants.kEndEffector;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.arm.ArmPivot;
+import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.collector.EndEffector;
 import frc.robot.subsystems.collector.EndEffectorIO;
 import frc.robot.subsystems.collector.EndEffectorIOSim;
@@ -87,14 +95,13 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
-import frc.robot.subsystems.LED;
 import frc.robot.util.AlignHelper;
+import frc.robot.util.AlignHelper.kClosestType;
+import frc.robot.util.AlignHelper.kDirection;
 import frc.robot.util.AutoTimer;
 import frc.robot.util.CaseCommand;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.OpponentRobot;
-import frc.robot.util.AlignHelper.kClosestType;
-import frc.robot.util.AlignHelper.kDirection;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -125,6 +132,8 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController primaryController   = new CommandXboxController(0);
     private final CommandXboxController secondaryController = new CommandXboxController(1);
+
+    public boolean aahanControls = false;
 
     /** If the robot is/should be running fully autonomously */
     public static boolean isTelopAuto = false;
@@ -263,6 +272,9 @@ public class RobotContainer {
             () -> removeAlgae,
             () -> secondaryController.getHID().getPOV() != -1
         ).onlyWhile(() -> isTelopAuto);
+
+        // Aaahan Controls
+        SmartDashboard.putData("Aahan Controls Set", Commands.runOnce(() -> aahanControls = !aahanControls).ignoringDisable(true));
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -687,7 +699,7 @@ public class RobotContainer {
                 sys_drive,
                 () -> -primaryController.getLeftY(),
                 () -> -primaryController.getLeftX(),
-                () -> -(primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
+                () -> -(aahanControls ? primaryController.getRightX(): primaryController.getRightTriggerAxis() - primaryController.getLeftTriggerAxis())
             )
         );
 
@@ -710,7 +722,7 @@ public class RobotContainer {
         //         );
 
         // Manual scoring if Vision doesn't work
-        primaryController.a()
+        new Trigger( () -> aahanControls ? primaryController.rightBumper().getAsBoolean() : primaryController.a().getAsBoolean())
             .onTrue(
                 getLevelSelectorCommand(false)
             )
@@ -727,7 +739,7 @@ public class RobotContainer {
             );
 
         // L1 pickup
-        primaryController.y()
+        new Trigger(() -> aahanControls ? primaryController.leftBumper().getAsBoolean() : primaryController.y().getAsBoolean())
             .whileTrue(
                 Commands.sequence(
                     sys_endEffector.setVoltage(2.5),
@@ -744,6 +756,7 @@ public class RobotContainer {
 
         // Algae removal button
         primaryController.x()
+            .or(()->primaryController.povRight().getAsBoolean())
             .whileTrue(
                 new ConditionalCommand(
                     Commands.sequence(
@@ -764,8 +777,7 @@ public class RobotContainer {
             .onTrue(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // Align left branch
-        primaryController
-            .leftBumper()
+        new Trigger( () -> aahanControls ?  new Trigger(() -> primaryController.getLeftTriggerAxis() > 0.1).getAsBoolean() : primaryController.leftBumper().getAsBoolean())
             .and(() -> !isTelopAuto)
                 .whileTrue(
                     Commands.sequence(
@@ -787,8 +799,7 @@ public class RobotContainer {
                 );
 
         // Align right branch
-        primaryController
-            .rightBumper()
+        new Trigger( () -> aahanControls ? new Trigger(() -> primaryController.getRightTriggerAxis() > 0.1).getAsBoolean() : primaryController.rightBumper().getAsBoolean())
             .and(() -> !isTelopAuto)
                 .whileTrue(
                     Commands.sequence(
@@ -818,21 +829,13 @@ public class RobotContainer {
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(true )).ignoringDisable(true));
 
         primaryController.povLeft()
-            .and(() -> !isTelopAuto)
+            .and(() -> isTelopAuto)
             .whileTrue(
                 DriveCommands.alignToPoint(
                     sys_drive, 
                     () -> AlignHelper.getClosestStation(sys_drive.getBlueSidePose())
                 ).beforeStarting(() -> AlignHelper.reset(sys_drive.getFieldRelativeSpeeds()))
             );
-
-        primaryController.povUp()
-            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
-            .onFalse(sys_endEffector.setVoltage(0.0, false));
-
-        primaryController.povDown()
-            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
-            .onFalse(sys_endEffector.setVoltage(0.0, false));
 
         // SECONDARY CONTROLLER
 
@@ -845,6 +848,15 @@ public class RobotContainer {
         secondaryController.y()
             .onTrue(prepLevelCommand(ScoringLevel.LEVEL4));
 
+        secondaryController.povUp()
+            .onTrue(sys_endEffector.setVoltage(kEndEffector.IDLE_VOLTAGE, false))
+            .onFalse(sys_endEffector.setVoltage(0.0, false));
+
+        secondaryController.povDown()
+            .onTrue(sys_endEffector.setVoltage(-kEndEffector.IDLE_VOLTAGE, false))
+            .onFalse(sys_endEffector.setVoltage(0.0, false));
+
+        // For teleop auto
         secondaryController.leftBumper()
             .onTrue(Commands.runOnce(() -> AutoCommands.scoreRight.setBoolean(false)).ignoringDisable(true));
 
