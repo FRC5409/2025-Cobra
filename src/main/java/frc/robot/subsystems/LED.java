@@ -339,7 +339,7 @@ public class LED extends SubsystemBase {
                     setLEDMode(LEDModes.OFF);
                 }
             },
-            this, endEffector, vision
+            this
         ).ignoringDisable(true);
     }
 }
