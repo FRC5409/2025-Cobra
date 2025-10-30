@@ -349,6 +349,8 @@ public class RobotContainer {
                 }).ignoringDisable(true)
             )
         );
+
+        sys_led.setDefaultCommand(sys_led.setLEDDefault(sys_vision, sys_endEffector, DriverStation.isFMSAttached(), () -> aahanControls));
     }
 
     /**
