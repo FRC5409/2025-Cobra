@@ -95,6 +95,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.subsystems.LED;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
@@ -348,6 +349,8 @@ public class RobotContainer {
                 }).ignoringDisable(true)
             )
         );
+
+        sys_led.setDefaultCommand(sys_led.setLEDDefault(sys_vision, sys_endEffector, DriverStation.isFMSAttached(), () -> aahanControls));
     }
 
     /**
