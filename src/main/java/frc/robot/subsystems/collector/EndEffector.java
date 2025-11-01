@@ -118,6 +118,7 @@ public class EndEffector extends SubsystemBase {
                 setVoltage(0.0),
                 Commands.waitSeconds(0.25)
             ).onlyWhile(this::coralDetected)
+            .andThen(Commands.waitSeconds(0.3))
             .finallyDo(() -> io.setVoltage(0.0));
     }
 
