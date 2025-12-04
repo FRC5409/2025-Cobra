@@ -349,8 +349,7 @@ public class RobotContainer {
                 }).ignoringDisable(true)
             )
         );
-
-        sys_led.setDefaultCommand(sys_led.setLEDDefault(sys_vision, sys_endEffector, DriverStation.isFMSAttached(), () -> aahanControls));
+        //sys_led.setDefaultCommand(sys_led.setLEDDefault(sys_vision, sys_endEffector, DriverStation.isFMSAttached(), () -> aahanControls));
     }
 
     /**
@@ -402,6 +401,10 @@ public class RobotContainer {
             simConfig.setSimulationWorldPose(startingPose);
 
         sys_drive.setPose(startingPose);
+    }
+
+    private void resetGyro() {
+        sys_drive.setPose(new Pose2d(0,0,new Rotation2d(Math.PI)));
     }
 
     /**
@@ -712,6 +715,13 @@ public class RobotContainer {
                     .ignoringDisable(true)
             ).onFalse(
                 Commands.runOnce(sys_drive::brakeMode)
+                    .ignoringDisable(true)
+            );
+
+        primaryController.start()
+            .and(primaryController.back())
+            .onTrue(
+                Commands.runOnce(this::resetGyro)
                     .ignoringDisable(true)
             );
 
