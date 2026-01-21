@@ -136,7 +136,7 @@ public class RobotContainer {
 
     public boolean aahanControls = false;
 
-    /** If the robot is/should be running fully autonomously */
+    /** If the robot is/should be running fully Fautonomously */
     public static boolean isTelopAuto = false;
 
     private boolean removeAlgae = false;
@@ -752,38 +752,47 @@ public class RobotContainer {
             );
 
         // L1 pickup
-        new Trigger(() -> aahanControls ? primaryController.leftBumper().getAsBoolean() : primaryController.y().getAsBoolean())
+        // new Trigger(() -> aahanControls ? primaryController.leftBumper().getAsBoolean() : primaryController.y().getAsBoolean())
+        //     .whileTrue(
+        //         Commands.sequence(
+        //             sys_endEffector.setVoltage(2.5),
+        //             sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
+        //             sys_elevator.elevatorGo(Meters.of(0.123)),
+        //             sys_armPivot.moveArm(kArmPivot.L1_PICKUP_ANGLE)
+        //         )
+        //     ).onFalse(
+        //         Commands.sequence(
+        //             sys_armPivot.moveArm(Degrees.of(100.0)),
+        //             sys_elevator.elevatorGo(Meters.of(0.01))
+        //         )
+        //     );
+
+        primaryController.y()
             .whileTrue(
-                Commands.sequence(
-                    sys_endEffector.setVoltage(2.5),
-                    sys_armPivot.moveArm(kArmPivot.MOVEMENT_SETPOINT),
-                    sys_elevator.elevatorGo(Meters.of(0.123)),
-                    sys_armPivot.moveArm(kArmPivot.L1_PICKUP_ANGLE)
-                )
-            ).onFalse(
-                Commands.sequence(
-                    sys_armPivot.moveArm(Degrees.of(100.0)),
-                    sys_elevator.elevatorGo(Meters.of(0.01))
-                )
+                DriveCommands.setSpeedLow(sys_drive)
             );
 
-        // Algae removal button
         primaryController.x()
-            .or(()->primaryController.povRight().getAsBoolean())
             .whileTrue(
-                new ConditionalCommand(
-                    Commands.sequence(
-                        Commands.runOnce(sys_drive::stop, sys_drive),
-                        Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.4))
-                            .alongWith(Commands.waitSeconds(1.0)),
-                        AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
-                    ),
-                    AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot),
-                    sys_endEffector::coralDetected
-                ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-                .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
-            )
-            .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
+                DriveCommands.setSpeedHigh(sys_drive)
+            );
+        // Algae removal button
+        // primaryController.x()
+        //     .or(()->primaryController.povRight().getAsBoolean())
+        //     .whileTrue(
+        //         new ConditionalCommand(
+        //             Commands.sequence(
+        //                 Commands.runOnce(sys_drive::stop, sys_drive),
+        //                 Commands.runOnce(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.4))
+        //                     .alongWith(Commands.waitSeconds(1.0)),
+        //                 AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)
+        //             ),
+        //             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot),
+        //             sys_endEffector::coralDetected
+        //         ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        //         .finallyDo(() -> primaryController.setRumble(RumbleType.kBothRumble, 0.0))
+        //     )
+        //     .onFalse(new IdleCommand(sys_elevator, sys_armPivot, sys_endEffector));
 
         // Idle button
         primaryController.b()
