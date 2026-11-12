@@ -1,20 +1,11 @@
-// Copyright 2021-2025 FRC 6328
+// Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//eeee
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.commands;
-
-import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -40,13 +31,18 @@ import frc.robot.Constants.kAutoAlign;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.ProfiledController;
+
+import static edu.wpi.first.units.Units.*;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.FlippingUtil;
 
@@ -80,8 +76,8 @@ public class DriveCommands {
     linearMagnitude = linearMagnitude * linearMagnitude;
 
     // Return new linear velocity
-    return new Pose2d(new Translation2d(), linearDirection)
-        .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+    return new Pose2d(Translation2d.kZero, linearDirection)
+        .transformBy(new Transform2d(linearMagnitude, 0.0, Rotation2d.kZero))
         .getTranslation();
   }
 
@@ -119,18 +115,18 @@ public class DriveCommands {
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), TRIGGER_DEADBAND);
 
           // Square rotation value for more precise control
-          omega = Math.copySign(Math.pow(Math.abs(omega), 2.0), omega);
+          omega = Math.copySign(omega * omega, omega);
 
           if (Math.abs(omega) >= TRIGGER_DEADBAND)
             omega += Math.copySign(0.05, omega);
 
           // Convert to field relative speeds & send command
-
-          ChassisSpeeds  speeds = new ChassisSpeeds(
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
                   omega * drive.getMaxAngularSpeedRadPerSec()*speedModifier);
-          
+
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
@@ -167,32 +163,32 @@ public class DriveCommands {
     // Construct command
     return Commands.run(
             () -> {
-                // Get linear velocity
-                Translation2d linearVelocity =
-                    getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
 
-                // Calculate angular speed
-                double omega =
-                angleController.calculate(
+                  // Calculate angular speed
+              double omega =
+                  angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
-
+              
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
-                    new ChassisSpeeds(
-                        linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                        linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
-                        omega);
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()*speedModifier,
+                      omega);
               boolean isFlipped =
-                    DriverStation.getAlliance().isPresent()
-                        && DriverStation.getAlliance().get() == Alliance.Red;
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
               drive.runVelocity(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
-                        speeds,
-                        isFlipped
-                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                            : drive.getRotation()));
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
             },
             drive)
 
@@ -314,7 +310,7 @@ public class DriveCommands {
         return alignToPoint(drive, target, () -> kAutoAlign.MAX_AUTO_ALIGN_VELOCITY_FAST, () -> kAutoAlign.MAX_AUTO_ALIGN_ACCELERATION_FAST);
     }
 
-  /**
+    /**
    * Measures the velocity feedforward constants for the drive motors.
    *
    * <p>This command should only be used in voltage control mode.
@@ -333,8 +329,8 @@ public class DriveCommands {
               voltageSamples.clear();
             }),
 
-
-        // Allow modules to orient
+        
+            // Allow modules to orient
         Commands.run(
                 () -> {
                   drive.runCharacterization(0.0);
@@ -342,11 +338,11 @@ public class DriveCommands {
                 drive)
             .withTimeout(FF_START_DELAY),
 
-
-        // Start timer
+        
+            // Start timer
         Commands.runOnce(timer::restart),
 
-
+        
         // Accelerate and gather data
         Commands.run(
                 () -> {
@@ -357,7 +353,7 @@ public class DriveCommands {
                 },
                 drive)
 
-
+            
             // When cancelled, calculate and print results
             .finallyDo(
                 () -> {
@@ -399,7 +395,7 @@ public class DriveCommands {
                   limiter.reset(0.0);
                 }),
 
-
+            
             // Turn in place, accelerating up to full speed
             Commands.run(
                 () -> {
@@ -408,7 +404,7 @@ public class DriveCommands {
                 },
                 drive)),
 
-
+        
         // Measurement sequence
         Commands.sequence(
             // Wait for modules to fully orient before starting measurement
@@ -423,7 +419,7 @@ public class DriveCommands {
                   state.gyroDelta = 0.0;
                 }),
 
-
+            
             // Update gyro delta
             Commands.run(
                     () -> {
@@ -432,7 +428,7 @@ public class DriveCommands {
                       state.lastAngle = rotation;
                     })
 
-
+                
                 // When cancelled, calculate and print results
                 .finallyDo(
                     () -> {
@@ -462,7 +458,7 @@ public class DriveCommands {
 
   private static class WheelRadiusCharacterizationState {
     double[] positions = new double[4];
-    Rotation2d lastAngle = new Rotation2d();
+    Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
   }
 }

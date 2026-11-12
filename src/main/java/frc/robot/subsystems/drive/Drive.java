@@ -1,30 +1,18 @@
-// Copyright 2021-2025 FRC 6328
+// Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.io.IOException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import org.json.simple.parser.ParseException;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -43,6 +31,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -62,55 +51,77 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.DebugCommand;
 import frc.robot.util.LocalADStarAK;
 
+import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.json.simple.parser.ParseException;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 public class Drive extends SubsystemBase {
-    // TunerConstants doesn't include these constants, so they are declared locally
-    static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
-        ? 250.0
-        : 100.0;
-    public static final double DRIVE_BASE_RADIUS = Math.max(
-        Math.max(
-            Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-            Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
-        Math.max(
-            Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-            Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+  // TunerConstants doesn't include these constants, so they are declared locally
+  static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
+  public static final double DRIVE_BASE_RADIUS =
+      Math.max(
+          Math.max(
+              Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+              Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+          Math.max(
+              Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+              Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
-    private final RobotConfig PP_CONFIG;
+  // PathPlanner config constants
+//   private static final double ROBOT_MASS_KG = 74.088;
+//   private static final double ROBOT_MOI = 6.883;
+//   private static final double WHEEL_COF = 1.2;
+  private final RobotConfig PP_CONFIG;
+    //   new RobotConfig(
+    //       ROBOT_MASS_KG,
+    //       ROBOT_MOI,
+    //       new ModuleConfig(
+    //           TunerConstants.FrontLeft.WheelRadius,
+    //           TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+    //           WHEEL_COF,
+    //           DCMotor.getKrakenX60Foc(1)
+    //               .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+    //           TunerConstants.FrontLeft.SlipCurrent,
+    //           1),
+    //       getModuleTranslations());
 
-    protected static final Lock odometryLock = new ReentrantLock();
-    private final GyroIO gyroIO;
-    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-    private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-    private final SysIdRoutine sysId;
+  static final Lock odometryLock = new ReentrantLock();
+  private final GyroIO gyroIO;
+  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+  private final SysIdRoutine sysId;
+  private final Alert gyroDisconnectedAlert =
+      new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
-    private static Pose2d globalPose;
-    private final Field2d field2d;
+  private static Pose2d globalPose;
+  private final Field2d field2d;
+  
 
-    // Alerts
-    private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
-        AlertType.kError);
+  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  private Rotation2d rawGyroRotation = Rotation2d.kZero;
+  private SwerveModulePosition[] lastModulePositions = // For delta tracking
+      new SwerveModulePosition[] {
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition()
+      };
+  private SwerveDrivePoseEstimator poseEstimator =
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
 
-    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
-    private Rotation2d rawGyroRotation = new Rotation2d();
-    private SwerveModulePosition[] lastModulePositions = // For delta tracking
-        new SwerveModulePosition[] {
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition()
-        };
-    private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
-        lastModulePositions, new Pose2d());
+  private final Vision vision;
 
-    private final Vision vision;
-
-    public Drive(
-        GyroIO gyroIO,
-        ModuleIO flModuleIO,
-        ModuleIO frModuleIO,
-        ModuleIO blModuleIO,
-        ModuleIO brModuleIO,
-        Vision vision) {
+  public Drive(
+      GyroIO gyroIO,
+      ModuleIO flModuleIO,
+      ModuleIO frModuleIO,
+      ModuleIO blModuleIO,
+      ModuleIO brModuleIO,
+      Vision vision) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
@@ -159,8 +170,7 @@ public class Drive extends SubsystemBase {
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
-          Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
         });
     PathPlannerLogging.setLogTargetPoseCallback(
         (targetPose) -> {
@@ -168,18 +178,19 @@ public class Drive extends SubsystemBase {
         });
 
     // Configure SysId
-    sysId = new SysIdRoutine(
-        new SysIdRoutine.Config(
-            null,
-            null,
-            null,
-            (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-        new SysIdRoutine.Mechanism(
-            (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    sysId =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
     field2d = new Field2d();
     SmartDashboard.putData("Robot Field", field2d);
-
+    
     // Register Debug Commands
     DebugCommand.register("Drive-X", Commands.runOnce(this::stopWithX, this));
 
@@ -187,7 +198,7 @@ public class Drive extends SubsystemBase {
     DebugCommand.register("Drive-Coast", Commands.runOnce(this::coastMode));
     DebugCommand.register("Drive-Brake", Commands.runOnce(this::brakeMode));
     DebugCommand.register("POSITION-REEF", Commands.runOnce(() -> setPose(new Pose2d(3.30, 4.037, new Rotation2d()))));
-  }
+}
 
   @Override
   public void periodic() {
@@ -216,7 +227,8 @@ public class Drive extends SubsystemBase {
     }
 
     // Update odometry
-    double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
+    double[] sampleTimestamps =
+        modules[0].getOdometryTimestamps(); // All signals are sampled together
     int sampleCount = sampleTimestamps.length;
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
@@ -224,10 +236,11 @@ public class Drive extends SubsystemBase {
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
         modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] = new SwerveModulePosition(
-            modulePositions[moduleIndex].distanceMeters
-                - lastModulePositions[moduleIndex].distanceMeters,
-            modulePositions[moduleIndex].angle);
+        moduleDeltas[moduleIndex] =
+            new SwerveModulePosition(
+                modulePositions[moduleIndex].distanceMeters
+                    - lastModulePositions[moduleIndex].distanceMeters,
+                modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
       }
 
@@ -285,11 +298,11 @@ public class Drive extends SubsystemBase {
 
   /**
    * Drives the robot forward (robot relative)
-   * @param speedMetersPerSecond the speed to drive the robot, negative for backward
+   * @param speed the speed to drive the robot, negative for backward
    */
-  public void driveForward(double speedMetersPerSecond) {
+  public void driveForward(LinearVelocity speed) {
     for (int i = 0; i < 4; i++) {
-        modules[i].runSetpoint(new SwerveModuleState(speedMetersPerSecond, new Rotation2d()));
+        modules[i].runSetpoint(new SwerveModuleState(speed, new Rotation2d()));
     }
   }
 
@@ -309,10 +322,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Stops the drive and turns the modules to an X arrangement to resist movement.
-   * The modules will
-   * return to their normal orientations the next time a nonzero velocity is
-   * requested.
+   * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
+   * return to their normal orientations the next time a nonzero velocity is requested.
    */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
@@ -362,10 +373,7 @@ public class Drive extends SubsystemBase {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 
-  /**
-   * Returns the module states (turn angles and drive velocities) for all of the
-   * modules.
-   */
+  /** Returns the module states (turn angles and drive velocities) for all of the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
@@ -375,10 +383,7 @@ public class Drive extends SubsystemBase {
     return states;
   }
 
-  /**
-   * Returns the module positions (turn angles and drive positions) for all of the
-   * modules.
-   */
+  /** Returns the module positions (turn angles and drive positions) for all of the modules. */
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
@@ -414,10 +419,7 @@ public class Drive extends SubsystemBase {
     return values;
   }
 
-  /**
-   * Returns the average velocity of the modules in rotations/sec (Phoenix native
-   * units).
-   */
+  /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     double output = 0.0;
     for (int i = 0; i < 4; i++) {
@@ -454,9 +456,13 @@ public class Drive extends SubsystemBase {
   /** Adds a new timestamped vision measurement. */
   public void addVisionMeasurement(
       Pose2d visionRobotPoseMeters,
-      double timestampSeconds) {
+      double timestampSeconds
+    //   ,Matrix<N3, N1> visionMeasurementStdDevs
+      ) {
     poseEstimator.addVisionMeasurement(
-        visionRobotPoseMeters, timestampSeconds);
+        visionRobotPoseMeters, timestampSeconds
+        // ,visionMeasurementStdDevs
+        );
   }
 
   /** Returns the maximum linear speed in meters per sec. */
@@ -472,10 +478,10 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-        new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-        new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-        new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-        new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+      new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+      new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+      new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+      new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
   }
 }

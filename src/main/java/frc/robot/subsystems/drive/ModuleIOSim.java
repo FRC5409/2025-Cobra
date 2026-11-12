@@ -1,15 +1,9 @@
-// Copyright 2021-2025 FRC 6328
+// Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.drive;
 
@@ -30,44 +24,48 @@ import frc.robot.generated.TunerConstants;
  * constants from Phoenix. Simulation is always based on voltage control.
  */
 public class ModuleIOSim implements ModuleIO {
-  // TunerConstants doesn't support separate sim constants, so they are declared locally
+  // TunerConstants doesn't support separate sim constants, so they are declared
+  // locally
   private static final double DRIVE_KP = 0.05;
   private static final double DRIVE_KD = 0.0;
-  
+//   private static final double DRIVE_KS = 0.0;
+//   private static final double DRIVE_KV_ROT =
+    //   0.91035; // Same units as TunerConstants: (volt * secs) / rotation
+//   private static final double DRIVE_KV = 1.0 / Units.rotationsToRadians(1.0 / DRIVE_KV_ROT);
   private static final double TURN_KP = 8.0;
   private static final double TURN_KD = 0.0;
 
   private final SwerveModuleSimulation moduleSim;
   private final GenericMotorController driveMotor, turnMotor;
 
-    private boolean driveClosedLoop = false;
-    private boolean turnClosedLoop = false;
-    private PIDController driveController = new PIDController(DRIVE_KP, 0, DRIVE_KD);
-    private PIDController turnController = new PIDController(TURN_KP, 0, TURN_KD);
-    private double driveAppliedVolts = 0.0;
-    private double turnAppliedVolts = 0.0;
-    private double desiredWheelVelocityRadPerSec = 0.0;
-    private Rotation2d desiredSteerFacing = new Rotation2d();
+  private boolean driveClosedLoop = false;
+  private boolean turnClosedLoop = false;
+  private PIDController driveController = new PIDController(DRIVE_KP, 0, DRIVE_KD);
+  private PIDController turnController = new PIDController(TURN_KP, 0, TURN_KD);
+  private double driveAppliedVolts = 0.0;
+  private double turnAppliedVolts = 0.0;
+  private double desiredWheelVelocityRadPerSec = 0.0;
+  private Rotation2d desiredSteerFacing = new Rotation2d();
 
-    public ModuleIOSim(SwerveModuleSimulation moduleSim) {
-        this.moduleSim = moduleSim;
+  public ModuleIOSim(SwerveModuleSimulation moduleSim) {
+    this.moduleSim = moduleSim;
 
-        this.driveMotor = 
-                moduleSim.useGenericMotorControllerForDrive()
-                .withCurrentLimit(TunerConstants.kSlipCurrent);
+    this.driveMotor = 
+            moduleSim.useGenericMotorControllerForDrive()
+            .withCurrentLimit(TunerConstants.kSlipCurrent);
 
-        this.turnMotor = 
-                moduleSim.useGenericControllerForSteer()
-                .withCurrentLimit(TunerConstants.steerInitialConfigs.CurrentLimits.getStatorCurrentLimitMeasure());
+    this.turnMotor = 
+            moduleSim.useGenericControllerForSteer()
+            .withCurrentLimit(TunerConstants.steerInitialConfigs.CurrentLimits.getStatorCurrentLimitMeasure());
 
-        // Enable wrapping for turn PID
-        turnController.enableContinuousInput(-Math.PI, Math.PI);
-        SimulatedArena.getInstance().addCustomSimulation((delta) -> runControlLoops(delta));
-    }
+    // Enable wrapping for turn PID
+    turnController.enableContinuousInput(-Math.PI, Math.PI);
+    SimulatedArena.getInstance().addCustomSimulation((delta) -> runControlLoops(delta));
+  }
 
-    @Override
-    public void updateInputs(ModuleIOInputs inputs) {
-        // Update drive inputs
+  @Override
+  public void updateInputs(ModuleIOInputs inputs) {
+    // Update drive inputs
         inputs.driveConnected = true;
         inputs.drivePositionRad = moduleSim.getDriveWheelFinalPosition().in(Radians);
         inputs.driveVelocityRadPerSec = moduleSim.getDriveWheelFinalSpeed().in(RadiansPerSecond);
@@ -89,9 +87,9 @@ public class ModuleIOSim implements ModuleIO {
         inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};
         inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
         inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
-    }
+  }
 
-    public void runControlLoops(double delta) {
+  public void runControlLoops(double delta) {
         // Run control loops if activated
         if (driveClosedLoop) calculateDriveControlLoops();
         else driveController.reset();
@@ -124,27 +122,27 @@ public class ModuleIOSim implements ModuleIO {
                 moduleSim.getSteerAbsoluteFacing().getRadians(), desiredSteerFacing.getRadians());
     }
 
-    @Override
-    public void setDriveOpenLoop(double output) {
-        driveClosedLoop = false;
-        driveAppliedVolts = output;
-    }
+  @Override
+  public void setDriveOpenLoop(double output) {
+    driveClosedLoop = false;
+    driveAppliedVolts = output;
+  }
 
-    @Override
-    public void setTurnOpenLoop(double output) {
-        turnClosedLoop = false;
-        turnAppliedVolts = output;
-    }
+  @Override
+  public void setTurnOpenLoop(double output) {
+    turnClosedLoop = false;
+    turnAppliedVolts = output;
+  }
 
-    @Override
-    public void setDriveVelocity(double velocityRadPerSec) {
-        driveClosedLoop = true;
-        desiredWheelVelocityRadPerSec = velocityRadPerSec;
-    }
+  @Override
+  public void setDriveVelocity(double velocityRadPerSec) {
+    driveClosedLoop = true;
+    desiredWheelVelocityRadPerSec = velocityRadPerSec;
+  }
 
-    @Override
-    public void setTurnPosition(Rotation2d rotation) {
-        turnClosedLoop = true;
-        desiredSteerFacing = rotation;
-    }
+  @Override
+  public void setTurnPosition(Rotation2d rotation) {
+    turnClosedLoop = true;
+    desiredSteerFacing = rotation;
+  }
 }

@@ -1,15 +1,9 @@
-// Copyright 2021-2025 FRC 6328
+// Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.drive;
 
@@ -33,7 +27,9 @@ public class Module {
   private final ModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final int index;
-  private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
+  private final SwerveModuleConstants<
+          TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+      constants;
 
   private final Alert driveDisconnectedAlert;
   private final Alert turnDisconnectedAlert;
@@ -46,26 +42,28 @@ public class Module {
   public Module(
       ModuleIO io,
       int index,
-      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
+      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+          constants) {
     this.io = io;
     this.index = index;
     this.constants = constants;
-    
     driveDisconnectedAlert =
         new Alert(
-            "Disconnected drive motor on module " + index + ".", AlertType.kError);
+            "Disconnected drive motor on module " + Integer.toString(index) + ".",
+            AlertType.kError);
     turnDisconnectedAlert =
         new Alert(
-            "Disconnected turn motor on module " + index + ".", AlertType.kError);
+            "Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
     turnEncoderDisconnectedAlert =
         new Alert(
-            "Disconnected CANCoder on module " + index + ".", AlertType.kError);
+            "Disconnected turn encoder on module " + Integer.toString(index) + ".",
+            AlertType.kError);
     turnEncoderOrangeAlert = 
         new Alert(
-            "CANCoder Magnetic strip on module" + index + " is Orange", AlertType.kWarning);
+            "CANCoder Magnetic strip on module" + Integer.toString(index) + " is Orange", AlertType.kWarning);
     turnEncoderRedAlert = 
         new Alert(
-            "CANCoder Magnetic strip on module" + index + " is Red", AlertType.kError);
+            "CANCoder Magnetic strip on module" + Integer.toString(index) + " is Red", AlertType.kError);
   }
 
   public void periodic() {
@@ -84,7 +82,7 @@ public class Module {
     // Update alerts
     driveDisconnectedAlert.set(!inputs.driveConnected);
     turnDisconnectedAlert.set(!inputs.turnConnected);
-    turnEncoderDisconnectedAlert.set(
+     turnEncoderDisconnectedAlert.set(
         (!inputs.turnEncoderConnected || inputs.magnetHealth == MagnetHealthValue.Magnet_Invalid)
         &&
         Constants.currentMode == Mode.REAL
@@ -107,7 +105,7 @@ public class Module {
   /** Runs the module with the specified output while controlling to zero degrees. */
   public void runCharacterization(double output) {
     io.setDriveOpenLoop(output);
-    io.setTurnPosition(new Rotation2d());
+    io.setTurnPosition(Rotation2d.kZero);
   }
 
   /** Disables all outputs to motors. */

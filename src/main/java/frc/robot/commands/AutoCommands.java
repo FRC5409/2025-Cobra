@@ -317,7 +317,7 @@ public class AutoCommands {
                 new IdleCommand(sys_elevator, sys_pivot, sys_endeffector),
                 Commands.sequence(
                     pathFindToNearestStation(drive),
-                    Commands.runOnce(() -> drive.driveForward(-0.75), drive),
+                    Commands.runOnce(() -> drive.driveForward(MetersPerSecond.of(-0.75)), drive),
                     Commands.idle(drive)
                 )
             ).unless(sys_endeffector::coralDetected).until(sys_endeffector::coralDetected),

@@ -13,10 +13,7 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
@@ -71,7 +68,6 @@ import frc.robot.commands.scoring.IdleCommand;
 import frc.robot.commands.scoring.RemoveAlgae;
 import frc.robot.commands.scoring.ScoreCommand;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -95,7 +91,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
-import frc.robot.subsystems.LED;
+// import frc.robot.subsystems.LED;
 import frc.robot.util.AlignHelper;
 import frc.robot.util.AlignHelper.kClosestType;
 import frc.robot.util.AlignHelper.kDirection;
@@ -121,7 +117,7 @@ public class RobotContainer {
     protected final Elevator    sys_elevator;
     protected final EndEffector sys_endEffector;
     protected final ArmPivot    sys_armPivot;
-    protected final LED         sys_led;
+    // protected final LED         sys_led;
 
     public static SwerveDriveSimulation simConfig;
 
@@ -192,7 +188,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIOTalonFX(kArmPivot.FALCON_ID, kArmPivot.CANCODER_ID));
                 sys_elevator = new Elevator(new ElevatorIOTalonFX(kElevator.MAIN_MOTOR_ID, kElevator.FOLLOWER_MOTOR_ID));
                 sys_endEffector = new EndEffector(new EndEffectorIOTalonFx(kEndEffector.ENDEFFECTOR_MOTOR_ID));
-                sys_led = new LED();
+                // sys_led = new LED();
             }
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
@@ -213,7 +209,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIOSim());
                 sys_elevator = new Elevator(new ElevatorIOSim());
                 sys_endEffector = new EndEffector(new EndEffectorIOSim());
-                sys_led = new LED();
+                // sys_led = new LED();
                 
                 simConfig = new SwerveDriveSimulation(
                     driveConfig,
@@ -253,7 +249,7 @@ public class RobotContainer {
                 sys_armPivot = new ArmPivot(new ArmPivotIO() {});
                 sys_elevator = new Elevator(new ElevatorIO(){});
                 sys_endEffector = new EndEffector(new EndEffectorIO() {});
-                sys_led = new LED();
+                // sys_led = new LED();
             }
         }
 
@@ -350,7 +346,7 @@ public class RobotContainer {
             )
         );
 
-        sys_led.setDefaultCommand(sys_led.setLEDDefault(sys_vision, sys_endEffector, DriverStation.isFMSAttached(), () -> aahanControls));
+        // sys_led.setDefaultCommand(sys_led.setLEDDefault(sys_vision, sys_endEffector, DriverStation.isFMSAttached(), () -> aahanControls));
     }
 
     /**
@@ -661,8 +657,8 @@ public class RobotContainer {
             sys_endEffector.getCurrent() >= 30 || sys_endEffector.coralDetected()
         ).withTimeout(2.0));
 
-        NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(-0.75), sys_drive));
-        NamedCommands.registerCommand("BUMP", Commands.runOnce(() -> sys_drive.driveForward(-2.0), sys_drive));
+        NamedCommands.registerCommand("DRIVE_FORWARD", Commands.runOnce(() -> sys_drive.driveForward(MetersPerSecond.of(-0.75)), sys_drive));
+        NamedCommands.registerCommand("BUMP", Commands.runOnce(() -> sys_drive.driveForward(MetersPerSecond.of(-2.0)), sys_drive));
 
         NamedCommands.registerCommand("REMOVE_ALGAE", 
             AutoCommands.automaticAlgae(sys_drive, sys_endEffector, sys_elevator, sys_armPivot)

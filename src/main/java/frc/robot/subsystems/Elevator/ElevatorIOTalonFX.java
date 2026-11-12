@@ -13,6 +13,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Angle;
@@ -77,7 +78,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         m_mainMotor.setNeutralMode(NeutralModeValue.Brake);
         m_followerMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        m_followerMotor.setControl(new Follower(mainMotorID, true));
+        m_followerMotor.setControl(new Follower(mainMotorID, MotorAlignmentValue.Opposed));
 
         m_request = new PositionVoltage(0).withSlot(0);
 
